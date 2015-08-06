@@ -134,7 +134,7 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 SET(VTK_LIBS vtkCommonCore vtkImagingCore vtkRenderingCore vtkIOLegacy vtkIOPLY
-             vtkInteractionStyle vtkRenderingOpenGL vtkRenderingFreeTypeOpenGL
+             vtkInteractionStyle vtkRenderingOpenGL 
              vtkFiltersHybrid vtkFiltersModeling vtkGeovisCore)
 IF(BLUEGENEQ)
     LINK_DIRECTORIES(${ICET_LIBRARY_DIR})

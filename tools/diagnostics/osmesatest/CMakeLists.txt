@@ -67,7 +67,6 @@ vtkIOImage
 vtkRenderingCore
 vtkRenderingOpenGL
 vtkRenderingFreeType 
-vtkRenderingFreeTypeOpenGL
 vtkInteractionStyle 
 )
 

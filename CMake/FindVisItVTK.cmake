@@ -109,7 +109,6 @@ SET(REQ_VTK_MODS
         vtkIOXML
         vtkInteractionStyle
         vtkRenderingAnnotation
-        vtkRenderingFreeTypeOpenGL 
         vtkRenderingOpenGL)
 
 IF(R_FOUND)

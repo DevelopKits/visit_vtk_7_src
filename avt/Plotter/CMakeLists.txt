@@ -192,9 +192,9 @@ LINK_DIRECTORIES(${LIBRARY_OUTPUT_DIRECTORY} ${EAVL_LIBRARY_DIR} ${VTK_LIBRARY_D
 #********************************* SERIAL ************************************
 ADD_LIBRARY(avtplotter_ser ${AVTPLOTTER_SOURCES})
 IF(HAVE_LIB_R)
-    TARGET_LINK_LIBRARIES(avtplotter_ser visitcommon avtmath avtview avtfilters_ser avtpipeline_ser visit_vtk lightweight_visit_vtk vtkFiltersHybrid vtkRenderingCore vtkRenderingFreeType vtkRenderingFreeTypeOpenGL ${GLEW_LIB} vtkFiltersStatisticsGnuR)
+    TARGET_LINK_LIBRARIES(avtplotter_ser visitcommon avtmath avtview avtfilters_ser avtpipeline_ser visit_vtk lightweight_visit_vtk vtkFiltersHybrid vtkRenderingCore vtkRenderingFreeType ${GLEW_LIB} vtkFiltersStatisticsGnuR)
 ELSE(HAVE_LIB_R)
-    TARGET_LINK_LIBRARIES(avtplotter_ser visitcommon avtmath avtview avtfilters_ser avtpipeline_ser visit_vtk lightweight_visit_vtk vtkFiltersHybrid vtkRenderingCore vtkRenderingFreeType vtkRenderingFreeTypeOpenGL ${GLEW_LIB})
+    TARGET_LINK_LIBRARIES(avtplotter_ser visitcommon avtmath avtview avtfilters_ser avtpipeline_ser visit_vtk lightweight_visit_vtk vtkFiltersHybrid vtkRenderingCore vtkRenderingFreeType ${GLEW_LIB})
 ENDIF(HAVE_LIB_R)
 # Add vtk defines
 ADD_TARGET_DEFINITIONS(avtplotter_ser "${VTK_DEFINITIONS}")
@@ -207,9 +207,9 @@ VISIT_INSTALL_TARGETS(avtplotter_ser)
 IF(VISIT_PARALLEL)
     ADD_PARALLEL_LIBRARY(avtplotter_par ${AVTPLOTTER_SOURCES})
     IF(HAVE_LIB_R)
-        TARGET_LINK_LIBRARIES(avtplotter_par visitcommon avtmath avtview avtfilters_par avtpipeline_par visit_vtk lightweight_visit_vtk vtkFiltersHybrid vtkRenderingCore vtkRenderingFreeType vtkRenderingFreeTypeOpenGL ${GLEW_LIB} vtkFiltersStatisticsGnuR)
+        TARGET_LINK_LIBRARIES(avtplotter_par visitcommon avtmath avtview avtfilters_par avtpipeline_par visit_vtk lightweight_visit_vtk vtkFiltersHybrid vtkRenderingCore vtkRenderingFreeType ${GLEW_LIB} vtkFiltersStatisticsGnuR)
     ELSE(HAVE_LIB_R)
-        TARGET_LINK_LIBRARIES(avtplotter_par visitcommon avtmath avtview avtfilters_par avtpipeline_par visit_vtk lightweight_visit_vtk vtkFiltersHybrid vtkRenderingCore vtkRenderingFreeType vtkRenderingFreeTypeOpenGL ${GLEW_LIB})
+        TARGET_LINK_LIBRARIES(avtplotter_par visitcommon avtmath avtview avtfilters_par avtpipeline_par visit_vtk lightweight_visit_vtk vtkFiltersHybrid vtkRenderingCore vtkRenderingFreeType ${GLEW_LIB})
     ENDIF(HAVE_LIB_R)
     # Add vtk defines
     ADD_TARGET_DEFINITIONS(avtplotter_par "${VTK_DEFINITIONS}")
