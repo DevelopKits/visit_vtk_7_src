@@ -1,3 +1,5 @@
+#ifndef QVIS_SESSION_FILE_OPEN_DIALOG_H
+#define QVIS_SESSION_FILE_OPEN_DIALOG_H
 /*****************************************************************************
 *
 * Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
@@ -35,44 +37,38 @@
 * DAMAGE.
 *
 *****************************************************************************/
+#include <QvisFileOpenDialog.h>
 
-// ************************************************************************* //
-//                                DebugStream.h                              //
-// ************************************************************************* //
-
-#ifndef DEBUG_STREAM_H
-#define DEBUG_STREAM_H
-
-#include <misc_exports.h>
-#include <visitstream.h>
-
+// ****************************************************************************
+// Class: QvisSessionFileDialog
 //
-// Hide as much of DebugStream interface as possible.
+// Purpose:
+//   This is a dialog version of the file open window for use to load or Save
+//   Session files. It has support to save or load from remote hosts.
 //
-namespace DebugStream
+// Notes:      
+//
+// Programmer: David Camp
+// Creation:   Tue Aug  4 11:04:14 PDT 2015
+//
+// Modifications:
+//
+// ****************************************************************************
+
+class QvisSessionFileDialog : public QvisFileOpenDialog
 {
-    // Query if a given level is enabled
-    extern MISC_API bool Level1();
-    extern MISC_API bool Level2();
-    extern MISC_API bool Level3();
-    extern MISC_API bool Level4();
-    extern MISC_API bool Level5();
+public:
+    enum DLG_TYPE { OPEN_DLG, SAVE_DLG };
 
-    // Obtain a given level's stream object
-    extern MISC_API ostream& Stream1(char const *__file__=0, int=-1);
-    extern MISC_API ostream& Stream2();
-    extern MISC_API ostream& Stream3();
-    extern MISC_API ostream& Stream4();
-    extern MISC_API ostream& Stream5();
+    QvisSessionFileDialog(const QString &caption);
+    virtual ~QvisSessionFileDialog();
 
-    // Query what the current level is (more expensive than LevelN())
-    extern MISC_API int GetLevel();
-}
+    // Blocking function to use the dialog to get a filename.
+    void getFileName(DLG_TYPE type,
+                     const QString &initialFile, 
+                     QualifiedFilename &filename);
 
-#define debug1 if (!DebugStream::Level1()) ; else (DebugStream::Stream1((char const *)__FILE__,(int)__LINE__))
-#define debug2 if (!DebugStream::Level2()) ; else (DebugStream::Stream2())
-#define debug3 if (!DebugStream::Level3()) ; else (DebugStream::Stream3())
-#define debug4 if (!DebugStream::Level4()) ; else (DebugStream::Stream4())
-#define debug5 if (!DebugStream::Level5()) ; else (DebugStream::Stream5())
+};
 
 #endif
+

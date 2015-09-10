@@ -36,43 +36,62 @@
 *
 *****************************************************************************/
 
-// ************************************************************************* //
-//                                DebugStream.h                              //
-// ************************************************************************* //
+#ifndef _RESTORE_SESSION_RPC_H_
+#define _RESTORE_SESSION_RPC_H_
+#include <mdsrpc_exports.h>
 
-#ifndef DEBUG_STREAM_H
-#define DEBUG_STREAM_H
+#include <VisItRPC.h>
+#include <string>
 
-#include <misc_exports.h>
-#include <visitstream.h>
-
+// ****************************************************************************
+// Class: RestoreSessionRPC
 //
-// Hide as much of DebugStream interface as possible.
+// Purpose:
+//   This RPC save session file on a remote file system.
 //
-namespace DebugStream
+// Notes:      
+//
+// Programmer: David Camp
+// Creation:   Tue Jul  7 07:56:12 PDT 2015
+//
+// Modifications:
+//
+// ****************************************************************************
+
+class MDSERVER_RPC_API RestoreSessionRPC : public BlockingRPC
 {
-    // Query if a given level is enabled
-    extern MISC_API bool Level1();
-    extern MISC_API bool Level2();
-    extern MISC_API bool Level3();
-    extern MISC_API bool Level4();
-    extern MISC_API bool Level5();
+public:
+    struct MDSERVER_RPC_API SessionFile : public AttributeSubject
+    {
+        std::string sessionFile;
+    public:
+        SessionFile();
+        ~SessionFile();
+        virtual void SelectAll();
+        virtual const std::string TypeName() const;
+    };
 
-    // Obtain a given level's stream object
-    extern MISC_API ostream& Stream1(char const *__file__=0, int=-1);
-    extern MISC_API ostream& Stream2();
-    extern MISC_API ostream& Stream3();
-    extern MISC_API ostream& Stream4();
-    extern MISC_API ostream& Stream5();
+public:
+    RestoreSessionRPC();
+    virtual ~RestoreSessionRPC();
 
-    // Query what the current level is (more expensive than LevelN())
-    extern MISC_API int GetLevel();
-}
+    // Invokation method
+    void operator()(const std::string &_filename, std::string &_contents);
 
-#define debug1 if (!DebugStream::Level1()) ; else (DebugStream::Stream1((char const *)__FILE__,(int)__LINE__))
-#define debug2 if (!DebugStream::Level2()) ; else (DebugStream::Stream2())
-#define debug3 if (!DebugStream::Level3()) ; else (DebugStream::Stream3())
-#define debug4 if (!DebugStream::Level4()) ; else (DebugStream::Stream4())
-#define debug5 if (!DebugStream::Level5()) ; else (DebugStream::Stream5())
+    // Property selection methods
+    virtual void SelectAll();
+
+    // Return name of object.
+    virtual const std::string TypeName() const;
+
+    // Restore session file to file system.
+    void RestoreSessionFile();
+
+private:
+    std::string filename;
+
+    SessionFile sf;
+};
 
 #endif
+

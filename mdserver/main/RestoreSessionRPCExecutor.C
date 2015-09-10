@@ -36,43 +36,71 @@
 *
 *****************************************************************************/
 
-// ************************************************************************* //
-//                                DebugStream.h                              //
-// ************************************************************************* //
+#include <RestoreSessionRPCExecutor.h>
+#include <MDServerConnection.h>
 
-#ifndef DEBUG_STREAM_H
-#define DEBUG_STREAM_H
-
-#include <misc_exports.h>
-#include <visitstream.h>
-
+// ****************************************************************************
+// Method: RestoreSessionRPCExecutor::RestoreSessionRPCExecutor
 //
-// Hide as much of DebugStream interface as possible.
+// Purpose: 
+//   Constructor for the RestoreSessionRPCExecutor class.
 //
-namespace DebugStream
+// Arguments:
+//   parent_ : A pointer to the object that created this RPC executor.
+//   s       : A pointer to the rpc that invokes this executor.
+//
+// Programmer: David Camp
+// Creation:   Tue Jul  7 07:56:12 PDT 2015
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+RestoreSessionRPCExecutor::RestoreSessionRPCExecutor(
+    MDServerConnection *parent_, Subject *s) : Observer(s)
 {
-    // Query if a given level is enabled
-    extern MISC_API bool Level1();
-    extern MISC_API bool Level2();
-    extern MISC_API bool Level3();
-    extern MISC_API bool Level4();
-    extern MISC_API bool Level5();
-
-    // Obtain a given level's stream object
-    extern MISC_API ostream& Stream1(char const *__file__=0, int=-1);
-    extern MISC_API ostream& Stream2();
-    extern MISC_API ostream& Stream3();
-    extern MISC_API ostream& Stream4();
-    extern MISC_API ostream& Stream5();
-
-    // Query what the current level is (more expensive than LevelN())
-    extern MISC_API int GetLevel();
+    parent = parent_;
 }
 
-#define debug1 if (!DebugStream::Level1()) ; else (DebugStream::Stream1((char const *)__FILE__,(int)__LINE__))
-#define debug2 if (!DebugStream::Level2()) ; else (DebugStream::Stream2())
-#define debug3 if (!DebugStream::Level3()) ; else (DebugStream::Stream3())
-#define debug4 if (!DebugStream::Level4()) ; else (DebugStream::Stream4())
-#define debug5 if (!DebugStream::Level5()) ; else (DebugStream::Stream5())
+// ****************************************************************************
+// Method: RestoreSessionRPCExecutor::~RestoreSessionRPCExecutor
+//
+// Purpose: 
+//   Destructor for the RestoreSessionRPCExecutor class.
+//
+// Programmer: David Camp
+// Creation:   Tue Jul  7 07:56:12 PDT 2015
+//
+// Modifications:
+//   
+// ****************************************************************************
 
-#endif
+RestoreSessionRPCExecutor::~RestoreSessionRPCExecutor()
+{
+}
+
+// ****************************************************************************
+// Method: RestoreSessionRPCExecutor::Update
+//
+// Purpose: 
+//   Restore session file on remote server.
+//
+// Arguments:
+//   s : A pointer to the RestoreSessionRPC that caused this method to be called.
+//
+// Programmer: David Camp
+// Creation:   Tue Jul  7 07:56:12 PDT 2015
+//
+// Modifications:
+//
+// ****************************************************************************
+
+void
+RestoreSessionRPCExecutor::Update(Subject *s)
+{
+    RestoreSessionRPC *rpc = (RestoreSessionRPC *)s;
+
+    // If RestoreSessionFile fails it will send an error message, so don't reply here.
+    rpc->RestoreSessionFile();
+}
+
