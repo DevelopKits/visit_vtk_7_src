@@ -70,6 +70,9 @@ class     vtkPLOT3DReader;
 //    Change this from type STMD to MTMD.
 //    Add solutionFiles, times, haveReadMetaFile, haveProcessedQ, previousTS.
 //
+//    Kathleen Biagas, Thu Aug 27 12:32:14 PDT 2015
+//    Use GetTime instead of GetTimes. Add solutionHasValidTime.
+//
 // ****************************************************************************
 
 class avtPLOT3DFileFormat : public avtMTMDFileFormat
@@ -78,7 +81,6 @@ class avtPLOT3DFileFormat : public avtMTMDFileFormat
                           avtPLOT3DFileFormat(const char *, DBOptionsAttributes *);
     virtual              ~avtPLOT3DFileFormat();
     
-    virtual void           GetTimes(std::vector<double> &);
     virtual int            GetNTimesteps(void);
 
     virtual const char   *GetType(void) { return "PLOT3D File Format"; };
@@ -96,20 +98,23 @@ class avtPLOT3DFileFormat : public avtMTMDFileFormat
     std::string           qFileName;
     std::string           solutionRoot;
     std::vector<std::string> solutionFiles;
-    std::vector<double>   times;
     bool                  haveSolutionFile;
     bool                  haveReadMetaFile;
     bool                  haveProcessedQ;
+    bool                  solutionHasValidTime;
     int                   previousTS;
 
+
     virtual void          PopulateDatabaseMetaData(avtDatabaseMetaData *, int);
+    virtual double        GetTime(int);
+
 
   private:
     bool                  ReadVisItMetaFile(void);
     bool                  ProcessQForTimeSeries(void);
     void                  SetTimeStep(int timeState);
+    double                time;
 };
-
 
 #endif
 

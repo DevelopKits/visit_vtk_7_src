@@ -1023,8 +1023,21 @@ bool
 avtLCSFilter::GetAllSeedsSentToAllProcs(void)
 {
   if (atts.GetSourceType() == LCSAttributes::NativeMesh)
-    return false;
-  else //if (atts.GetSourceType() == LCSAttributes::RegularGrid)
+  {
+ #ifdef PARALLEL
+    if (method == PICS_SERIAL)
+      return true;
+    else if (method == PICS_PARALLEL_OVER_DOMAINS)
+      return false;
+    // else if (method == PICS_PARALLEL_COMM_DOMAINS)
+    //   return false;
+    // else if (method == PICS_PARALLEL_MASTER_SLAVE)
+    //   return false;
+#else
+    return true;
+#endif
+  }
+  //  else if (atts.GetSourceType() == LCSAttributes::RegularGrid)
     return true;
 }
 
@@ -1489,7 +1502,7 @@ void avtLCSFilter::ComputeEigenVectors(vtkDataArray *jacobian[3],
                                        vtkDataArray *valArray,
                                        vtkDataArray *vecArray)
 {
-  double t0, t1, t2, sign, weight = atts.GetEigenWeight();
+    double t0, t1, t2, sign, weight = atts.GetEigenWeight();
 
     if( eigenComponent == LCSAttributes::PosShearVector ||
         eigenComponent == LCSAttributes::PosLambdaShearVector )
@@ -1546,10 +1559,9 @@ void avtLCSFilter::ComputeEigenVectors(vtkDataArray *jacobian[3],
                      (sqrt(eigenvals[0])+sqrt(eigenvals[1])) );
 
           // With the plus (minus) sign referring to the direction of
-          // maximal positive (negative) shear in the frame of [ξ1,
-          // ξ0].
-          eigenvec[0] = eigenvecs[1][0] * t1 + sign * eigenvecs[0][0] * t0;
-          eigenvec[1] = eigenvecs[1][1] * t1 + sign * eigenvecs[0][1] * t0;
+          // maximal positive (negative) shear in the frame of [ξ1,ξ0].
+          eigenvec[0] = t0 * eigenvecs[1][0] + sign * t1 * eigenvecs[0][0];
+          eigenvec[1] = t0 * eigenvecs[1][1] + sign * t1 * eigenvecs[0][1];
           eigenvec[2] = 0;
 
           valArray->SetTuple1(l, eigenval);
@@ -1565,11 +1577,9 @@ void avtLCSFilter::ComputeEigenVectors(vtkDataArray *jacobian[3],
           t1 = sqrt( (eigenval-eigenvals[1]) / (eigenvals[0]-eigenvals[1]) );
           
           // With the plus (minus) sign referring to the direction of
-          // maximal positive (negative) shear in the frame of [ξ1,
-          // ξ0].
-          eigenvec[0] = eigenvecs[1][0] * t0 + sign * eigenvecs[0][0] * t1;
-          eigenvec[1] = eigenvecs[1][1] * t0 + sign * eigenvecs[0][1] * t1;
-          
+          // maximal positive (negative) shear in the frame of [ξ1,ξ0].
+          eigenvec[0] = t0 * eigenvecs[1][0] + sign * t1 * eigenvecs[0][0];
+          eigenvec[1] = t0 * eigenvecs[1][1] + sign * t1 * eigenvecs[0][1];
           eigenvec[2] = 0;
 
           valArray->SetTuple1(l, eigenval);
@@ -1635,11 +1645,10 @@ void avtLCSFilter::ComputeEigenVectors(vtkDataArray *jacobian[3],
                      (sqrt(eigenvals[0])+sqrt(eigenvals[2])) );
 
           // With the plus (minus) sign referring to the direction of
-          // maximal positive (negative) shear in the frame of [ξ2,
-          // ξ0].
-          eigenvec[0] = eigenvecs[0][2] * t0 + sign * eigenvecs[0][0] * t2;
-          eigenvec[1] = eigenvecs[1][2] * t0 + sign * eigenvecs[1][0] * t2;
-          eigenvec[2] = eigenvecs[2][2] * t0 + sign * eigenvecs[2][0] * t2;
+          // maximal positive (negative) shear in the frame of [ξ2,ξ0].
+          eigenvec[0] = t0 * eigenvecs[0][2] + sign * t2 * eigenvecs[0][0];
+          eigenvec[1] = t0 * eigenvecs[1][2] + sign * t2 * eigenvecs[1][0];
+          eigenvec[2] = t0 * eigenvecs[2][2] + sign * t2 * eigenvecs[2][0];
 
           valArray->SetTuple1(l, eigenval);
           vecArray->SetTuple (l, eigenvec);
@@ -1654,14 +1663,13 @@ void avtLCSFilter::ComputeEigenVectors(vtkDataArray *jacobian[3],
           t2 = sqrt( (eigenval-eigenvals[2]) / (eigenvals[0]-eigenvals[2]) );
           
           // With the plus (minus) sign referring to the direction of
-          // maximal positive (negative) shear in the frame of [ξ2,
-          // ξ0].
-          eigenvec[0] = eigenvecs[0][2] * t0 + sign * eigenvecs[0][0] * t2;
-          eigenvec[1] = eigenvecs[1][2] * t0 + sign * eigenvecs[1][0] * t2;
-          eigenvec[2] = eigenvecs[2][2] * t0 + sign * eigenvecs[2][0] * t2;
+          // maximal positive (negative) shear in the frame of [ξ2,ξ0].
+          eigenvec[0] = t0 * eigenvecs[0][2] + sign * t2 * eigenvecs[0][0];
+          eigenvec[1] = t0 * eigenvecs[1][2] + sign * t2 * eigenvecs[1][0];
+          eigenvec[2] = t0 * eigenvecs[2][2] + sign * t2 * eigenvecs[2][0];
 
           valArray->SetTuple1(l, eigenval);
-          vecArray->SetTuple(l, eigenvec);
+          vecArray->SetTuple (l, eigenvec);
         }
       }
     }
@@ -1715,8 +1723,10 @@ void avtLCSFilter::ComputeLyapunovExponent(vtkDataArray *jacobian[3],
     {
       for(size_t l = 0; l < nTuples; ++l)
       {
-        // if( (doTime     && expArray->GetTuple1(l) < maxTime) ||
-        //     (doDistance && expArray->GetTuple1(l) < maxDistance) )
+        // if( (doTime &&
+        //      (fabs(expArray->GetTuple1(l) - absMaxTime) > FLT_MIN)) ||
+        //     (doDistance &&
+        //      (expArray->GetTuple1(l) < maxDistance)) )
         //   expArray->SetTuple1(l, 0);
         // else
         {
@@ -1753,8 +1763,10 @@ void avtLCSFilter::ComputeLyapunovExponent(vtkDataArray *jacobian[3],
     {
       for(size_t l = 0; l < nTuples; ++l)
       {
-        // if( (doTime     && expArray->GetTuple1(l) < maxTime) ||
-        //     (doDistance && expArray->GetTuple1(l) < maxDistance) )
+        // if( (doTime &&
+        //      (fabs(expArray->GetTuple1(l) - absMaxTime) > FLT_MIN)) ||
+        //     (doDistance &&
+        //      (expArray->GetTuple1(l) < maxDistance)) )
         //   expArray->SetTuple1(l, 0);
         // else
         {
@@ -2132,11 +2144,13 @@ avtDataTree_p
 avtLCSFilter::GetCachedDataSet()
 {
     avtDataTree_p rv = NULL;
+
     if (atts.GetSourceType() == LCSAttributes::NativeMesh)
     {
-        rv = GetCachedNativeDataSet(GetInputDataTree());
-
         int looksOK = 1;
+
+        rv = GetCachedNativeDataSet(GetInputDataTree());
+      
         if ((*rv == NULL) && (*(GetInputDataTree()) != NULL))
             looksOK = 0;
 
@@ -2198,6 +2212,7 @@ avtLCSFilter::GetCachedNativeDataSet(avtDataTree_p inDT)
         int domain = inDT->GetDataRepresentation().GetDomain();
         std::string label = inDT->GetDataRepresentation().GetLabel();
         std::string str = CreateCacheString();
+
         vtkDataSet *rv = (vtkDataSet *)
           FetchArbitraryVTKObject(SPATIAL_DEPENDENCE | DATA_DEPENDENCE,
                                   outVarName.c_str(), domain, -1, str.c_str());

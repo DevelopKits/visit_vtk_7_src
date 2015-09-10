@@ -63,7 +63,7 @@ function bv_vtk_force
 
 function bv_vtk_info
 {
-export VTK_FILE=${VTK_FILE:-"VTK-6.3.0.rc1.tar.gz"}
+export VTK_FILE=${VTK_FILE:-"VTK-6.3.0.tar.gz"}
 export VTK_VERSION=${VTK_VERSION:-"6.3.0"}
 export VTK_SHORT_VERSION=${VTK_SHORT_VERSION:-"6.3"}
 export VTK_COMPATIBILITY_VERSION=${VTK_SHORT_VERSION}

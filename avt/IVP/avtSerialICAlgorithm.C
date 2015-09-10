@@ -46,8 +46,6 @@
 #include <DebugStream.h>
 #include <VisItStreamUtil.h>
 
-using namespace std;
-
 // ****************************************************************************
 //  Method: avtSerialICAlgorithm::avtSerialICAlgorithm
 //
@@ -108,7 +106,7 @@ avtSerialICAlgorithm::~avtSerialICAlgorithm()
 // ****************************************************************************
 
 void
-avtSerialICAlgorithm::Initialize(vector<avtIntegralCurve *> &seedPts)
+avtSerialICAlgorithm::Initialize(std::vector<avtIntegralCurve *> &seedPts)
 {
     avtICAlgorithm::Initialize(seedPts);
 
@@ -136,7 +134,8 @@ avtSerialICAlgorithm::RestoreInitialize(std::vector<avtIntegralCurve *> &ics, in
     {
         avtIntegralCurve *s = ics[i];
 
-        if (s->blockList.front().timeStep == curTimeSlice)
+        if (!s->blockList.empty() &&
+            s->blockList.front().timeStep == curTimeSlice)
         {
             s->status.ClearAtTemporalBoundary();
             SetDomain(s);
@@ -172,7 +171,7 @@ avtSerialICAlgorithm::RestoreInitialize(std::vector<avtIntegralCurve *> &ics, in
 // ****************************************************************************
 
 void
-avtSerialICAlgorithm::AddIntegralCurves(vector<avtIntegralCurve *> &ics)
+avtSerialICAlgorithm::AddIntegralCurves(std::vector<avtIntegralCurve *> &ics)
 {
     int nSeeds = ics.size();
     int i0 = 0, i1 = nSeeds;
@@ -193,7 +192,7 @@ avtSerialICAlgorithm::AddIntegralCurves(vector<avtIntegralCurve *> &ics)
         }
         else
         {
-        i0 = (rank)*(nSeedsPerProc) + oneExtraUntil;
+            i0 = (rank)*(nSeedsPerProc) + oneExtraUntil;
             i1 = (rank+1)*(nSeedsPerProc) + oneExtraUntil;
         }
     
@@ -214,17 +213,17 @@ avtSerialICAlgorithm::AddIntegralCurves(vector<avtIntegralCurve *> &ics)
 #endif
     }
 
-    if (DebugStream::Level5()) 
+    if (DebugStream::Level1()) 
     {
       if( i0 < i1 )
       {
-        debug5 << "Proc " << PAR_Rank() << " has seeds: "
+        debug1 << "Proc " << PAR_Rank() << " has seeds: "
                << i0 << " to " << (i1-1) << " of " << nSeeds << " seeds"
                << std::endl;
       }
       else
       {
-        debug5 << "Proc " << PAR_Rank() << " has no seeds " << std::endl;
+        debug1 << "Proc " << PAR_Rank() << " has no seeds " << std::endl;
       }
     }
 }
@@ -243,7 +242,8 @@ avtSerialICAlgorithm::AddIntegralCurves(vector<avtIntegralCurve *> &ics)
 void
 avtSerialICAlgorithm::ActivateICs()
 {
-    list<avtIntegralCurve *>::iterator it = inactiveICs.begin();
+    std::list<avtIntegralCurve *>::iterator it = inactiveICs.begin();
+
     while (it != inactiveICs.end())
     {
         if (!(*it)->status.EncounteredTemporalBoundary())
@@ -320,6 +320,7 @@ avtSerialICAlgorithm::RunAlgorithm()
                 AdvectParticle(ic);
             }
             while (ic->status.Integrateable() &&
+                   !ic->blockList.empty() &&
                    DomainLoaded(ic->blockList.front()));
             
             // If the user termination criteria was reached so terminate the IC.

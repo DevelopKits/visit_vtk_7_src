@@ -1318,12 +1318,12 @@ avtPICSFilter::Execute(void)
         for (size_t i = 0; i < domainTimeIntervals.size(); i++)
         {
             icAlgo->Execute();
-                
+
             if (icAlgo->CheckNextTimeStepNeeded(curTimeSlice) &&
                 LoadNextTimeSlice())
             {
                 icAlgo->ActivateICsForNextTimeStep();
-                
+
                 if( rollover )
                   i = -1;
             }
@@ -3069,6 +3069,8 @@ avtPICSFilter::AddSeedPoint(avtVector &pt,
     vels.push_back( vel );
 
     CreateIntegralCurvesFromSeeds(pts, vels, ics, ids);
+
+    icAlgo->SetAllSeedsSentToAllProcs( GetAllSeedsSentToAllProcs() );
     icAlgo->AddIntegralCurves(ics);
 }
 
@@ -3236,8 +3238,11 @@ avtPICSFilter::CreateIntegralCurvesFromSeeds(std::vector<avtVector> &pts,
 
 //    MaxID = pts.size();
 
-    // Sort them on domain.
-    std::sort(curves.begin(), curves.end(), avtIntegralCurve::DomainCompare);
+    //  For the serial algorithm with more than one domain sort the
+    //  curves based on the domain. If not sorted one could get into a
+    //  situation where the block cache is continually purged.
+    if (method == PICS_SERIAL)
+      std::sort(curves.begin(), curves.end(), avtIntegralCurve::DomainCompare);
 
     if (DebugStream::Level5())
     {
