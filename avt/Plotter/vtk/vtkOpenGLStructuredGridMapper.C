@@ -369,6 +369,10 @@ void vtkOpenGLStructuredGridMapper::Render(vtkRenderer *ren, vtkActor *act)
 //   Brad Whitlock, Sun Apr 22 01:00:33 PDT 2012
 //   Support double coordinates.
 //
+//   Kathleen Biagas, Thu Sep 17 15:18:32 PDT 2015
+//   Texture coordinates (coming from vtkMapper) are now 2D, so change 
+//   indexing into the array to only use the first coordinate.
+//
 // ****************************************************************************
 
 int vtkOpenGLStructuredGridMapper::Draw(vtkRenderer *ren, vtkActor *act)
@@ -541,7 +545,7 @@ int vtkOpenGLStructuredGridMapper::Draw(vtkRenderer *ren, vtkActor *act)
                    int idx = j*(fastDim-1) + i;\
 \
                    if(texCoords != NULL)\
-                       glTexCoord1f(texCoords[idx]);\
+                       glTexCoord1f(texCoords[2*idx]);\
                    else if(colors != NULL)\
                        glColor4ubv(colors + 4*idx);\
 \
@@ -571,7 +575,7 @@ int vtkOpenGLStructuredGridMapper::Draw(vtkRenderer *ren, vtkActor *act)
                        int idx = J*fastDim + I;\
 \
                        if(texCoords != NULL)\
-                           glTexCoord1f(texCoords[idx]);\
+                           glTexCoord1f(texCoords[2*idx]);\
                        else if(colors != NULL)\
                            glColor4ubv(colors + 4*idx);\
 \
@@ -773,6 +777,10 @@ vtkOpenGLStructuredGridMapper::LooksDiscrete() const
 //   Brad Whitlock, Wed Aug 10 11:00:42 PDT 2011
 //   Make same changes as in the rectilinear mapper.
 //
+//   Kathleen Biagas, Thu Sep 17 15:18:32 PDT 2015
+//   Texture coordinates (coming from vtkMapper) are now 2D, so set
+//   ColorTextureSize to be haff the size of the ColorTextureMap.
+//
 // ****************************************************************************
 
 void
@@ -790,7 +798,7 @@ vtkOpenGLStructuredGridMapper::BeginColorTexturing()
             GetVoidPointer(0);
         if(this->ColorTexture != NULL)
             delete [] this->ColorTexture;
-        this->ColorTextureSize = textColors->GetNumberOfTuples();
+        this->ColorTextureSize = textColors->GetNumberOfTuples()/2;
         this->ColorTexture = new float[this->ColorTextureSize * 4];
         for(int i = 0; i < this->ColorTextureSize * 4; ++i)
             this->ColorTexture[i] = float(rgba[i]) / 256.f;

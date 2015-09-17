@@ -386,7 +386,12 @@ void vtkOpenGLRectilinearGridMapper::Render(vtkRenderer *ren, vtkActor *act)
 //    Add support for 1D rectilinear (Nx, 1, 1 case) grids as lines.
 //
 //    Brad Whitlock, Mon Mar 19 11:04:09 PDT 2012
-//    Add double coordinate support via macro. Change loops to avoid some branching.
+//    Add double coordinate support via macro. Change loops to avoid some
+//    branching.
+//
+//    Kathleen Biagas, Thu Sep 17 15:18:32 PDT 2015
+//    Texture coordinates (coming from vtkMapper) are now 2D, so change 
+//    indexing into the array to only use the first coordinate.
 //
 // ****************************************************************************
 
@@ -559,7 +564,7 @@ int vtkOpenGLRectilinearGridMapper::Draw(vtkRenderer *ren, vtkActor *act)
                if(nodeData) \
                { \
                    if(texCoords != NULL) \
-                        glTexCoord1f(texCoords[i]); \
+                        glTexCoord1f(texCoords[i*2]); \
                    else if(colors != NULL) \
                         glColor4ubv(colors + 4*i); \
                } \
@@ -615,7 +620,7 @@ int vtkOpenGLRectilinearGridMapper::Draw(vtkRenderer *ren, vtkActor *act)
                    { \
                        int idx = j*(fastDim-1) + i; \
                        if(texCoords != NULL) \
-                           glTexCoord1f(texCoords[idx]); \
+                           glTexCoord1f(texCoords[idx*2]); \
                        else if(colors != NULL) \
                            glColor4ubv(colors + 4*idx); \
                        if (flatI) \
@@ -647,7 +652,7 @@ int vtkOpenGLRectilinearGridMapper::Draw(vtkRenderer *ren, vtkActor *act)
                                 { \
                                     int idx = (j + quadorder[k]/2)*fastDim +  \
                                               (i+(quadorder[k]%2)); \
-                                    glTexCoord1f(texCoords[idx]); \
+                                    glTexCoord1f(texCoords[idx*2]); \
                                     VERTEXFUNC(X[0], Y[i + quadorder[k] % 2],  \
                                                Z[j + quadorder[k]/2]); \
                                 } \
@@ -658,7 +663,7 @@ int vtkOpenGLRectilinearGridMapper::Draw(vtkRenderer *ren, vtkActor *act)
                                 { \
                                     int idx = (j + quadorder[k]/2)*fastDim +  \
                                               (i+(quadorder[k]%2)); \
-                                    glTexCoord1f(texCoords[idx]); \
+                                    glTexCoord1f(texCoords[idx*2]); \
                                     VERTEXFUNC(X[i + quadorder[k] % 2], Y[0], \
                                                Z[j + quadorder[k]/2]); \
                                 } \
@@ -669,7 +674,7 @@ int vtkOpenGLRectilinearGridMapper::Draw(vtkRenderer *ren, vtkActor *act)
                                 { \
                                     int idx = (j + quadorder[k]/2)*fastDim +  \
                                               (i+(quadorder[k]%2)); \
-                                    glTexCoord1f(texCoords[idx]); \
+                                    glTexCoord1f(texCoords[idx*2]); \
                                     VERTEXFUNC(X[i + quadorder[k] % 2],  \
                                                Y[j + quadorder[k]/2], Z[0]); \
                                 } \
@@ -914,6 +919,10 @@ vtkOpenGLRectilinearGridMapper::LooksDiscrete() const
 //    I moved code from other methods to this one. I also changed how we get
 //    the colors so we get them from the ColorTextureMap of the mapper.
 //
+//    Kathleen Biagas, Thu Sep 17 15:18:32 PDT 2015
+//    Texture coordinates (coming from vtkMapper) are now 2D, so set
+//    ColorTextureSize to be haff the size of the ColorTextureMap.
+//
 // ****************************************************************************
 
 void
@@ -931,7 +940,7 @@ vtkOpenGLRectilinearGridMapper::BeginColorTexturing()
             GetVoidPointer(0);
         if(this->ColorTexture != NULL)
             delete [] this->ColorTexture;
-        this->ColorTextureSize = textColors->GetNumberOfTuples();
+        this->ColorTextureSize = textColors->GetNumberOfTuples()/2;
         this->ColorTexture = new float[this->ColorTextureSize * 4];
         for(int i = 0; i < this->ColorTextureSize * 4; ++i)
             this->ColorTexture[i] = float(rgba[i]) / 256.f;
