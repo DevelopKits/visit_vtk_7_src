@@ -260,7 +260,7 @@ ADD_LIBRARY(avtpipeline_ser ${ALL_SOURCES})
     TARGET_LINK_LIBRARIES(avtpipeline_ser visitcommon ${AVTMATH} avtdbatts 
                                            visit_vtk lightweight_visit_vtk vtkCommonCore 
                                            vtkCommonDataModel vtkFiltersGeometry 
-                                           vtkRenderingOpenGL vtkRenderingFreeType 
+                                           vtkRenderingOpenGL2 vtkRenderingFreeType 
                                            vtkInteractionStyle 
                                            ${ZLIB_LIB} ${EAVL_LIB})
 
@@ -279,7 +279,7 @@ IF(VISIT_PARALLEL)
         TARGET_LINK_LIBRARIES(avtpipeline_par visitcommon ${AVTMATH} avtdbatts 
                                               visit_vtk lightweight_visit_vtk vtkCommonCore 
                                               vtkCommonDataModel vtkFiltersGeometry 
-                                              vtkRenderingOpenGL vtkRenderingFreeType 
+                                              vtkRenderingOpenGL2 vtkRenderingFreeType 
                                               vtkInteractionStyle ${ZLIB_LIB} 
                                               ${EAVL_LIB})
     IF(HAVE_LIB_R)

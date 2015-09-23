@@ -667,11 +667,7 @@ function build_vtk
     if [[ "$DO_DBIO_ONLY" != "yes" ]]; then
         if [[ "$DO_ENGINE_ONLY" != "yes" ]]; then
             if [[ "$DO_SERVER_COMPONENTS_ONLY" != "yes" ]]; then
-                if [["$BACKEND_OPENGL2" == "yes"]]; then
-                    vopts="${vopts} -DModule_vtkGUISupportQtOpenGL2:BOOL=true"
-                else
-                    vopts="${vopts} -DModule_vtkGUISupportQtOpenGL:BOOL=true"
-                fi
+                vopts="${vopts} -DModule_vtkGUISupportQtOpenGL:BOOL=true"
                 vopts="${vopts} -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_BIN_DIR}/qmake"
                 if [[ ${IS_QT5} == "yes" ]]; then
                     vopts="${vopts} -DVTK_QT_VERSION=5"

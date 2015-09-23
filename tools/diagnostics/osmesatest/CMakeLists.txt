@@ -65,7 +65,7 @@ vtkFiltersHybrid
 vtkFiltersSources
 vtkIOImage
 vtkRenderingCore
-vtkRenderingOpenGL
+vtkRenderingOpenGL2
 vtkRenderingFreeType 
 vtkInteractionStyle 
 )

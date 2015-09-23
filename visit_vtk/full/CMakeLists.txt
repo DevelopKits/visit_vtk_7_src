@@ -125,9 +125,9 @@ LINK_DIRECTORIES(${LIBRARY_OUTPUT_DIRECTORY} ${VTK_LIBRARY_DIRS})
 ADD_LIBRARY(visit_vtk ${VISIT_VTK_SOURCES})
 
 IF(HAVE_LIB_R)
-    TARGET_LINK_LIBRARIES(visit_vtk lightweight_visit_vtk vtkFiltersExtraction vtkFiltersFlowPaths vtkImagingHybrid vtkRenderingOpenGL vtkRenderingFreeType vtkInteractionStyle vtktiff vtkFiltersStatisticsGnuR)
+    TARGET_LINK_LIBRARIES(visit_vtk lightweight_visit_vtk vtkFiltersExtraction vtkFiltersFlowPaths vtkImagingHybrid vtkRenderingOpenGL2 vtkRenderingFreeType vtkInteractionStyle vtktiff vtkFiltersStatisticsGnuR)
 ELSE(HAVE_LIB_R)
-    TARGET_LINK_LIBRARIES(visit_vtk lightweight_visit_vtk vtkFiltersExtraction vtkFiltersFlowPaths vtkImagingHybrid vtkRenderingOpenGL vtkRenderingFreeType vtkInteractionStyle vtktiff)
+    TARGET_LINK_LIBRARIES(visit_vtk lightweight_visit_vtk vtkFiltersExtraction vtkFiltersFlowPaths vtkImagingHybrid vtkRenderingOpenGL2 vtkRenderingFreeType vtkInteractionStyle vtktiff)
 ENDIF(HAVE_LIB_R)
 # Add vtk definitions
 ADD_TARGET_DEFINITIONS(visit_vtk "${VTK_DEFINITIONS}")

@@ -56,7 +56,7 @@ ${VTK_INCLUDE_DIRS}
 LINK_DIRECTORIES(${LIBRARY_OUTPUT_DIRECTORY} ${VTK_LIBRARY_DIRS})
 
 ADD_LIBRARY(avtview ${AVTVIEW_SOURCES})
-TARGET_LINK_LIBRARIES(avtview visitcommon vtkRenderingOpenGL vtkRenderingFreeType vtkInteractionStyle)
+TARGET_LINK_LIBRARIES(avtview visitcommon vtkRenderingOpenGL2 vtkRenderingFreeType vtkInteractionStyle)
 
 # Add vtk definitions
 ADD_TARGET_DEFINITIONS(avtview "${VTK_DEFINITIONS}")

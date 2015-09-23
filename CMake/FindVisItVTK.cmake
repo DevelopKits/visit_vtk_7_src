@@ -109,7 +109,7 @@ SET(REQ_VTK_MODS
         vtkIOXML
         vtkInteractionStyle
         vtkRenderingAnnotation
-        vtkRenderingOpenGL)
+        vtkRenderingOpenGL2)
 
 IF(R_FOUND)
     SET(REQ_VTK_MODS ${REQ_VTK_MODS} vtkFiltersStatisticsGnuR)
