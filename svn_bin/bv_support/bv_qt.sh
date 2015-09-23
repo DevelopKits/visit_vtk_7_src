@@ -136,9 +136,9 @@ function bv_qt_info
         fi
     fi
         
-export QT_FILE=${QT_FILE:-"qt-everywhere-opensource-src-4.8.3.tar.gz"}
-export QT_VERSION=${QT_VERSION:-"4.8.3"}
-export QT_MD5_CHECKSUM=${QT_MD5_CHECKSUM:-"a663b6c875f8d7caa8ac9c30e4a4ec3b"}
+export QT_FILE=${QT_FILE:-"qt-everywhere-opensource-src-4.8.6.tar.gz"}
+export QT_VERSION=${QT_VERSION:-"4.8.6"}
+export QT_MD5_CHECKSUM="2edbe4d6c2eff33ef91732602f3518eb"
 export QT_BUILD_DIR=${QT_BUILD_DIR:-"${QT_FILE%.tar*}"}
 export QT_BIN_DIR="${QT_BUILD_DIR}/bin"
 export QT_SHA256_CHECKSUM=""

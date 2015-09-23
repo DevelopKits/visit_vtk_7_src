@@ -2,6 +2,7 @@
 ## Setup VISITHOME & VISITARCH variables.
 ##
 SET(VISITHOME /home/biagas2/visit/thirdparty/2.10.0)
+SET(VISITHOME2 /home/biagas2/visit/thirdparty/2.11.0)
 SET(VISITARCH linux-x86_64_gcc-4.4)
 
 ## Compiler flags.
@@ -37,24 +38,24 @@ VISIT_OPTION_DEFAULT(VISIT_MESA_DIR ${VISITHOME}/mesa/7.10.2/${VISITARCH})
 ##
 ## Python
 ##
-VISIT_OPTION_DEFAULT(VISIT_PYTHON_DIR ${VISITHOME}/python/2.7.6/${VISITARCH})
+VISIT_OPTION_DEFAULT(VISIT_PYTHON_DIR ${VISITHOME2}/python/2.7.6/${VISITARCH})
 
 ##
 ## Qt
 ##
-VISIT_OPTION_DEFAULT(VISIT_QT_BIN ${VISITHOME}/qt/4.8.3/${VISITARCH}/bin)
+VISIT_OPTION_DEFAULT(VISIT_QT_BIN ${VISITHOME2}/qt/4.8.6/${VISITARCH}/bin)
 
 ##
 ## VTK
 ##
 SETUP_APP_VERSION(VTK 6.3.0)
-VISIT_OPTION_DEFAULT(VISIT_VTK_DIR ${VISITHOME}/vtk/${VTK_VERSION}/${VISITARCH})
+VISIT_OPTION_DEFAULT(VISIT_VTK_DIR ${VISITHOME2}/vtk-opengl2/${VTK_VERSION}/${VISITARCH})
 
 
 ##
 ## BOOST
 ##
-VISIT_OPTION_DEFAULT(VISIT_BOOST_DIR /home/biagas2/visit/thirdparty/boost_minimal_headers/1.57.0)
+#VISIT_OPTION_DEFAULT(VISIT_BOOST_DIR /home/biagas2/visit/thirdparty/boost_minimal_headers/1.57.0)
 
 ##
 ## Boxlib
