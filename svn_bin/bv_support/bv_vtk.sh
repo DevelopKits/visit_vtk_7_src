@@ -4,7 +4,9 @@ function bv_vtk_initialize
     export ON_VTK="on"
     export FORCE_VTK="no"
     export USE_SYSTEM_VTK="no"
+    export BACKEND_OPENGL2="no"
     add_extra_commandline_args "vtk" "alt-vtk-dir" 1 "Use alternate VTK (exp)"
+    add_extra_commandline_args "vtk" "opengl2-backend" 0 "Enable OpenGL-2 backend when building VTK"
 }
 
 function bv_vtk_enable
@@ -27,6 +29,13 @@ function bv_vtk_alt_vtk_dir
     USE_SYSTEM_VTK="yes"
     SYSTEM_VTK_DIR="$1"
     info "Using Alternate VTK: $SYSTEM_VTK_DIR"
+}
+
+function bv_vtk_opengl2_backend
+{
+    bv_vtk_enable
+    BACKEND_OPENGL2="yes"
+    info "Using OpenGL 2 backend for VTK"
 }
 
 function bv_vtk_depends_on
@@ -83,8 +92,8 @@ printf "%s%s\n" "VTK_BUILD_DIR=" "${VTK_BUILD_DIR}"
 
 function bv_vtk_print_usage
 {
-printf "\t\t%15s\n" "NOTE: not available for download from web"
 printf "%-15s %s [%s]\n" "--vtk" "Build VTK" "built by default unless --no-thirdparty flag is used"
+printf "%-15s %s [%s]\n" "--opengl2-backend" "Enable OpenGL-2 backend when building VTK" "$BACKEND_OPENGL2"
 }
 
 function bv_vtk_host_profile
@@ -105,7 +114,9 @@ function bv_vtk_host_profile
 function bv_vtk_initialize_vars
 {
     info "initalizing vtk vars"
-    if [[ $DO_R == "yes" ]]; then
+    if [[ $BACKEND_OPENGL2 == "yes" ]]; then
+        VTK_INSTALL_DIR="vtk-opengl2"
+    elif [[ $DO_R == "yes" ]]; then
         VTK_INSTALL_DIR="vtk-r"
     fi
 }
@@ -418,6 +429,7 @@ EOF
 function apply_vtk_patch
 {  
     # also apply objc flag patch to 6.1.0
+    # needed for 6.3?
     
     if [[ ${VTK_VERSION} == 6.1.0 ]] ; then
         apply_vtk_600_patch
@@ -425,13 +437,6 @@ function apply_vtk_patch
         if [[ "$OPSYS" == "Linux" ]] ; then
 	   apply_vtk_610_patch
         fi
-        if [[ $? != 0 ]] ; then
-            return 1
-        fi
-    fi
-
-    if [[ ${VTK_VERSION} == 6.2.0 ]] ; then
-        apply_vtk_600_patch
         if [[ $? != 0 ]] ; then
             return 1
         fi
@@ -610,6 +615,13 @@ function build_vtk
     # allow VisIt to override any of vtk's classes
     vopts="${vopts} -DVTK_ALL_NEW_OBJECT_FACTORY:BOOL=true"
 
+    # Which backend?
+    if [["$BACKEND_OPENGL2" == "yes"]]; then
+        vopts="${vopts} -DVTK_RENDERING_BACKEND:STRING=OpenGL2"
+    else
+        vopts="${vopts} -DVTK_RENDERING_BACKEND:STRING=OpenGL"
+    fi
+
     # Turn off module groups
     vopts="${vopts} -DVTK_Group_Imaging:BOOL=false"
     vopts="${vopts} -DVTK_Group_MPI:BOOL=false"
@@ -633,7 +645,11 @@ function build_vtk
     vopts="${vopts} -DModule_vtkInteractionStyle:BOOL=true"
     vopts="${vopts} -DModule_vtkRenderingAnnotation:BOOL=true"
     vopts="${vopts} -DModule_vtkRenderingFreeType:BOOL=true"
-    vopts="${vopts} -DModule_vtkRenderingOpenGL:BOOL=true"
+    if [["$BACKEND_OPENGL2" == "yes"]]; then
+        vopts="${vopts} -DModule_vtkRenderingOpenGL2:BOOL=true"
+    else
+        vopts="${vopts} -DModule_vtkRenderingOpenGL:BOOL=true"
+    fi
     vopts="${vopts} -DModule_vtklibxml2:BOOL=true"
 
     # Tell VTK where to locate qmake if we're building graphical support. We
@@ -641,7 +657,11 @@ function build_vtk
     if [[ "$DO_DBIO_ONLY" != "yes" ]]; then
         if [[ "$DO_ENGINE_ONLY" != "yes" ]]; then
             if [[ "$DO_SERVER_COMPONENTS_ONLY" != "yes" ]]; then
-                vopts="${vopts} -DModule_vtkGUISupportQtOpenGL:BOOL=true"
+                if [["$BACKEND_OPENGL2" == "yes"]]; then
+                    vopts="${vopts} -DModule_vtkGUISupportQtOpenGL2:BOOL=true"
+                else
+                    vopts="${vopts} -DModule_vtkGUISupportQtOpenGL:BOOL=true"
+                fi
                 vopts="${vopts} -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_BIN_DIR}/qmake"
                 if [[ ${IS_QT5} == "yes" ]]; then
                     vopts="${vopts} -DVTK_QT_VERSION=5"
