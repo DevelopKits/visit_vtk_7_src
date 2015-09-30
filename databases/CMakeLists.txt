@@ -183,6 +183,9 @@
 #    Changed BOOST logic and added CHECK_THIRDPARTY_SATISIFED, 
 #    which is used for explicitly check 3rd party deps for each db plugin.
 #
+#    Kathleen Biagas, Wed Sep 23 09:38:22 MST 2015 
+#    Don't attempt to build HDFS on Windows.
+#
 #****************************************************************************/
 
 IF(NOT WIN32)
@@ -462,7 +465,6 @@ lata
 volimage
 unv
 ${XDBPLUGIN}
-HDFS
 )
 
 IF(TARGET vtkIOEnSight)
@@ -478,6 +480,7 @@ ENDIF(TARGET vtkIOEnSight)
 IF (NOT WIN32)
     LIST(APPEND REQUIRED_DATABASE_PLUGINS 
         Claw
+        HDFS
         STAR
         TCGA
         Vis5D
