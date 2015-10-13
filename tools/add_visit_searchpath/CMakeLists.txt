@@ -34,25 +34,24 @@
 # OUT OF THE  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 # DAMAGE.
 #
+# Modifications:
+#
 #****************************************************************************/
 
-# Use the BOOST_DIR hint from the config-site .cmake file 
+SET(SOURCES add_visit_searchpath.C)
 
-INCLUDE(${VISIT_SOURCE_DIR}/CMake/SetUpThirdParty.cmake)
+INCLUDE_DIRECTORIES(
+${CMAKE_CURRENT_SOURCE_DIR}
+${SILO_INCLUDE_DIR}
+)
 
-SET(BOOST_LIBS NO_LIBS)
+LINK_DIRECTORIES(${SILO_LIBRARY_DIR})
 
-IF(NEKTAR++_FOUND)
-  SET(BOOST_LIBS
-   boost_chrono
-   boost_iostreams
-   boost_thread
-   boost_date_time
-   boost_filesystem
-   boost_regex
-   boost_system
-   boost_timer
-   boost_program_options)
-ENDIF()
+ADD_EXECUTABLE(add_visit_searchpath ${SOURCES})
 
-SET_UP_THIRD_PARTY(BOOST lib include ${BOOST_LIBS} )
+TARGET_LINK_LIBRARIES(add_visit_searchpath
+${SILO_LIB}
+) 
+
+VISIT_INSTALL_TARGETS(add_visit_searchpath)
+VISIT_TOOLS_ADD_FOLDER(add_visit_searchpath)
