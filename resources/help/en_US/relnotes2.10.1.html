@@ -1,0 +1,54 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta http-equiv="Content-Language" content="en-us">
+  <meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+  <meta name="ProgId" content="FrontPage.Editor.Document">
+  <title>VisIt 2.10.1 Release Notes</title>
+</head>
+<body>
+
+<center><b><font size="6">VisIt 2.10.1 Release Notes</font></b></center>
+
+<p>Welcome to VisIt's release notes page. This page describes the important
+enhancements and bug-fixes that were added to this release.</p>
+
+<p><b>Sections</b></p>
+<ul>
+  <li><a href="#Bugs_fixed">Bug Fixes</a></li>
+  <li><a href="#Enhancements">Enhancements</a></li>
+  <li><a href="#Dev_changes">Changes for VisIt developers</a></li>
+</ul>
+
+<a name="Bugs_fixed"></a>
+<p><b><font size="4">Bugs fixed in version 2.10.1</font></b></p>
+<ul>
+  <li>The <i>VisItAddPlot()</i> function in Libsim was incorrectly using the global <i>"Apply operators to all plots"</i> setting when creating plots. The behavior for VisItAddPlot() has been changed so new plots are not created with previously applied operators to more closely match the operation of the VisIt CLI.</li>
+  <li>Large tecplot files could not be read on Windows.</li>
+  <li>A potential memory overwrite was fixed in the Fortran <i>visitgetenv</i> function in Libsim.</li>
+  <li>Fixed the bug with the missing QT4 include and archive files after doing a 'make install'</li>
+  <li>Re-enable Adaptive csg capability for Windows, which was inadvertently disabled for previous release.</li>
+  <li>Fixed a bug with the PF3D reader where the time and cycle were reported as zero for all the time states accessed after the initial time state accessed.</li>
+  <li>Fixed a bug preventing the reading of DOS-formatted .visit files on Linux</li>
+</ul>
+
+<a name="Enhancements"></a>
+<p><b><font size="4">Enhancements in version 2.10.1</font></b></p>
+<ul>
+  <li>VisIt now permits the <i>-socket-bridge-host</i> command line argument to override the host name passed to compute engines when VCL starts a socket bridge. This is useful for login nodes that are attached to multiple network interfaces such as on BlueGene/Q where compute nodes may need to attach to the socket bridge host (typically the LAC node) using an alias.</li>
+  <li>The PF3D reader was enhanced so that it now reads the new multi level file format.</li>
+  <li></li>
+  <li></li>
+</ul>
+
+<a name="Dev_changes"></a>
+<p><b><font size="4">Changes for VisIt developers in version 2.10.1</font></b></p>
+<ul>
+  <li></li>
+</ul>
+
+<p>Click the following link to view the release notes for the previous version
+of VisIt: <a href=relnotes2.10.0.html>2.10.0</a>.</p>
+</body>
+</html>

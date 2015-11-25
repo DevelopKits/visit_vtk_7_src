@@ -2707,6 +2707,10 @@ GetRestrictedMaterialIndices(const avtDatabaseMetaData *md, const char *const va
 //    I corrected a bug where a NULL pointer would be de-referenced causing
 //    a crash if a multivar was completely empty.
 //
+//    Mark C. Miller, Mon Nov  9 17:14:21 PST 2015
+//    Adjusted setting of associated meshname from objects 'mmesh_name' member
+//    to use absolute path name instead of just whatever the Silo file had
+//    stored.
 // ****************************************************************************
 void
 avtSiloFileFormat::ReadMultivars(DBfile *dbfile,
@@ -2772,7 +2776,10 @@ avtSiloFileFormat::ReadMultivars(DBfile *dbfile,
                 {
                     if (mv->mmesh_name != 0)
                     {
-                        meshname = mv->mmesh_name;
+                        char cwd[512];
+                        DBGetDir(dbfile, cwd);
+                        meshname = FileFunctions::Absname(cwd,mv->mmesh_name,"/");
+                        meshname.erase(meshname.begin());
                         debug5 << "Variable \"" << multivar_names[i] 
                                << "\" indicates it is defined on mesh \""
                                << meshname.c_str() << "\"" << endl;
@@ -3703,6 +3710,10 @@ avtSiloFileFormat::ReadMaterials(DBfile *dbfile,
 //    Improve way multimat and mat info are inspected to create material names.
 //    Avoid using using a dummy DBMaterial struct and pointer stealing.
 //
+//    Mark C. Miller, Mon Nov  9 17:14:21 PST 2015
+//    Adjusted setting of associated meshname from object's 'mmesh_name' member
+//    to use absolute path name instead of just whatever the Silo file had
+//    stored.
 // ****************************************************************************
 void
 avtSiloFileFormat::ReadMultimats(DBfile *dbfile,
@@ -3866,7 +3877,10 @@ avtSiloFileFormat::ReadMultimats(DBfile *dbfile,
 
                 if (mm->mmesh_name != 0)
                 {
-                    meshname = mm->mmesh_name;
+                    char cwd[512];
+                    DBGetDir(dbfile, cwd);
+                    meshname = FileFunctions::Absname(cwd,mm->mmesh_name,"/");
+                    meshname.erase(meshname.begin());
                     debug5 << "Material \"" << multimat_names[i]
                            << "\" indicates it is defined on mesh \""
                            << meshname.c_str() << "\"" << endl;
@@ -14256,6 +14270,8 @@ avtSiloFileFormat::GetDataExtents(const char *varName)
 //    I corrected a memory error where a buffer used to hold material names
 //    was underallocated. This resulted in crashes in some instances.
 //
+//    Mark C. Miller, Fri Nov  6 09:13:22 PST 2015
+//    Avert segv on deref of material_names in block level mat object.
 // ****************************************************************************
 
 avtMaterial *
@@ -14315,7 +14331,7 @@ avtSiloFileFormat::CalcMaterial(DBfile *dbfile, const char *matname, const char 
         {
             matnames[i] = buffer + (256+max_dlen)*i;
             int matno = silomat->matnos[i];
-            const char *matname = silomat->matnames[i];
+            const char *matname = silomat->matnames ? silomat->matnames[i] : 0;
             if (mm&&mm->matnos)
                 matno = mm->matnos[i];
             if (mm&&mm->material_names)
