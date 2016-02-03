@@ -56,6 +56,7 @@
 #include <vector>
 
 #include <avtSiloMBObjectCache.h>
+#include <avtLocalStructuredDomainBoundaries.h>
 
 class     vtkUnstructuredGrid;
 
@@ -288,6 +289,9 @@ typedef struct _GroupInfo
 //    regions, so this is a significant saving. CSG meshes with thousands
 //    of regions were exhausting memory in the previous scheme.
 //
+//    Mark C. Miller, Tue Feb  2 14:48:25 PST 2016
+//    Added firstAllEmptyMultimesh and emptyObjectList to handle cases where
+//    a multi-mesh consists of all empty blocks.
 // ****************************************************************************
 
 class avtSiloFileFormat : public avtSTMDFileFormat
@@ -357,6 +361,9 @@ class avtSiloFileFormat : public avtSTMDFileFormat
     avtSiloMBObjectCache multivarCache;
     avtSiloMBObjectCache multimatCache;
     avtSiloMBObjectCache multispecCache;
+
+    std::string                          firstAllEmptyMultimesh;
+    std::map<std::string, bool>          emptyObjectsList;
 
     std::map<std::string, std::string>   multivarToMultimeshMap;
 
@@ -475,6 +482,9 @@ class avtSiloFileFormat : public avtSTMDFileFormat
 
     avtIntervalTree      *GetSpatialExtents(const char *);
     avtIntervalTree      *GetDataExtents(const char *);
+
+    avtLocalStructuredDomainBoundaryList *
+                          GetLocalDomainBoundaryInfo(int, const char *);
 
     void                  GetQuadGhostZones(DBquadmesh *, vtkDataSet *);
     void                  VerifyQuadmesh(DBquadmesh *, const char *);
