@@ -392,6 +392,12 @@
 #    Burlen Loring, Thu Oct  8 10:45:36 PDT 2015
 #    Added define for aligned_alloc in visit-config.h
 #
+#    Eric Brugger, Wed Dec  9 12:05:18 PST 2015
+#    Added support for VTKm.
+#
+#    Eric Brugger, Thu Jan 14 08:43:03 PST 2016
+#    Added vtkm directory that builds vtkm library.
+#
 #****************************************************************************/
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8 FATAL_ERROR)
@@ -807,6 +813,7 @@ VISIT_3RDPARTY_VAR(SILO_DIR      "Path containing the Silo library's include and
 VISIT_3RDPARTY_DEP(SILO_LIBDEP   "Silo library dependencies")
 VISIT_3RDPARTY_VAR(UINTAH_DIR    "Path containing the Uintah library's include and lib")
 VISIT_3RDPARTY_VAR(VISUS_DIR     "Path containing the Visus library's include and lib")
+VISIT_3RDPARTY_VAR(VTKM_DIR      "Path containing the VTKm library's include and lib")
 VISIT_3RDPARTY_VAR(XDMF_DIR      "Path containing the Xdmf library's include and lib")
 VISIT_3RDPARTY_DEP(XDMF_LIBDEP   "Xdmf library dependencies")
 VISIT_3RDPARTY_VAR(XERCESC_DIR   "Path containing the Xerces-C library's include and lib")
@@ -995,7 +1002,7 @@ ENDMACRO(VISIT_INSTALL_TARGETS)
 IF(VISIT_HEADERS_SKIP_INSTALL)
     MESSAGE(STATUS "Skipping VisIt headers installation")
 ELSE(VISIT_HEADERS_SKIP_INSTALL)
-    INSTALL(DIRECTORY avt common engine gui launcher mdserver third_party_builtin viewer visit_vtk visitpy vtkqt winutil
+    INSTALL(DIRECTORY avt common engine gui launcher mdserver third_party_builtin viewer visit_vtk visitpy vtkm vtkqt winutil
         DESTINATION ${VISIT_INSTALLED_VERSION_INCLUDE}/visit
         FILE_PERMISSIONS OWNER_READ OWNER_WRITE
                          GROUP_READ GROUP_WRITE
@@ -1398,6 +1405,12 @@ IF(NOT VISIT_BUILD_MINIMAL_PLUGINS OR VISIT_SELECTED_DATABASE_PLUGINS)
     IF(VISUS_FOUND)
         SET(HAVE_LIBVISUS 1)
     ENDIF(VISUS_FOUND)
+
+    # Configure VTKm support.
+    INCLUDE(${VISIT_SOURCE_DIR}/CMake/FindVTKm.cmake)
+    IF(VTKM_FOUND)
+        SET(HAVE_LIBVTKM 1)
+    ENDIF(VTKM_FOUND)
 
     # Configure GFortran support.
     INCLUDE(${VISIT_SOURCE_DIR}/CMake/FindGFortran.cmake)
@@ -2217,6 +2230,7 @@ ENDFUNCTION(CREATE_PLUGIN_DEPENDENCIES)
 ADD_SUBDIRECTORY(third_party_builtin)
 ADD_SUBDIRECTORY(common)
 ADD_SUBDIRECTORY(visit_vtk)
+ADD_SUBDIRECTORY(vtkm)
 ADD_SUBDIRECTORY(avt)
 
 IF(NOT VISIT_DBIO_ONLY)

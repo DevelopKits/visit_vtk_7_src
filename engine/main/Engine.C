@@ -362,6 +362,9 @@ protected:
 //    Brad Whitlock, Fri Sep 28 09:21:38 PDT 2012
 //    Change intitialization to member-order. NULL out more member pointers.
 //
+//    Kevin Griffin, Tue Jan 26 17:45:52 PST 2016
+//    Enable IceT by default.
+//
 // ****************************************************************************
 
 Engine::Engine() : EngineBase(), viewerArgs(), destinationFormat(), rpcExecutors()
@@ -408,7 +411,7 @@ Engine::Engine() : EngineBase(), viewerArgs(), destinationFormat(), rpcExecutors
     procAtts = NULL;
 
 #if defined(PARALLEL) && defined(HAVE_ICET)
-    useIceT = false; //true;
+    useIceT = true;
 #else
     useIceT = false;
 #endif
@@ -567,6 +570,25 @@ Engine::Initialize(int *argc, char **argv[], bool sigs)
 {
     int initTimer = visitTimer->StartTimer();
 
+    int nthreads = 0;
+    for (int i = 0 ; i < *argc-1 ; i++)
+    {
+        if ((strcmp((*argv)[i], "-thread") == 0) ||
+            (strcmp((*argv)[i], "-threads") == 0))
+        {
+            nthreads = atoi((*argv)[i+1]);
+            if (nthreads > 0)
+            {
+                VisitSetNumberOfThreads(nthreads);
+            }
+            else
+            {
+                debug1 << "Invalid number of threads!  Ignoring argument" << endl;
+            }
+
+        }
+    }
+
 #ifdef PARALLEL
     // We fork/exec X servers in some cases.  Open MPI will yell at us about
     // it, but the warning is not relevant for us because our children are
@@ -597,8 +619,6 @@ Engine::Initialize(int *argc, char **argv[], bool sigs)
     // Configure external options.
     RuntimeSetting::parse_command_line(*argc, const_cast<const char**>(*argv));
     this->X_Args = RuntimeSetting::lookups("x-args");
-
-    VisitSetNumberOfThreads( RuntimeSetting::lookupi("threads") );
 
     //
     // Set a different new handler for the engine

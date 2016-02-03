@@ -57,6 +57,9 @@
 #   Brad Whitlock, Mon Apr  7 15:24:19 PDT 2014
 #   Link to visit_vtk.
 #
+#   Eric Brugger, Thu Jan 14 10:44:28 PST 2016
+#   Add linking of vtkm library.
+#
 #****************************************************************************/
 
 SET(DATA_SOURCES
@@ -242,7 +245,9 @@ ${VISIT_SOURCE_DIR}/avt/Pipeline/Sinks
 ${VISIT_SOURCE_DIR}/avt/Pipeline/Sources
 ${VISIT_SOURCE_DIR}/visit_vtk/full
 ${VISIT_SOURCE_DIR}/visit_vtk/lightweight
+${VISIT_SOURCE_DIR}/vtkm
 ${EAVL_INCLUDE_DIR}
+${VTKM_INCLUDE_DIR}
 ${VTK_INCLUDE_DIRS}
 ${ZLIB_INCLUDE_DIR}
 )
@@ -262,7 +267,7 @@ ADD_LIBRARY(avtpipeline_ser ${ALL_SOURCES})
                                            vtkCommonDataModel vtkFiltersGeometry 
                                            vtkRenderingOpenGL2 vtkRenderingFreeType 
                                            vtkInteractionStyle 
-                                           ${ZLIB_LIB} ${EAVL_LIB})
+                                           ${ZLIB_LIB} ${EAVL_LIB} ${VTKM_LIB})
 
 IF(HAVE_LIB_R)
      TARGET_LINK_LIBRARIES(avtpipeline_ser vtkFiltersStatisticsGnuR)
@@ -281,7 +286,7 @@ IF(VISIT_PARALLEL)
                                               vtkCommonDataModel vtkFiltersGeometry 
                                               vtkRenderingOpenGL2 vtkRenderingFreeType 
                                               vtkInteractionStyle ${ZLIB_LIB} 
-                                              ${EAVL_LIB})
+                                              ${EAVL_LIB} ${VTKM_LIB})
     IF(HAVE_LIB_R)
         TARGET_LINK_LIBRARIES(avtpipeline_par vtkFiltersStatisticsGnuR)
     ENDIF(HAVE_LIB_R)
