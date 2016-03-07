@@ -31,7 +31,9 @@ class vtkPolyDataMapper;
 class vtkRectilinearGridMapper;
 class vtkStructuredGridMapper;
 class vtkDataSetSurfaceFilter;
+#if 0
 class vtkTexturedPointsPainter;
+#endif
 
 // ****************************************************************************
 // Modifications:
@@ -86,7 +88,9 @@ protected:
   vtkVisItDataSetMapper();
   ~vtkVisItDataSetMapper();
 
+#if 0
   vtkTexturedPointsPainter  *TexturedPointsPainter;
+#endif
   vtkRectilinearGridMapper  *RectilinearGridMapper;
   vtkStructuredGridMapper   *StructuredGridMapper;
   PointTextureMode           PointTextureMethod;

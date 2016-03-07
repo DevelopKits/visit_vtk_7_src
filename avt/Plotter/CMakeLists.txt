@@ -83,7 +83,6 @@ avtOpenGLSurfaceAndWireframeRenderer.C
 vtk/vtkOpenGLRectilinearGridMapper.C 
 vtk/vtkOpenGLStructuredGridMapper.C 
 vtk/vtkOpenGLTexturedBackgroundMapper.C 
-vtk/vtkTexturedPointsPainter.C
 )
 
 IF(VISIT_USE_GLEW)

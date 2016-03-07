@@ -26,9 +26,11 @@
 #include "vtkToolkits.h"
 #include "vtkScalarsToColors.h"
 
+#if 0
 #include <vtkPainterPolyDataMapper.h>
 #include <vtkChooserPainter.h>
 #include <vtkTexturedPointsPainter.h>
+#endif
 
 #include "vtkOpenGLRectilinearGridMapper.h"
 #include "vtkOpenGLStructuredGridMapper.h"
@@ -60,7 +62,9 @@ vtkStandardNewMacro(vtkVisItDataSetMapper);
 
 vtkVisItDataSetMapper::vtkVisItDataSetMapper()
 {
+#if 0
   this->TexturedPointsPainter = NULL;
+#endif
   this->RectilinearGridMapper = NULL;
   this->StructuredGridMapper = NULL;
   this->PointTextureMethod = TEXTURE_NO_POINTS;
@@ -83,10 +87,12 @@ vtkVisItDataSetMapper::vtkVisItDataSetMapper()
 
 vtkVisItDataSetMapper::~vtkVisItDataSetMapper()
 {
+#if 0
   if(this->TexturedPointsPainter)
     {
     this->TexturedPointsPainter->Delete();
     }
+#endif
   if ( this->RectilinearGridMapper )
     {
     this->RectilinearGridMapper->Delete();
@@ -184,6 +190,7 @@ void vtkVisItDataSetMapper::Render(vtkRenderer *ren, vtkActor *act)
     vtkStructuredGridMapper *sgm = vtkStructuredGridMapper::New();
     pm->SetInputConnection(gf->GetOutputPort());
 
+#if 0
     // Install a textured point painter on the polydata mapper.
     vtkPainterPolyDataMapper *ppdm = vtkPainterPolyDataMapper::SafeDownCast(pm);
     if(ppdm != NULL)
@@ -195,6 +202,7 @@ void vtkVisItDataSetMapper::Render(vtkRenderer *ren, vtkActor *act)
            cp->SetVertPainter(this->TexturedPointsPainter);
         }
     }
+#endif
 
     this->GeometryExtractor = gf;
     this->PolyDataMapper = pm;
@@ -365,8 +373,10 @@ vtkVisItDataSetMapper::SetPointTextureMethod(
     this->PointTextureMethod = m;
 
     int doIt = (this->PointTextureMethod == TEXTURE_USING_POINTSPRITES)?1:0;
+#if 0
     if(this->TexturedPointsPainter != NULL)
         this->TexturedPointsPainter->SetDoTexturing(doIt);
+#endif
 
     // We can't do color texturing if we are also doing point sprites.
     if(doIt > 0)
