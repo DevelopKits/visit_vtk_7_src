@@ -81,7 +81,6 @@ vtkjpeg
 vtkpng
 ${VTKZLIB_LIB}
 ${VTK_FREETYPE_LIBRARIES}
-vtkftgl
 )
 
 ADD_EXECUTABLE(visitprotocol dump_protocol.C ${STATIC_SOURCES})

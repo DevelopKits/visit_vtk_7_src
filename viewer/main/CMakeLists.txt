@@ -301,7 +301,6 @@ TARGET_LINK_LIBRARIES(viewer_exe
     vtkjpeg
     ${VTKZLIB_LIB}
     ${VTK_FREETYPE_LIBRARIES}
-    vtkftgl
 )
 
 # If we're building statically then the viewer can't be linked until the plugin

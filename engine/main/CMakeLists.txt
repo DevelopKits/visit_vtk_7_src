@@ -198,7 +198,6 @@ TARGET_LINK_LIBRARIES(engine_ser_exe
     vtkpng
     ${VTKZLIB_LIB}
     ${VTK_FREETYPE_LIBRARIES}
-    vtkftgl
     ${ALL_THIRDPARTY_IO_LIB}
     ${TCMALLOC_LIB}
     ${CMAKE_THREAD_LIBS} 
@@ -301,7 +300,6 @@ IF(VISIT_PARALLEL)
         vtkpng
         ${VTKZLIB_LIB}
         ${VTK_FREETYPE_LIBRARIES}
-        vtkftgl
         ${ALL_THIRDPARTY_IO_LIB}
         ${ICET_STATIC_LIB}
         ${TCMALLOC_LIB}

@@ -109,7 +109,6 @@ vtkjpeg
 vtkpng
 ${VTKZLIB_LIB}
 ${VTK_FREETYPE_LIBRARIES}
-vtkftgl
 )
 
 IF(VISIT_STATIC)

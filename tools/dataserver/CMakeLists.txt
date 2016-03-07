@@ -75,7 +75,6 @@ vtkjpeg
 vtkpng
 ${VTKZLIB_LIB}
 ${VTK_FREETYPE_LIBRARIES}
-vtkftgl
 )
 
 ADD_EXECUTABLE(usedataserver usedataserver.cpp VisItDataServer.cpp ${STATIC_SOURCES})
