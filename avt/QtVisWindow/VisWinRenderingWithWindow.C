@@ -48,7 +48,10 @@
 #include <vtkRubberBandMapper2D.h>
 #include <vtkDashedXorGridMapper2D.h>
 #include <vtkOpenGLRenderWindow.h>
+#include <vtkOpenGL.h>
+#if 0
 #include <vtkOpenGLExtensionManager.h>
+#endif
 
 #if defined(Q_WS_X11) || defined(Q_OS_LINUX)
 // We only need WindowMetrics here if we're on X11.
@@ -139,6 +142,7 @@ VisWinRenderingWithWindow::~VisWinRenderingWithWindow()
 //    Report some capabilities in the debug log.
 //
 // ****************************************************************************
+#define safes(arg) (arg?((const char *)arg):"")
 
 void
 VisWinRenderingWithWindow::RealizeRenderWindow(void)
@@ -158,10 +162,17 @@ VisWinRenderingWithWindow::RealizeRenderWindow(void)
     debug2 << "render window is a vtkQtRenderWindow" << endl;
     vtkOpenGLRenderWindow *glrw = dynamic_cast<vtkOpenGLRenderWindow*>(renWin->GetRenderWindow());
     if (!glrw) return;
+
+    const char *glvers = safes(glGetString(GL_VERSION));
+    debug2 << "  GLVersion: " << glvers << endl;
+
+
+#if 0
     vtkOpenGLExtensionManager *em = glrw->GetExtensionManager();
     debug2 << "GLVendor = " << em->GetDriverGLVendor() << endl
         << "GLVersion = " << em->GetDriverGLVersion() << endl
         << "GLRenderer = " << em->GetDriverGLRenderer() << endl;
+#endif
 }
 
 // ****************************************************************************

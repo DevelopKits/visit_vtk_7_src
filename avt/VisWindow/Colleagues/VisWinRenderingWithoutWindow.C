@@ -51,7 +51,10 @@
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkOpenGLRenderWindow.h>
+#include <vtkOpenGL.h>
+#if 0
 #include <vtkOpenGLExtensionManager.h>
+#endif
 
 #define DS_NOT_CHECKED    0
 #define DS_NOT_AVAILABLE  1
@@ -224,6 +227,10 @@ VisWinRenderingWithoutWindow::RenderRenderWindow(void)
 //
 // ****************************************************************************
 
+
+#define safes(arg) (arg?((const char *)arg):"")
+
+
 void
 VisWinRenderingWithoutWindow::RealizeRenderWindow(void)
 {
@@ -255,10 +262,16 @@ VisWinRenderingWithoutWindow::RealizeRenderWindow(void)
     debug2 << "render window is a " << renWin->GetClassName() << endl;
     vtkOpenGLRenderWindow *glrw = dynamic_cast<vtkOpenGLRenderWindow*>(renWin);
     if (!glrw) return;
+
+    const char *glvers = safes(glGetString(GL_VERSION));
+    debug2 << "  GLVersion: " << glvers << endl;
+
+#if 0
     vtkOpenGLExtensionManager *em = glrw->GetExtensionManager();
     debug2 << "GLVendor = " << em->GetDriverGLVendor() << endl
         << "GLVersion = " << em->GetDriverGLVersion() << endl
         << "GLRenderer = " << em->GetDriverGLRenderer() << endl;
+#endif
 }
 
 // ****************************************************************************
