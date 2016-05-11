@@ -453,7 +453,7 @@ avtMeshPlot::SetMeshColor(const unsigned char *col)
     rgb[0] = (double) col[0] / 255.0;
     rgb[1] = (double) col[1] / 255.0;
     rgb[2] = (double) col[2] / 255.0;
-    mapper->SetLineColor(rgb);
+    mapper->SetEdgeColor(rgb);
  
     if (wireframeRenderingIsInappropriate)
     {
@@ -487,7 +487,7 @@ avtMeshPlot::SetMeshColor(const double *col)
     rgb[0] = col[0]; 
     rgb[1] = col[1];
     rgb[2] = col[2];
-    mapper->SetLineColor(rgb);
+    mapper->SetEdgeColor(rgb);
  
     if (wireframeRenderingIsInappropriate)
     {
@@ -527,7 +527,7 @@ avtMeshPlot::SetOpaqueColor(const unsigned char *col, bool force)
         rgb[0] = (double) col[0] / 255.0;
         rgb[1] = (double) col[1] / 255.0;
         rgb[2] = (double) col[2] / 255.0;
-        mapper->SetSurfaceColor(rgb);
+        mapper->SetColor(rgb);
     }
 }
 
@@ -559,7 +559,7 @@ avtMeshPlot::SetOpaqueColor(const double *col, bool force)
         rgb[0] = col[0];
         rgb[1] = col[1];
         rgb[2] = col[2];
-        mapper->SetSurfaceColor(rgb);
+        mapper->SetColor(rgb);
     }
 }
 

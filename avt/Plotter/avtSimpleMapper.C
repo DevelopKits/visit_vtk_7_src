@@ -61,8 +61,8 @@
 avtSimpleMapper::avtSimpleMapper() 
 {
     edgeVis = true;
-    surfaceColor[0] = surfaceColor[1] = surfaceColor[2] = 1.; // white
     edgeColor[0]    = edgeColor[1]    = edgeColor[2]    = 0.; // black
+    surfaceColor[0] = surfaceColor[1] = surfaceColor[2] = 1.; // white
     opacity = 1.0;
     lineWidth = 1.0;
     lineStyle = 0xFFFF;

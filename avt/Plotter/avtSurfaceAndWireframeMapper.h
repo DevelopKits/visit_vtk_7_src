@@ -44,21 +44,7 @@
 #define AVT_SURFACEANDWIREFRAMEMAPPER_H
 
 #include <plotter_exports.h>
-#include <avtMapper.h>
-
-#include <avtTerminatingDatasetSink.h>
-#include <avtDrawable.h>
-
-#include <vector>
-#include <string>
-
-class   vtkActor;
-class   vtkAlgorithmOutput;
-class   vtkDataObjectCollection;
-class   vtkDataSetMapper;
-
-class   avtTransparencyActor;
-class   ColorAttribute;
+#include <avtSimpleMapper.h>
 
 
 // ****************************************************************************
@@ -75,10 +61,12 @@ class   ColorAttribute;
 //  Creation:   May 11, 2016 
 //
 //  Modifications:
+//    Kathleen Biagas, Wed May 11 14:19:56 MST 2016
+//    Derive from avtSimpleMapper.
 //
 // ****************************************************************************
 
-class PLOTTER_API avtSurfaceAndWireframeMapper : public avtMapper
+class PLOTTER_API avtSurfaceAndWireframeMapper : public avtSimpleMapper
 {
   public:
                                avtSurfaceAndWireframeMapper();
@@ -86,31 +74,17 @@ class PLOTTER_API avtSurfaceAndWireframeMapper : public avtMapper
 
 
     virtual bool               GetLighting(void);
-
     virtual void               SetSurfaceRepresentation(int rep);
 
     void                       SetIgnoreLighting(bool val)
                                    { ignoreLighting = val; }
 
     void                       SetSurfaceVisibility(bool val);
-    void                       SetLineVisibility(bool val);
 
-    void                       SetSurfaceColor(double rgb[3]);
-    void                       SetLineColor(double rgb[3]);
-
-    void                       SetOpacity(double val);
-    void                       SetLineWidth(int lw);
-    void                       SetLineStyle(int ls);
 
   protected:
     bool                       ignoreLighting;
     bool                       surfaceVis;
-    bool                       lineVis;
-    double                     surfaceColor[3];
-    double                     lineColor[3];
-    double                     opacity;
-    int                        lineWidth;
-    int                        lineStyle;
 
     virtual void               CustomizeMappers(void);
 };

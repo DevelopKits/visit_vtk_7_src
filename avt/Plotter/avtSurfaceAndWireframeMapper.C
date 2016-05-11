@@ -42,30 +42,11 @@
 
 #include <avtSurfaceAndWireframeMapper.h>
 
-#include <float.h>
-#include <vector>
-#include <string>
-
 #include <vtkActor.h>
-#include <vtkDataObjectCollection.h>
 #include <vtkDataSet.h>
 #include <vtkDataSetMapper.h>
 #include <vtkPolyData.h>
 #include <vtkProperty.h>
-
-#include <avtCallback.h>
-#include <avtDatasetExaminer.h>
-#include <avtExtents.h>
-#include <avtGeometryDrawable.h>
-
-#include <ColorAttribute.h>
-#include <BadIndexException.h>
-#include <DebugStream.h>
-#include <ImproperUseException.h>
-#include <NoInputException.h>
-
-using std::vector;
-using std::string;
 
 
 // ****************************************************************************
@@ -75,19 +56,15 @@ using std::string;
 //  Creation:   May 11, 2016 
 //
 //  Modifications:
+//    Kathleen Biagas, Wed May 11 14:20:20 PDT 2016
+//    Derive from avtSimpleMapper.
 //
 // ****************************************************************************
 
-avtSurfaceAndWireframeMapper::avtSurfaceAndWireframeMapper() 
+avtSurfaceAndWireframeMapper::avtSurfaceAndWireframeMapper() : avtSimpleMapper()
 {
     ignoreLighting = true;
     surfaceVis = true;
-    lineVis = true;
-    surfaceColor[0] = surfaceColor[1] = surfaceColor[2] = 1.; // white
-    lineColor[0]    = lineColor[1]    = lineColor[2]    = 0.; // black
-    opacity = 1.0;
-    lineWidth = 1.0;
-    lineStyle = 0xFFFF;
 }
 
 
@@ -204,13 +181,13 @@ avtSurfaceAndWireframeMapper::CustomizeMappers()
             vtkProperty *prop = actors[i]->GetProperty();
             if (hasLines)
             {
-                if (lineVis)
+                if (edgeVis)
                 {
                 // Not sure of the cost for doing this if we are not 
                 // rendering the polys.  Could add a test for surfaceVis ??
                 mappers[i]->SetResolveCoincidentTopologyToPolygonOffset();
                 mappers[i]->SetResolveCoincidentTopologyLineOffsetParameters(1., 1.);
-                prop->SetColor(lineColor);
+                prop->SetColor(edgeColor);
                 prop->SetOpacity(opacity);
                 prop->SetLineWidth(lineWidth);
                 // This currently isn't supported with vtk's opengl2 backend
@@ -266,153 +243,3 @@ avtSurfaceAndWireframeMapper::SetSurfaceVisibility(bool val)
     }
 }
 
-
-// ****************************************************************************
-//  Method: avtSurfaceAndWireframeMapper::SetLineVisibility
-//
-//  Purpose:
-//      Toggles line visibility.
-//
-//  Programmer: Kathleen Biagas
-//  Creation:   May 11, 2016 
-//
-//  Modifications:
-//
-// ****************************************************************************
-
-void
-avtSurfaceAndWireframeMapper::SetLineVisibility(bool val)
-{
-    if (lineVis != val)
-    {
-        lineVis = val;
-        CustomizeMappers();
-    }
-}
-
-
-// ****************************************************************************
-//  Method: avtSurfaceAndWireframeMapper::SetSurfaceColor
-//
-//  Purpose:
-//      Sets the color for the surface.
-//
-//  Programmer: Kathleen Biagas
-//  Creation:   May 11, 2016 
-//
-//  Modifications:
-//
-// ****************************************************************************
-
-void
-avtSurfaceAndWireframeMapper::SetSurfaceColor(double rgb[3])
-{
-    if (surfaceColor[0] != rgb[0] ||
-        surfaceColor[1] != rgb[1] ||
-        surfaceColor[2] != rgb[2] ) 
-    {
-        surfaceColor[0] = rgb[0];
-        surfaceColor[1] = rgb[1];
-        surfaceColor[2] = rgb[2];
-        CustomizeMappers();
-    }
-}
-
-
-// ****************************************************************************
-//  Method: avtSurfaceAndWireframeMapper::SetLineColor
-//
-//  Purpose:
-//      Sets the color for the lines.
-//
-//  Programmer: Kathleen Biagas
-//  Creation:   May 11, 2016 
-//
-//  Modifications:
-//
-// ****************************************************************************
-
-void
-avtSurfaceAndWireframeMapper::SetLineColor(double rgb[3])
-{
-    if (lineColor[0] != rgb[0] ||
-        lineColor[1] != rgb[1] ||
-        lineColor[2] != rgb[2] ) 
-    {
-        lineColor[0] = rgb[0];
-        lineColor[1] = rgb[1];
-        lineColor[2] = rgb[2];
-        CustomizeMappers();
-    }
-}
-
-// ****************************************************************************
-//  Method: avtSurfaceAndWireframeMapper::SetOpacity
-//
-//  Purpose:
-//      Sets the opacity.
-//
-//  Programmer: Kathleen Biagas
-//  Creation:   May 11, 2016 
-//
-//  Modifications:
-//
-// ****************************************************************************
-
-void
-avtSurfaceAndWireframeMapper::SetOpacity(double val)
-{
-    if (opacity != val)
-    {
-        opacity = val;
-        CustomizeMappers();
-    }
-}
-
-
-// ****************************************************************************
-//  Method: avtSurfaceAndWireframeMapper::SetLineWidth
-//
-//  Purpose:
-//      Sets the lineWidth.
-//
-//  Programmer: Kathleen Biagas
-//  Creation:   May 11, 2016 
-//
-//  Modifications:
-//
-// ****************************************************************************
-
-void
-avtSurfaceAndWireframeMapper::SetLineWidth(int lw)
-{
-    if (lineWidth != lw)
-    {
-        lineWidth = lw;
-        CustomizeMappers();
-    }
-}
-
-
-// ****************************************************************************
-//  Method: avtSurfaceAndWireframeMapper::SetLineStyle
-//
-//  Purpose:
-//      Sets the lineStyle.
-//
-//  Programmer: Kathleen Biagas
-//  Creation:   May 11, 2016 
-//
-//  Modifications:
-//
-// ****************************************************************************
-
-void
-avtSurfaceAndWireframeMapper::SetLineStyle(int ls)
-{
-    if (lineStyle != ls)
-    {
-        lineStyle = ls;
-        CustomizeMappers();
-    }
-}

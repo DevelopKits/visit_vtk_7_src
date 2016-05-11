@@ -75,10 +75,11 @@ class PLOTTER_API avtSimpleMapper : public avtMapper
     virtual                   ~avtSimpleMapper();
 
 
+    // From avtMapper
     virtual bool               GetLighting(void) { return false; }
-
     virtual void               SetSurfaceRepresentation(int rep);
 
+    // this class
     void                       SetEdgeVisibility(bool val);
 
     void                       SetColor(double rgb[3]);
@@ -90,8 +91,8 @@ class PLOTTER_API avtSimpleMapper : public avtMapper
 
   protected:
     bool                       edgeVis;
-    double                     surfaceColor[3];
     double                     edgeColor[3];
+    double                     surfaceColor[3];
     double                     opacity;
     int                        lineWidth;
     int                        lineStyle;
