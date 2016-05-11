@@ -42,8 +42,6 @@
 
 #include <avtMeshFilter.h>
 
-#include <vtkAppendPolyData.h>
-#include <vtkCellArray.h>
 #include <vtkCellData.h>
 #include <vtkDataSetRemoveGhostCells.h>
 #include <vtkExtractEdges.h>
