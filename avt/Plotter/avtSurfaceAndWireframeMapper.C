@@ -127,7 +127,6 @@ avtSurfaceAndWireframeMapper::GetLighting()
 }
 
 
-
 // ****************************************************************************
 //  Method: avtSurfaceAndWireframeMapper::SetSurfaceRepresentation
 //
