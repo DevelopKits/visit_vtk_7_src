@@ -38,7 +38,10 @@
 
 #include <InitVTKRendering.h>
 
+// VTK-7 HACK remove when determine custom mapper no longer needed
+#if 0
 #include <vtkVisItDataSetMapper.h>
+#endif
 #include <vtkToolkits.h>
 #include <vtkVisItRectilinearGrid.h>
 #include <vtkVisItStructuredGrid.h>
@@ -47,8 +50,6 @@
 #include <vtkVersion.h>
 #if !defined(_WIN32)
 #include <vtkGraphicsFactory.h>
-//FIX_ME_VTK6.0
-//#include <vtkImagingFactory.h>
 #endif
 
 
@@ -80,7 +81,7 @@ class vtkVisItGraphicsFactory : public vtkObjectFactory
 //
 // Necessary for each object that will override a vtkObject.
 //
-VTK_CREATE_CREATE_FUNCTION(vtkVisItDataSetMapper);
+//VTK_CREATE_CREATE_FUNCTION(vtkVisItDataSetMapper);
 VTK_CREATE_CREATE_FUNCTION(vtkVisItRectilinearGrid);
 VTK_CREATE_CREATE_FUNCTION(vtkVisItStructuredGrid);
 
@@ -129,10 +130,13 @@ vtkVisItGraphicsFactory::GetVTKSourceVersion()
 //
 vtkVisItGraphicsFactory::vtkVisItGraphicsFactory()
 {
+// VTK-7 HACK remove when determine custom mapper no longer needed
+#if 0
   this->RegisterOverride("vtkDataSetMapper", "vtkVisItDataSetMapper",
                          "vtkVisItDataSetMapper override vtkDataSetMapper",
                          1,
                          vtkObjectFactoryCreatevtkVisItDataSetMapper);
+#endif
   this->RegisterOverride("vtkRectilinearGrid", "vtkVisItRectilinearGrid",
                          "vtkVisItRectilinearGrid override vtkRectilinearGrid",
                          1,

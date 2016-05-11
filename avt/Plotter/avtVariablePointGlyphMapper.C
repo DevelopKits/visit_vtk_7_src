@@ -47,8 +47,6 @@
 #include <vtkDataSetMapper.h>
 #include <vtkLookupTable.h>
 
-#include <vtkVisItDataSetMapper.h>
-
 #include <string>
 
 // ****************************************************************************
@@ -159,6 +157,9 @@ avtVariablePointGlyphMapper::CustomizeMappers(void)
         // anything like this, I have to cast to the concrete types that
         // I care about.
         //
+
+//VTK-7 HACK  Remove when determined custom mapper no longer needed.
+#if 0
         for (int i = 0; i < nMappers; i++)
         {
             if (mappers[i] != NULL)
@@ -187,6 +188,7 @@ avtVariablePointGlyphMapper::CustomizeMappers(void)
                 }
             }
         }
+#endif
 
         if (!colorByScalar)
             ColorBySingleColor(singleColor);

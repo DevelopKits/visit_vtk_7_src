@@ -47,8 +47,6 @@
 #include <vtkDataSetMapper.h>
 #include <vtkLookupTable.h>
 
-#include <vtkVisItDataSetMapper.h>
-
 #include <string>
 
 // ****************************************************************************
@@ -125,6 +123,9 @@ avtLevelsPointGlyphMapper::CustomizeMappers(void)
         {
             if (mappers[i] != NULL)
             {
+
+// VTK-7 HACK  Remove when determine how to do point sprites with native vtk
+#if 0
                 if(strcmp(mappers[i]->GetClassName(), 
                           "vtkVisItDataSetMapper") == 0)
                 {
@@ -133,6 +134,7 @@ avtLevelsPointGlyphMapper::CustomizeMappers(void)
                          vtkVisItDataSetMapper::TEXTURE_USING_POINTSPRITES :
                          vtkVisItDataSetMapper::TEXTURE_NO_POINTS);
                 }
+#endif
             }
         }
 

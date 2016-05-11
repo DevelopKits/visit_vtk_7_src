@@ -54,6 +54,9 @@
 #
 #   Kathleen Biagas, Wed Jan  8 14:19:28 PST 2014
 #   Add vtkAxesActor2D.
+#  
+#   Kathleen Biagas, Tue May 10 18:35:26 MST 2016
+#   Remove vtkVisItDataSetMapper and its subclasses.
 #
 #****************************************************************************/
 
@@ -80,8 +83,6 @@ CONFIGURE_FILE(
 SET(AVTPLOTTER_OPENGL_SOURCES
 avtOpenGLExtensionManager.C 
 avtOpenGLSurfaceAndWireframeRenderer.C 
-vtk/vtkOpenGLRectilinearGridMapper.C 
-vtk/vtkOpenGLStructuredGridMapper.C 
 vtk/vtkOpenGLTexturedBackgroundMapper.C 
 )
 
@@ -98,8 +99,6 @@ vtk/vtkBackgroundActor.C
 vtk/vtkLineLegend.C 
 vtk/vtkMultiFontVectorText.C 
 vtk/vtkParallelImageSpaceRedistributor.C 
-vtk/vtkRectilinearGridMapper.C 
-vtk/vtkStructuredGridMapper.C 
 vtk/vtkTexturedBackgroundActor.C 
 vtk/vtkTimeSliderActor.C 
 vtk/vtkTriad2D.C 
@@ -107,7 +106,6 @@ vtk/vtkVectorFontCharacterData.C
 vtk/vtkVisItAxisActor.C 
 vtk/vtkVisItAxisActor2D.C 
 vtk/vtkVisItCubeAxesActor.C 
-vtk/vtkVisItDataSetMapper.C 
 vtk/vtkVisItScalarBarActor.C 
 vtk/vtkVisItScalarBarWithOpacityActor.C 
 vtk/vtkVisItTextActor.C

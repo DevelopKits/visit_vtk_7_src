@@ -54,8 +54,6 @@
 #include <avtDatasetExaminer.h>
 #include <avtTransparencyActor.h>
 
-#include <vtkVisItDataSetMapper.h>
-
 #include <BadIndexException.h>
 #include <DebugStream.h>
 
@@ -206,12 +204,15 @@ avtLevelsMapper::CustomizeMappers(void)
         {
             mappers[i]->ScalarVisibilityOff();
 
+// VTK-7 HACK, remove if/when determined custom mapper no longer needed
+#if 0
             if (strcmp(mappers[i]->GetClassName(), "vtkVisItDataSetMapper")==0)
             {                 
                 vtkVisItDataSetMapper *m = (vtkVisItDataSetMapper *)mappers[i];
                 m->SetSceneIs3D(GetInput()->GetInfo().GetAttributes().
                                                     GetSpatialDimension() == 3);
             }
+#endif
             vtkProperty* prop = actors[i]->GetProperty();
             prop->SetLineStipplePattern(LineStyle2StipplePattern(lineStyle));
             prop->SetLineWidth(LineWidth2Int(lineWidth));
