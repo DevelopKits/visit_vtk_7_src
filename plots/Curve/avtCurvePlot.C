@@ -51,7 +51,6 @@
 #include <avtCurveFilter.h>
 #include <avtCurveLegend.h>
 #include <avtLabeledCurveMapper.h>
-#include <avtSurfaceAndWireframeRenderer.h> 
 #include <avtWarpFilter.h>
 #include <avtUserDefinedMapper.h>
 #include <avtPolarToCartesianFilter.h>
