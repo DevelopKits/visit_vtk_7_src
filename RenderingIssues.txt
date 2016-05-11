@@ -1,0 +1,2 @@
+MeshPlot:
+  1) Changing opacity to < 1, then changing back to 1, the plot goes completely transparent.

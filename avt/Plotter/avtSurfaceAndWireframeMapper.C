@@ -226,7 +226,7 @@ avtSurfaceAndWireframeMapper::CustomizeMappers()
                 if (surfaceVis)
                 {
                     prop->SetColor(surfaceColor);
-                    prop->SetOpacity(1.0);
+                    prop->SetOpacity(opacity);
                 }
                 else
                 {
