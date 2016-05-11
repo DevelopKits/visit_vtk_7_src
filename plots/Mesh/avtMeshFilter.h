@@ -85,6 +85,9 @@ class vtkDataSet;
 //    Eric Brugger, Tue Aug 19 10:55:03 PDT 2014
 //    Modified the class to work with avtDataRepresentation.
 //
+//    Kathleen Biagas, Tue May 10 18:56:05 MST 2016
+//    Add PostExecute.
+//
 // ****************************************************************************
 
 class avtMeshFilter : public avtSIMODataTreeIterator
@@ -105,6 +108,8 @@ class avtMeshFilter : public avtSIMODataTreeIterator
     virtual void               UpdateDataObjectInfo(void);
     virtual avtContract_p     
                                ModifyContract(avtContract_p spec);
+
+    virtual void               PostExecute(void);
 };
 
 

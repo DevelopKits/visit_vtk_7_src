@@ -47,14 +47,12 @@
 #include <MeshAttributes.h>
 
 #include <avtPlot.h>
-#include <avtSurfaceAndWireframeRenderer.h>
+#include <avtSurfaceAndWireframeMapper.h>
 #include <avtGhostZoneAndFacelistFilter.h>
 
-class     vtkProperty;
 
 class     avtMeshFilter;
 class     avtSmoothPolyDataFilter;
-class     avtUserDefinedMapper;
 class     avtVariableLegend;
 class     avtVariablePointGlyphMapper;
 
@@ -152,6 +150,9 @@ class     avtVariablePointGlyphMapper;
 //    Kathleen Biagas, Wed Feb 29 13:11:09 MST 2012
 //    Add GetExtraInfoForPick.
 //
+//    Kathleen Biagas, Wed May 11 08:48:51 PDT 2016
+//    Remove custom renderer in favor of native renderers in VTK-7.
+//
 // ****************************************************************************
 
 class
@@ -189,13 +190,11 @@ avtMeshPlot : public avtPlot
     virtual const MapNode &GetExtraInfoForPick(void);
 
   protected:
-    avtSurfaceAndWireframeRenderer_p renderer;
-    avtUserDefinedMapper            *mapper;
+    avtSurfaceAndWireframeMapper    *mapper;
     avtVariablePointGlyphMapper     *glyphMapper;
     avtVariableLegend               *varLegend;
     avtGhostZoneAndFacelistFilter   *ghostAndFaceFilter;
     avtMeshFilter                   *filter;
-    vtkProperty                     *property;
     avtLegend_p                      varLegendRefPtr;
     avtSmoothPolyDataFilter         *smooth;
     double                           bgColor[3];

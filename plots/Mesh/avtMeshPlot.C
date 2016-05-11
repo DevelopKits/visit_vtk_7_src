@@ -49,8 +49,7 @@
 
 #include <avtMeshFilter.h>
 #include <avtSmoothPolyDataFilter.h>
-#include <avtSurfaceAndWireframeRenderer.h>
-#include <avtUserDefinedMapper.h>
+#include <avtSurfaceAndWireframeMapper.h>
 #include <avtVariableLegend.h>
 #include <avtVariablePointGlyphMapper.h>
 
@@ -124,6 +123,11 @@
 //    can sometimes avoid it (and get better performance), but we don't
 //    know that until we're about to execute it.
 //
+//    Kathleen Biagas, Wed May 11 08:51:13 MST 2016
+//    Remove custom renderer in favor of native renderers in VTK-7. Use
+//    new avtSurfaceAndWireframeMapper that sets vtkMapper/vtkActor properties
+//    as necessary to handle lines/polys appropriately.
+//
 // ****************************************************************************
 
 avtMeshPlot::avtMeshPlot()
@@ -133,35 +137,13 @@ avtMeshPlot::avtMeshPlot()
     ghostAndFaceFilter = new avtGhostZoneAndFacelistFilter;
     ghostAndFaceFilter->SetUseFaceFilter(true);
     ghostAndFaceFilter->GhostDataMustBeRemoved();
-    renderer = avtSurfaceAndWireframeRenderer::New();
-    avtCustomRenderer_p cr;
-    CopyTo(cr, renderer);
-    mapper = new avtUserDefinedMapper(cr);
+    mapper = new avtSurfaceAndWireframeMapper();
+
+    bgColor[0] = bgColor[1] = bgColor[2] = 1.0;  // white
+    fgColor[0] = fgColor[1] = fgColor[2] = 0.0;  // black
 
     glyphMapper = new avtVariablePointGlyphMapper;
     
-    property = vtkProperty::New();
-    property->SetAmbient(1.);
-    property->SetDiffuse(0.);
-    property->SetEdgeColor(0., 0., 0.); // black
-
-    property->EdgeVisibilityOn();
-    renderer->ScalarVisibilityOff();
-    renderer->IgnoreLighting(true);
-  
-    //
-    //  Since we know our MeshFilter returns lines for the mesh part
-    //  and polys for the opaque part, tell the renderer not to draw
-    //  the polys in the edge-drawing routine, and not to draw lines
-    //  in the surface-drawing routine.
-    //
-    renderer->EdgePolysOff();
-    renderer->EdgeStripsOff();
-    renderer->SurfaceVertsOff();
-    renderer->SurfaceLinesOff();
-
-    property->SetColor(1., 1., 1.); // white
-
     varLegend = new avtVariableLegend;
     varLegend->SetTitle("Mesh");
     vtkLookupTable *lut = vtkLookupTable::New();
@@ -169,9 +151,6 @@ avtMeshPlot::avtMeshPlot()
     lut->Delete();
     varLegend->SetColorBarVisibility(0);
     varLegend->SetVarRangeVisibility(0);
-
-    bgColor[0] = bgColor[1] = bgColor[2] = 1.0;  // white
-    fgColor[0] = fgColor[1] = fgColor[2] = 0.0;  // black
 
     wireframeRenderingIsInappropriate = false;
 
@@ -217,6 +196,9 @@ avtMeshPlot::avtMeshPlot()
 //    Kathleen Bonnell, Tue Nov  2 10:41:33 PST 2004
 //    Added glyphMapper, removed glyphPoints. 
 //
+//    Kathleen Biagas, Wed May 11 08:55:01 MST 2016
+//    Remove property.
+//
 // ****************************************************************************
 
 avtMeshPlot::~avtMeshPlot()
@@ -235,11 +217,6 @@ avtMeshPlot::~avtMeshPlot()
     {
         delete mapper;
         mapper = NULL;
-    }
-    if (property != NULL)
-    {
-        property->Delete();
-        property = NULL;
     }
     if (smooth != NULL)
     {
@@ -361,6 +338,9 @@ avtMeshPlot::SetCellCountMultiplierForSRThreshold(const avtDataObject_p dob)
 //    Brad Whitlock, Mon Jan  7 17:00:39 PST 2013
 //    I added some new glyph types.
 //
+//    Kathleen Biagas, Wed May 11 08:56:00 MST 2016
+//    Send opacity to the mapper instead of property.
+//
 // ****************************************************************************
 
 void
@@ -434,7 +414,7 @@ avtMeshPlot::SetAtts(const AttributeGroup *a)
     // Do the opacity stuff
     //
     double opacity = atts.GetOpacity();
-    property->SetOpacity(opacity);
+    mapper->SetOpacity(opacity);
     behavior->SetRenderOrder((atts.GetOpacity() < 1.0) ?
                              ABSOLUTELY_LAST : DOES_NOT_MATTER);
     behavior->SetAntialiasedRenderOrder(ABSOLUTELY_LAST);
@@ -461,6 +441,9 @@ avtMeshPlot::SetAtts(const AttributeGroup *a)
 //    Kathleen Bonnell, Mon Mar 24 17:48:27 PST 2003 
 //    Added call to SetOpaqueColor. 
 //
+//    Kathleen Biagas, Wed May 11 08:56:00 MST 2016
+//    Send line color to the mapper instead of property.
+//
 // ****************************************************************************
 
 void
@@ -470,7 +453,7 @@ avtMeshPlot::SetMeshColor(const unsigned char *col)
     rgb[0] = (double) col[0] / 255.0;
     rgb[1] = (double) col[1] / 255.0;
     rgb[2] = (double) col[2] / 255.0;
-    property->SetEdgeColor(rgb);
+    mapper->SetLineColor(rgb);
  
     if (wireframeRenderingIsInappropriate)
     {
@@ -492,6 +475,8 @@ avtMeshPlot::SetMeshColor(const unsigned char *col)
 //  Creation:     March 24, 2003
 //
 //  Modifications:
+//    Kathleen Biagas, Wed May 11 08:56:00 MST 2016
+//    Send line color to the mapper instead of property.
 //
 // ****************************************************************************
 
@@ -502,7 +487,7 @@ avtMeshPlot::SetMeshColor(const double *col)
     rgb[0] = col[0]; 
     rgb[1] = col[1];
     rgb[2] = col[2];
-    property->SetEdgeColor(rgb);
+    mapper->SetLineColor(rgb);
  
     if (wireframeRenderingIsInappropriate)
     {
@@ -528,6 +513,9 @@ avtMeshPlot::SetMeshColor(const double *col)
 //    The opaque color should match the mesh color if wireframe rendering
 //    is inappropriate.  Don't allow the color to be set incorrectly.
 //
+//    Kathleen Biagas, Wed May 11 08:56:00 MST 2016
+//    Send surface color to the mapper instead of property.
+//
 // ****************************************************************************
 
 void
@@ -539,7 +527,7 @@ avtMeshPlot::SetOpaqueColor(const unsigned char *col, bool force)
         rgb[0] = (double) col[0] / 255.0;
         rgb[1] = (double) col[1] / 255.0;
         rgb[2] = (double) col[2] / 255.0;
-        property->SetColor(rgb);
+        mapper->SetSurfaceColor(rgb);
     }
 }
 
@@ -556,6 +544,10 @@ avtMeshPlot::SetOpaqueColor(const unsigned char *col, bool force)
 //  Programmer:   Kathleen Bonnell
 //  Creation:     March 24, 2003 
 //
+//  Modifications:
+//    Kathleen Biagas, Wed May 11 08:56:00 MST 2016
+//    Send surface color to the mapper instead of property.
+//
 // ****************************************************************************
 
 void
@@ -567,7 +559,7 @@ avtMeshPlot::SetOpaqueColor(const double *col, bool force)
         rgb[0] = col[0];
         rgb[1] = col[1];
         rgb[2] = col[2];
-        property->SetColor(rgb);
+        mapper->SetSurfaceColor(rgb);
     }
 }
 
@@ -617,12 +609,15 @@ avtMeshPlot::SetLegend(bool legendOn)
 //    Kathleen Bonnell, Mon Jun 25 09:03:29 PDT 2001 
 //    Set property linewidth instead of mapper line width. 
 //
+//    Kathleen Biagas, Wed May 11 08:56:00 MST 2016
+//    Send mapper line width instead of property.
+//
 // ****************************************************************************
 
 void
 avtMeshPlot::SetLineWidth(_LineWidth lw)
 {
-    property->SetLineWidth(LineWidth2Int(lw));
+    mapper->SetLineWidth(LineWidth2Int(lw));
 }
 
 
@@ -643,12 +638,15 @@ avtMeshPlot::SetLineWidth(_LineWidth lw)
 //    Kathleen Bonnell, Mon Jun 25 09:03:29 PDT 2001 
 //    Set property line style instead of mapper line style. 
 //
+//    Kathleen Biagas, Wed May 11 08:56:00 MST 2016
+//    Send mapper line width instead of property.
+//
 // ****************************************************************************
 
 void
 avtMeshPlot::SetLineStyle(_LineStyle ls)
 {
-    property->SetLineStipplePattern(LineStyle2StipplePattern(ls));
+    mapper->SetLineStyle(LineStyle2StipplePattern(ls));
 }
 
 
@@ -666,7 +664,7 @@ avtMeshPlot::SetLineStyle(_LineStyle ls)
 void
 avtMeshPlot::SetPointSize(float ps)
 {
-    property->SetPointSize(ps);
+    //property->SetPointSize(ps);
 }
 
 
@@ -700,25 +698,15 @@ avtMeshPlot::SetPointSize(float ps)
 //    Kathleen Bonnell, Thu Sep  4 11:15:30 PDT 2003 
 //    Modified to support tri-modal opaque mode. 
 //    
+//    Kathleen Biagas, Wed May 11 09:14:21 PDT 2016
+//    Set mapper's surface visibility.
+//
 // ****************************************************************************
 
 void
 avtMeshPlot::SetRenderOpaque()
 {
-    if (ShouldRenderOpaque())
-    {
-        renderer->SurfacePolysOn();
-        renderer->SurfaceStripsOn();
-        renderer->ResolveTopologyOn();
-        property->SetRepresentationToSurface();
-    }
-    else 
-    {
-        renderer->SurfacePolysOff();
-        renderer->SurfaceStripsOff();
-        renderer->ResolveTopologyOff();
-        property->SetRepresentationToWireframe();
-    }
+    mapper->SetSurfaceVisibility(ShouldRenderOpaque());
 }
 
 
@@ -941,13 +929,15 @@ avtMeshPlot::ApplyRenderingTransformation(avtDataObject_p input)
 //    Jeremy Meredith, Fri Feb 20 17:26:05 EST 2009
 //    Added per-plot alpha support.
 //
+//    Kathleen Biagas, Wed May 11 09:18:18 MST 2016
+//    Remove property.
+//
 // ****************************************************************************
 
 void
 avtMeshPlot::CustomizeBehavior(void)
 {
     SetPointGlyphSize();
-    renderer->SetProperty(property);
 
     behavior->SetLegend(varLegendRefPtr);
     behavior->SetShiftFactor(0.5);

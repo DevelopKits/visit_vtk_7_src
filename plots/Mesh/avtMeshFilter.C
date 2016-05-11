@@ -196,6 +196,10 @@ avtMeshFilter::~avtMeshFilter()
 //    Eric Brugger, Tue Aug 19 10:55:44 PDT 2014
 //    Modified the class to work with avtDataRepresentation.
 //
+//    Kathleen Biagas, Wed May 11 08:46:25 MST 2016
+//    For VTK-7, keep lines and polys separate, so we can use native VTK
+//    mappers/rendering.
+//
 // ****************************************************************************
 
 avtDataTree_p
@@ -364,26 +368,16 @@ avtMeshFilter::ExecuteDataTree(avtDataRepresentation *inDR)
     }
     else
     {
-        //
-        //  Tack on the opaque poly's to the outDS (which is only lines
-        //  at this point. 
-        //
-        if (opaquePolys != NULL && opaquePolys->GetNumberOfCells() != 0)
-        {
-            vtkAppendPolyData *append = vtkAppendPolyData::New();
-            append->AddInputData(outDS);
-            append->AddInputData(opaquePolys);
-            append->Update();
-            vtkPolyData *outPoly = vtkPolyData::New();
-            outPoly->ShallowCopy(append->GetOutput());
-            rv = new avtDataTree(outPoly, domain, label);
-            outPoly->Delete();
-            append->Delete();
-        }
-        else  
-        {
-            rv = new avtDataTree(outDS, domain, label);
-        }
+        // create an avtDataTree with two ds, one for lines, one for polys,
+        // and tack on labels with prefix lines_ and polys_
+        // to keep them from being merged together by CompactTreeFilter
+        vtkDataSet *outs[2];
+        outs[0] = outDS;
+        outs[1] = opaquePolys;
+        stringVector l;
+        l.push_back(std::string("lines_") + label); 
+        l.push_back(std::string("polys_") + label); 
+        rv = new avtDataTree(2, outs, domain, l);
     }
 
     revisedInput3->Delete();
@@ -516,4 +510,28 @@ avtMeshFilter::ModifyContract(avtContract_p spec)
     return rv;
 }
 
+
+// ****************************************************************************
+//  Method: avtMeshFilter::PostExcecute
+//
+//  Purpose:  
+//    Sets the output's label attributes to reflect what is currently
+//    present in the tree.  
+//
+//  Programmer: Kathleen Biagas 
+//  Creation:   May 11, 2016
+//
+//  Modifications:
+//
+// ****************************************************************************
+
+void
+avtMeshFilter::PostExecute(void)
+{
+    // Use labels to ensure lines/polys aren't merged back together
+    // during CompactTreeFilter
+    stringVector treeLabels;
+    GetDataTree()->GetAllUniqueLabels(treeLabels);
+    GetOutput()->GetInfo().GetAttributes().SetLabels(treeLabels);
+}
 

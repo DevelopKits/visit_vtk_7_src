@@ -58,6 +58,9 @@
 #   Kathleen Biagas, Tue May 10 18:35:26 MST 2016
 #   Remove vtkVisItDataSetMapper and its subclasses.
 #
+#   Kathleen Biagas, Tue May 10 18:55:00 PDT 2016
+#   Add avtSurfaceAndWireframeMapper.C
+#
 #****************************************************************************/
 
 SET(VISIT_VTK_MANTA_SOURCES
@@ -138,6 +141,7 @@ avtPlot.C
 avtPlotMetaData.C
 avtPointGlypher.C
 avtSoftwareShader.C
+avtSurfaceAndWireframeMapper.C
 avtSurfaceAndWireframeRenderer.C
 avtTensorGlyphMapper.C
 avtTheater.C
