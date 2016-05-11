@@ -120,6 +120,9 @@ class   ColorAttribute;
 //    Kathleen Biagas, Wed Feb 6 19:38:27 PDT 2013
 //    Changed signature of InsertFilters.
 //
+//    Kathleen Biagas, Tue May 10 18:26:48 PDT 2016
+//    Remove unused SetTransparencyActor.
+//
 // ****************************************************************************
 
 class PLOTTER_API avtMapper : public avtTerminatingDatasetSink
@@ -182,7 +185,6 @@ class PLOTTER_API avtMapper : public avtTerminatingDatasetSink
     void                       SetUpMappers(void);
     void                       SetDefaultRange(void);
     void                       PrepareExtents(void);
-    void                       SetUpTransparency(void);
 
     virtual void               ChangedInput(void);
     virtual void               CustomizeMappers(void) = 0;
