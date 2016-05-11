@@ -61,6 +61,9 @@
 #   Kathleen Biagas, Tue May 10 18:55:00 PDT 2016
 #   Add avtSurfaceAndWireframeMapper.C
 #
+#   Kathleen Biagas, Wed May 11 11:54:00 PDT 2016
+#   Add avtSimpleMapper.C
+#
 #****************************************************************************/
 
 SET(VISIT_VTK_MANTA_SOURCES
@@ -140,6 +143,7 @@ avtPickActor.C
 avtPlot.C
 avtPlotMetaData.C
 avtPointGlypher.C
+avtSimpleMapper.C
 avtSoftwareShader.C
 avtSurfaceAndWireframeMapper.C
 avtSurfaceAndWireframeRenderer.C
