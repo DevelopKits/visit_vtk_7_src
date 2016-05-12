@@ -47,7 +47,7 @@
 #include <MeshAttributes.h>
 
 #include <avtPlot.h>
-#include <avtSurfaceAndWireframeMapper.h>
+#include <avtLinesAndPolysMapper.h>
 #include <avtGhostZoneAndFacelistFilter.h>
 
 
@@ -82,7 +82,7 @@ class     avtVariablePointGlyphMapper;
 //    a surface plot.
 //
 //    Kathleen Bonnell, Wed Aug 22 15:22:55 PDT 2001 
-//    Use avtUserDefinedMapper and avtSurfaceAndWireframeRenderer instead
+//    Use avtUserDefinedMapper and avtLinesAndPolysMapper instead
 //    of avtWireframeMapper to better draw opaque mode.  Modified arguments
 //    to SetLineWidth and SetLineStyle.  Added member property.
 //    
@@ -190,7 +190,7 @@ avtMeshPlot : public avtPlot
     virtual const MapNode &GetExtraInfoForPick(void);
 
   protected:
-    avtSurfaceAndWireframeMapper    *mapper;
+    avtLinesAndPolysMapper          *mapper;
     avtVariablePointGlyphMapper     *glyphMapper;
     avtVariableLegend               *varLegend;
     avtGhostZoneAndFacelistFilter   *ghostAndFaceFilter;

@@ -41,6 +41,7 @@
 // ************************************************************************* //
 
 #include <avtSimpleMapper.h>
+#include <avtTransparencyActor.h>
 
 #include <vtkActor.h>
 #include <vtkDataSet.h>
@@ -213,6 +214,7 @@ avtSimpleMapper::SetColor(double rgb[3])
         surfaceColor[1] = rgb[1];
         surfaceColor[2] = rgb[2];
         CustomizeMappers();
+        NotifyTransparencyActor();
     }
 }
 
@@ -241,6 +243,7 @@ avtSimpleMapper::SetEdgeColor(double rgb[3])
         edgeColor[1] = rgb[1];
         edgeColor[2] = rgb[2];
         CustomizeMappers();
+        NotifyTransparencyActor();
     }
 }
 
@@ -264,6 +267,7 @@ avtSimpleMapper::SetOpacity(double val)
     {
         opacity = val;
         CustomizeMappers();
+        NotifyTransparencyActor();
     }
 }
 
@@ -288,6 +292,7 @@ avtSimpleMapper::SetLineWidth(int lw)
     {
         lineWidth = lw;
         CustomizeMappers();
+        NotifyTransparencyActor();
     }
 }
 
@@ -312,5 +317,27 @@ avtSimpleMapper::SetLineStyle(int ls)
     {
         lineStyle = ls;
         CustomizeMappers();
+        NotifyTransparencyActor();
     }
+}
+
+
+// ****************************************************************************
+//  Method: avtSimpleMapper::NotifyTransparencyActor
+//
+//  Purpose:
+//    Informs the transparency actor that its input has changed.
+//
+//  Programmer: Kathleen Biagas
+//  Creation:   May 11, 2016 
+//
+//  Modifications:
+//
+// ****************************************************************************
+
+void
+avtSimpleMapper::NotifyTransparencyActor()
+{
+    if (transparencyActor != NULL)
+        transparencyActor->InputWasModified(transparencyIndex);
 }

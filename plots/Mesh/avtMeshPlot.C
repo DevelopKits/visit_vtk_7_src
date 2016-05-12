@@ -49,7 +49,7 @@
 
 #include <avtMeshFilter.h>
 #include <avtSmoothPolyDataFilter.h>
-#include <avtSurfaceAndWireframeMapper.h>
+#include <avtLinesAndPolysMapper.h>
 #include <avtVariableLegend.h>
 #include <avtVariablePointGlyphMapper.h>
 
@@ -125,7 +125,7 @@
 //
 //    Kathleen Biagas, Wed May 11 08:51:13 MST 2016
 //    Remove custom renderer in favor of native renderers in VTK-7. Use
-//    new avtSurfaceAndWireframeMapper that sets vtkMapper/vtkActor properties
+//    new avtLinesAndPolysMapper that sets vtkMapper/vtkActor properties
 //    as necessary to handle lines/polys appropriately.
 //
 // ****************************************************************************
@@ -137,7 +137,7 @@ avtMeshPlot::avtMeshPlot()
     ghostAndFaceFilter = new avtGhostZoneAndFacelistFilter;
     ghostAndFaceFilter->SetUseFaceFilter(true);
     ghostAndFaceFilter->GhostDataMustBeRemoved();
-    mapper = new avtSurfaceAndWireframeMapper();
+    mapper = new avtLinesAndPolysMapper();
 
     bgColor[0] = bgColor[1] = bgColor[2] = 1.0;  // white
     fgColor[0] = fgColor[1] = fgColor[2] = 0.0;  // black

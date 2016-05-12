@@ -58,11 +58,14 @@
 #   Kathleen Biagas, Tue May 10 18:35:26 MST 2016
 #   Remove vtkVisItDataSetMapper and its subclasses.
 #
-#   Kathleen Biagas, Tue May 10 18:55:00 PDT 2016
+#   Kathleen Biagas, Tue May 10 18:55:00 MST 2016
 #   Add avtSurfaceAndWireframeMapper.C
 #
-#   Kathleen Biagas, Wed May 11 11:54:00 PDT 2016
+#   Kathleen Biagas, Wed May 11 11:54:00 MST 2016
 #   Add avtSimpleMapper.C
+#
+#   Kathleen Biagas, Wed May 11 15:28:15 MST 2016
+#   Rename avtSurfaceAndWireframeMapper to avtLinesAndPolysMapper.
 #
 #****************************************************************************/
 
@@ -138,6 +141,7 @@ avtLevelsMapper.C
 avtLevelsPointGlyphMapper.C
 avtLightList.C
 avtLineoutActor.C
+avtLinesAndPolysMapper.C
 avtMapper.C
 avtPickActor.C
 avtPlot.C
@@ -145,7 +149,6 @@ avtPlotMetaData.C
 avtPointGlypher.C
 avtSimpleMapper.C
 avtSoftwareShader.C
-avtSurfaceAndWireframeMapper.C
 avtSurfaceAndWireframeRenderer.C
 avtTensorGlyphMapper.C
 avtTheater.C

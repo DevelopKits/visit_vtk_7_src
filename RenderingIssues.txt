@@ -1,2 +1,5 @@
-MeshPlot:
-  1) Changing opacity to < 1, then changing back to 1, the plot goes completely transparent.
+Pseudocolor plot:
+  1) curve3d -- entire arch is black (lighting/normals incorrect?)
+     -dump output matches visit trunk, so is somewhere in the rendering.
+     *I exported the silo file to vtk, and created a simple vtk pipeline.
+      It renders correctly in the vtk stand alone program.

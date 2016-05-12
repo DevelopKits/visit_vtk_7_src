@@ -37,68 +37,56 @@
 *****************************************************************************/
 
 // ************************************************************************* //
-//                            avtSimpleMapper.h                              //
+//                       avtLinesAndPolysMapper.h                            //
 // ************************************************************************* //
 
-#ifndef AVT_SIMPLEMAPPER_H
-#define AVT_SIMPLEMAPPER_H
+#ifndef AVT_LINESANDPOLYSMAPPER_H
+#define AVT_LINESANDPOLYSMAPPER_H
 
 #include <plotter_exports.h>
-#include <avtMapper.h>
+#include <avtSimpleMapper.h>
 
 
 // ****************************************************************************
-//  Class:  avtSimpleMapper
+//  Class:  avtLinesAndPolysMapper
 //
 //  Purpose:
-//      Does not map scalars to colors, all actors colored by single color.
-//      Allows changing edge colors and edge visibility
-//  
+//      This takes geometry and makes a drawable by mapping the variable to 
+//      colors.
+//
 //      Specializes avtMapper by allowing wireframe representation to be
 //      drawn at same time as surface.
-//
-//      Surface and lines/edges can have different colors.
-//
-//      Ignores Lighting.
 //
 //  Programmer: Kathleen Biagas 
 //  Creation:   May 11, 2016 
 //
 //  Modifications:
+//    Kathleen Biagas, Wed May 11 14:19:56 MST 2016
+//    Derive from avtSimpleMapper.
 //
 // ****************************************************************************
 
-class PLOTTER_API avtSimpleMapper : public avtMapper
+class PLOTTER_API avtLinesAndPolysMapper : public avtSimpleMapper
 {
   public:
-                               avtSimpleMapper();
-    virtual                   ~avtSimpleMapper();
+                               avtLinesAndPolysMapper();
+    virtual                   ~avtLinesAndPolysMapper();
 
 
-    // From avtMapper
-    virtual bool               GetLighting(void) { return false; }
+    virtual bool               GetLighting(void);
     virtual void               SetSurfaceRepresentation(int rep);
 
-    // this class
-    void                       SetEdgeVisibility(bool val);
+    void                       SetIgnoreLighting(bool val)
+                                   { ignoreLighting = val; }
 
-    void                       SetColor(double rgb[3]);
-    void                       SetEdgeColor(double rgb[3]);
+    void                       SetSurfaceVisibility(bool val);
 
-    void                       SetOpacity(double val);
-    void                       SetLineWidth(int lw);
-    void                       SetLineStyle(int ls);
 
   protected:
-    bool                       edgeVis;
-    double                     edgeColor[3];
-    double                     surfaceColor[3];
-    double                     opacity;
-    int                        lineWidth;
-    int                        lineStyle;
+    bool                       ignoreLighting;
+    bool                       surfaceVis;
 
     virtual void               CustomizeMappers(void);
-    void                       NotifyTransparencyActor();
 };
 
 
