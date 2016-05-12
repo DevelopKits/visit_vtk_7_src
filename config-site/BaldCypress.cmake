@@ -1,3 +1,4 @@
+set(VISIT_WINDOWS_DIR "D:\\A_VisIt\\trunk\\windowsbuild")
 include(${VISIT_SOURCE_DIR}/config-site/windows.cmake)
 
 # disable some warnings

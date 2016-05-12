@@ -81,34 +81,18 @@ IF (WIN32)
 ENDIF (WIN32)
 
 FUNCTION(ADD_TARGET_INCLUDE target)
-    # Setting include_directories via set_target_properties overrides
+    set_property(TARGET ${target} APPEND
     # the current settings, but we want to append, so first retrieve
     # the current values, then append the desired include.
-    GET_TARGET_PROPERTY(currentInc ${target} INCLUDE_DIRECTORIES)
-    LIST(APPEND currentInc ${ARGN})
-    SET_TARGET_PROPERTIES(${target} PROPERTIES
-                          INCLUDE_DIRECTORIES "${currentInc}")
-    UNSET(currentInc)
+                 PROPERTY INCLUDE_DIRECTORIES ${ARGN})
 ENDFUNCTION(ADD_TARGET_INCLUDE)
 
 FUNCTION(ADD_TARGET_DEFINITIONS target newDefs)
-    GET_TARGET_PROPERTY(currentDefs ${target} COMPILE_DEFINITIONS)
+    set_property(TARGET ${target} APPEND
+                 PROPERTY COMPILE_DEFINITIONS ${newDefs})
     # if there truly are current definitions, and more than 1 in the list, then
     # IF(${currentDefs} MATCHES NOTFOUND) causes a configure failure.
     # Grab the first item in the list for comparison instead.
-    if (currentDefs)
-        LIST(GET currentDefs 0 firstItem )
-        IF(${firstItem} MATCHES NOTFOUND)
-            SET(allDefs ${newDefs})
-        ELSE(${firstItem} MATCHES NOTFOUND)
-            SET(allDefs ${currentDefs} ${newDefs})
-        ENDIF(${firstItem} MATCHES NOTFOUND)
-    else()
-        SET(allDefs ${newDefs})
-    endif()
-    SET_TARGET_PROPERTIES(${target} PROPERTIES
-            COMPILE_DEFINITIONS "${allDefs}"
-        )
 ENDFUNCTION(ADD_TARGET_DEFINITIONS)
 
 FUNCTION(ADD_PARALLEL_LIBRARY target)
