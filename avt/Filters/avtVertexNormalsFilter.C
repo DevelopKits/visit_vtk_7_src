@@ -216,6 +216,9 @@ avtVertexNormalsFilter::ExecuteData(avtDataRepresentation *in_dr)
     
         return out_dr;
     }
+#if 0
+// VTK-7 HACK  Remove this commented out block if we decide we don't
+// want/need a specialized mapper/renderer for structured grids.
     else if (in_ds->GetDataObjectType() == VTK_STRUCTURED_GRID)
     {
         vtkStructuredGrid *sgrid = (vtkStructuredGrid *)in_ds;
@@ -246,6 +249,7 @@ avtVertexNormalsFilter::ExecuteData(avtDataRepresentation *in_dr)
 
         return out_dr;
     }
+#endif
 
     // Don't know what to do with other grid types.
     debug1 << "Sent unsupported grid type into normals filter" << endl;
