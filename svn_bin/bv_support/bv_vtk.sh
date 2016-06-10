@@ -4,9 +4,7 @@ function bv_vtk_initialize
     export ON_VTK="on"
     export FORCE_VTK="no"
     export USE_SYSTEM_VTK="no"
-    export BACKEND_OPENGL2="no"
     add_extra_commandline_args "vtk" "alt-vtk-dir" 1 "Use alternate VTK (exp)"
-    add_extra_commandline_args "vtk" "opengl2-backend" 0 "Enable OpenGL-2 backend when building VTK"
 }
 
 function bv_vtk_enable
@@ -29,13 +27,6 @@ function bv_vtk_alt_vtk_dir
     USE_SYSTEM_VTK="yes"
     SYSTEM_VTK_DIR="$1"
     info "Using Alternate VTK: $SYSTEM_VTK_DIR"
-}
-
-function bv_vtk_opengl2_backend
-{
-    bv_vtk_enable
-    BACKEND_OPENGL2="yes"
-    info "Using OpenGL 2 backend for VTK"
 }
 
 function bv_vtk_depends_on
@@ -72,13 +63,12 @@ function bv_vtk_force
 
 function bv_vtk_info
 {
-export VTK_FILE=${VTK_FILE:-"VTK-7.0.0.tar.gz"}
-export VTK_VERSION=${VTK_VERSION:-"7.0.0"}
-export VTK_SHORT_VERSION=${VTK_SHORT_VERSION:-"7.0"}
+export VTK_FILE=${VTK_FILE:-"vtk-master.tar.gz"}
+export VTK_VERSION=${VTK_VERSION:-"7.1.0"}
+export VTK_SHORT_VERSION=${VTK_SHORT_VERSION:-"7.1"}
 export VTK_COMPATIBILITY_VERSION=${VTK_SHORT_VERSION}
-export VTK_BUILD_DIR=${VTK_BUILD_DIR:-"VTK-7.0.0"}
+export VTK_BUILD_DIR=${VTK_BUILD_DIR:-"vtk-master"}
 export VTK_INSTALL_DIR=${VTK_INSTALL_DIR:-"vtk"}
-export VTK_URL=${VTK_URL:-"http://www.vtk.org/files/release/7.0"}
 export VTK_MD5_CHECKSUM=""
 export VTK_SHA256_CHECKSUM=""
 }
@@ -93,7 +83,6 @@ printf "%s%s\n" "VTK_BUILD_DIR=" "${VTK_BUILD_DIR}"
 function bv_vtk_print_usage
 {
 printf "%-15s %s [%s]\n" "--vtk" "Build VTK" "built by default unless --no-thirdparty flag is used"
-printf "%-15s %s [%s]\n" "--opengl2-backend" "Enable OpenGL-2 backend when building VTK" "$BACKEND_OPENGL2"
 }
 
 function bv_vtk_host_profile
@@ -114,9 +103,7 @@ function bv_vtk_host_profile
 function bv_vtk_initialize_vars
 {
     info "initalizing vtk vars"
-    if [[ $BACKEND_OPENGL2 == "yes" ]]; then
-        VTK_INSTALL_DIR="vtk-opengl2"
-    elif [[ $DO_R == "yes" ]]; then
+    if [[ $DO_R == "yes" ]]; then
         VTK_INSTALL_DIR="vtk-r"
     fi
 }
@@ -426,11 +413,188 @@ EOF
     return 0;
 }
 
+function apply_vtk_710_glew_patch
+{
+  # path vtk's glew to use our own dlGetProcAddressMesa 
+
+   patch -p0 << \EOF
+*** ThirdParty/glew/vtkglew/src/glew.orig.c	Fri Jun 10 12:34:46 2016
+--- ThirdParty/glew/vtkglew/src/glew.c	Fri Jun 10 12:43:08 2016
+***************
+*** 36,42 ****
+  #  include <GL/wglew.h>
+  #elif defined(VTK_USE_OFFSCREEN_EGL)
+  #  include <EGL/egl.h>
+! #elif !defined(GLEW_OSMESA) && !defined(__ANDROID__) && !defined(__native_client__) && !defined(__HAIKU__) && (!defined(__APPLE__) || defined(GLEW_APPLE_GLX))
+  #  include <GL/glxew.h>
+  #endif
+  
+--- 36,42 ----
+  #  include <GL/wglew.h>
+  #elif defined(VTK_USE_OFFSCREEN_EGL)
+  #  include <EGL/egl.h>
+! #elif !defined(__ANDROID__) && !defined(__native_client__) && !defined(__HAIKU__) && (!defined(__APPLE__) || defined(GLEW_APPLE_GLX))
+  #  include <GL/glxew.h>
+  #endif
+  
+***************
+*** 110,130 ****
+  }
+  #endif /* __sgi || __sun || GLEW_APPLE_GLX */
+  
+! #if defined(GLEW_OSMESA)
+  #include <dlfcn.h>
+  #include <stdio.h>
+  #include <stdlib.h>
+  
+  void* dlGetProcAddressMesa (const GLubyte* name)
+  {
+    static void* h = NULL;
+!   static void* gpa;
+  
+!   if (h == NULL)
+    {
+      if ((h = dlopen(NULL, RTLD_LAZY | RTLD_LOCAL)) == NULL)
+        return NULL;
+!     gpa = dlsym(h, "OSMesaGetProcAddress");
+    }
+  
+    if (gpa != NULL)
+--- 110,142 ----
+  }
+  #endif /* __sgi || __sun || GLEW_APPLE_GLX */
+  
+! #define VISIT_GLEW_OSMESA
+! #if defined(VISIT_GLEW_OSMESA)
+  #include <dlfcn.h>
+  #include <stdio.h>
+  #include <stdlib.h>
++ int using_osmesa = 0;
+  
+  void* dlGetProcAddressMesa (const GLubyte* name)
+  {
+    static void* h = NULL;
+!   static void* gpa = NULL;
+  
+!   if (h == NULL && gpa == NULL)
+    {
+      if ((h = dlopen(NULL, RTLD_LAZY | RTLD_LOCAL)) == NULL)
+        return NULL;
+! 
+!     gpa = dlsym(h, "glXGetProcAddress");
+! 
+!     if(gpa == NULL)
+!     {
+!       gpa = dlsym(h, "OSMesaGetProcAddress");
+!       if (gpa != NULL)
+!       {
+!           using_osmesa = 1;
+!       }
+!     }
+    }
+  
+    if (gpa != NULL)
+***************
+*** 207,213 ****
+  #  define glewGetProcAddress(name) NULL /* TODO */
+  #elif defined(__native_client__)
+  #  define glewGetProcAddress(name) NULL /* TODO */
+! #elif defined(GLEW_OSMESA)
+  #  define glewGetProcAddress(name) dlGetProcAddressMesa(name)
+  #elif defined(VTK_USE_OFFSCREEN_EGL)
+  #  define glewGetProcAddress(name) eglGetProcAddress(name)
+--- 219,225 ----
+  #  define glewGetProcAddress(name) NULL /* TODO */
+  #elif defined(__native_client__)
+  #  define glewGetProcAddress(name) NULL /* TODO */
+! #elif defined(VISIT_GLEW_OSMESA)
+  #  define glewGetProcAddress(name) dlGetProcAddressMesa(name)
+  #elif defined(VTK_USE_OFFSCREEN_EGL)
+  #  define glewGetProcAddress(name) eglGetProcAddress(name)
+***************
+*** 13167,13173 ****
+    return GLEW_OK;
+  }
+  
+! #elif !defined(GLEW_OSMESA) && !defined(__ANDROID__) && !defined(__native_client__) && !defined(__HAIKU__) && (!defined(__APPLE__) && !defined(VTK_USE_OFFSCREEN_EGL) || defined(GLEW_APPLE_GLX))
+  
+  PFNGLXGETCURRENTDISPLAYPROC __glewXGetCurrentDisplay = NULL;
+  
+--- 13179,13185 ----
+    return GLEW_OK;
+  }
+  
+! #elif !defined(__ANDROID__) && !defined(__native_client__) && !defined(__HAIKU__) && (!defined(__APPLE__) && !defined(VTK_USE_OFFSCREEN_EGL) || defined(GLEW_APPLE_GLX))
+  
+  PFNGLXGETCURRENTDISPLAYPROC __glewXGetCurrentDisplay = NULL;
+  
+***************
+*** 14408,14416 ****
+    GLenum r;
+    r = glewContextInit();
+    if ( r != 0 ) return r;
+! #if defined(GLEW_OSMESA)
+!   return r;
+! #elif defined(_WIN32)
+    return wglewContextInit();
+  #elif !defined(__ANDROID__) && !defined(__native_client__) && !defined(__HAIKU__) && (!defined(__APPLE__) && ! defined(VTK_USE_OFFSCREEN_EGL) || defined(GLEW_APPLE_GLX))
+    return glxewContextInit();
+--- 14420,14430 ----
+    GLenum r;
+    r = glewContextInit();
+    if ( r != 0 ) return r;
+! #if defined(VISIT_GLEW_OSMESA)
+!   if(using_osmesa == 1)
+!      return r;
+! #endif
+! #if defined(_WIN32)
+    return wglewContextInit();
+  #elif !defined(__ANDROID__) && !defined(__native_client__) && !defined(__HAIKU__) && (!defined(__APPLE__) && ! defined(VTK_USE_OFFSCREEN_EGL) || defined(GLEW_APPLE_GLX))
+    return glxewContextInit();
+
+EOF
+
+    if [[ $? != 0 ]] ; then
+      warn "vtk710 patch vtk glew #1 failed."
+      return 1
+    fi
+   patch -p0 << \EOF
+*** ThirdParty/glew/vtkglew/CMakeLists.txt.orig	Fri Jun 10 12:34:46 2016
+--- ThirdParty/glew/vtkglew/CMakeLists.txt	Fri Jun 10 12:43:08 2016
+***************
+*** 22,30 ****
+  
+  vtk_add_library(vtkglew ${common_SRCS})
+  vtk_opengl_link(vtkglew)
+! if(VTK_USE_OSMESA AND UNIX AND NOT APPLE)
+    target_link_libraries(vtkglew LINK_PRIVATE ${CMAKE_DL_LIBS})
+! endif()
+  
+  if(NOT VTK_INSTALL_NO_DEVELOPMENT)
+    install(DIRECTORY ${VTKGLEW_SOURCE_DIR}/include
+--- 22,30 ----
+  
+  vtk_add_library(vtkglew ${common_SRCS})
+  vtk_opengl_link(vtkglew)
+! #if(VTK_USE_OSMESA AND UNIX AND NOT APPLE)
+    target_link_libraries(vtkglew LINK_PRIVATE ${CMAKE_DL_LIBS})
+! #endif()
+  
+  if(NOT VTK_INSTALL_NO_DEVELOPMENT)
+    install(DIRECTORY ${VTKGLEW_SOURCE_DIR}/include
+
+EOF
+
+    if [[ $? != 0 ]] ; then
+      warn "vtk710 patch vtk glew #2 failed."
+      return 1
+    fi
+    return 0;
+}
+
+
 function apply_vtk_patch
 {  
-    # also apply objc flag patch to 6.1.0
-    # needed for 6.3?
-    
     if [[ ${VTK_VERSION} == 6.1.0 ]] ; then
         apply_vtk_600_patch
         apply_vtk_610_patch_2
@@ -439,6 +603,15 @@ function apply_vtk_patch
         fi
         if [[ $? != 0 ]] ; then
             return 1
+        fi
+    fi
+
+    if [[ ${VTK_VERSION} == 7.1.0 ]] ; then
+        if [[ "$DO_MESA" == "yes" && "$OPSYS" == "Linux" ]] ; then
+            apply_vtk_710_glew_patch
+            if [[ $? != 0 ]] ; then
+                return 1
+            fi
         fi
     fi
 
@@ -606,7 +779,7 @@ function build_vtk
     vopts="${vopts} -DCMAKE_EXE_LINKER_FLAGS:STRING=${lf}"
     vopts="${vopts} -DCMAKE_MODULE_LINKER_FLAGS:STRING=${lf}"
     vopts="${vopts} -DCMAKE_SHARED_LINKER_FLAGS:STRING=${lf}"
-    vopts="${vopts} -DVTK_REPORT_OPENGL_ERRORS:BOOL=false"
+    vopts="${vopts} -DVTK_REPORT_OPENGL_ERRORS:BOOL=true"
     if test "${OPSYS}" = "Darwin" ; then
         vopts="${vopts} -DVTK_USE_COCOA:BOOL=ON"
         vopts="${vopts} -DCMAKE_INSTALL_NAME_DIR:PATH=${vtk_inst_path}/lib"
@@ -625,12 +798,8 @@ function build_vtk
     # allow VisIt to override any of vtk's classes
     vopts="${vopts} -DVTK_ALL_NEW_OBJECT_FACTORY:BOOL=true"
 
-    # Which backend?
-    if [["$BACKEND_OPENGL2" == "yes"]]; then
-        vopts="${vopts} -DVTK_RENDERING_BACKEND:STRING=OpenGL2"
-    else
-        vopts="${vopts} -DVTK_RENDERING_BACKEND:STRING=OpenGL"
-    fi
+    # OpenGL2 backend
+    vopts="${vopts} -DVTK_RENDERING_BACKEND:STRING=OpenGL2"
 
     # Turn off module groups
     vopts="${vopts} -DVTK_Group_Imaging:BOOL=false"
@@ -655,11 +824,7 @@ function build_vtk
     vopts="${vopts} -DModule_vtkInteractionStyle:BOOL=true"
     vopts="${vopts} -DModule_vtkRenderingAnnotation:BOOL=true"
     vopts="${vopts} -DModule_vtkRenderingFreeType:BOOL=true"
-    if [["$BACKEND_OPENGL2" == "yes"]]; then
-        vopts="${vopts} -DModule_vtkRenderingOpenGL2:BOOL=true"
-    else
-        vopts="${vopts} -DModule_vtkRenderingOpenGL:BOOL=true"
-    fi
+    vopts="${vopts} -DModule_vtkRenderingOpenGL2:BOOL=true"
     vopts="${vopts} -DModule_vtklibxml2:BOOL=true"
 
     # Tell VTK where to locate qmake if we're building graphical support. We

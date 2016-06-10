@@ -23,9 +23,10 @@ echo ""
 
 function bv_mesa_info
 {
-export MESA_FILE=${MESA_FILE:-"MesaLib-7.10.2.tar.gz"}
-export MESA_VERSION=${MESA_VERSION:-"7.10.2"}
-export MESA_BUILD_DIR=${MESA_BUILD_DIR:-"Mesa-7.10.2"}
+export MESA_FILE=${MESA_FILE:-"mesa-11.2.2.tar.gz"}
+export MESA_VERSION=${MESA_VERSION:-"11.2.2"}
+export MESA_BUILD_DIR=${MESA_BUILD_DIR:-"mesa-11.2.2"}
+export MESA_URL=${MESA_URL:-"https://mesa.freedesktop.org/archive/11.2.2/mesa-11.2.2.tar.gz"}
 export MESA_MD5_CHECKSUM=""
 export MESA_SHA256_CHECKSUM=""
 }
@@ -40,7 +41,6 @@ printf "%s%s\n" "MESA_BUILD_DIR=" "${MESA_BUILD_DIR}"
 
 function bv_mesa_print_usage
 {
-printf "\t\t%15s\n" "NOTE: not available for download from web"
 printf "%-15s %s [%s]\n" "--mesa" "Build Mesa" "$DO_MESA"
 }
 
@@ -620,7 +620,7 @@ function apply_mesa_patch
         fi
     else
         warn "Unsupported Mesa Version ${MESA_VERSION}"
-        return 1
+        return 0
     fi
 
     return 0
@@ -718,13 +718,21 @@ function build_mesa
       --prefix=${PF}                    \
       --without-demos                   \
       --with-driver=osmesa              \
-      --disable-gallium                 \
       --with-max-width=16384            \
       --with-max-height=16384           \
-      --enable-glx-tls                  \
       --disable-glw                     \
+      --disable-xvmc                    \
+      --disable-glx                     \
+      --disable-dri                     \
+      --with-dri-drivers=               \
+      --with-gallium-drivers=swrast     \
+      --enable-texture-float            \
+      --with-egl-platforms=             \
+      --enable-gallium-osmesa           \
+      --enable-gallium-llvm=yes         \
       ${DISABLE_GLU}                    \
       --disable-egl  ${MESA_STATIC_DYNAMIC}
+
     if [[ $? != 0 ]] ; then
         warn "Mesa: 'configure' for Offscreen failed.  Giving up"
         return 1
