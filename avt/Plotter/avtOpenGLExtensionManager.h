@@ -47,7 +47,8 @@
 // We don't need it in this header, but include GLEW here for ease of use.
 // GLEW must be included before any OpenGL headers, and if clients want this
 // file then *not* including GLEW wouldn't make any sense!
-#include <GL/glew.h>
+//#include <GL/glew.h>
+#include <vtk_glew.h>
 #else
 // We're not using GLEW for OpenGL. Use straight OpenGL.
 #define GL_GLEXT_PROTOTYPES

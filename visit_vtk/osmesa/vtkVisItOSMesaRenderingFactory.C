@@ -39,10 +39,8 @@
 
 #include "vtkVisItOSMesaRenderingFactory.h"
 #include "vtkOSMesaGLRenderWindow.h"
-#include "vtkOSMesaGLExtensionManager.h"
 
 VTK_CREATE_CREATE_FUNCTION(vtkOSMesaGLRenderWindow);
-VTK_CREATE_CREATE_FUNCTION(vtkOSMesaGLExtensionManager);
 
 
 // ****************************************************************************
@@ -62,11 +60,6 @@ vtkVisItOSMesaRenderingFactory::vtkVisItOSMesaRenderingFactory()
                            "Render Window Hijack Overwride",
                            1,
                            vtkObjectFactoryCreatevtkOSMesaGLRenderWindow);
-    this->RegisterOverride("vtkOpenGLExtensionManager",
-                           "vtkOSMesaGLExtensionManager",
-                            "Ext Manager Hijack Overwride",
-                            1,
-                            vtkObjectFactoryCreatevtkOSMesaGLExtensionManager);
 }
 
 

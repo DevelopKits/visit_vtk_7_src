@@ -663,7 +663,7 @@ OPTION(VISIT_TUVOK    "Build VisIt with support for the Tuvok volume rendering l
 OPTION(VISIT_SLIVR    "Build VisIt with support for the SLIVR volume rendering library." ON)
 OPTION(VISIT_STATIC   "Build VisIt statically." OFF)
 IF(VISIT_STATIC)
-    ADD_DEFINITIONS(-DVISIT_STATIC -DGLEW_STATIC)
+    ADD_DEFINITIONS(-DVISIT_STATIC)
 ENDIF(VISIT_STATIC)
 OPTION(VISIT_OSX_USE_RPATH      "Use rpath instead of executable_path while installing" OFF)
 OPTION(VISIT_PYTHON_SCRIPTING      "Build VisIt with Python scripting support." ON)
@@ -716,7 +716,6 @@ IF(APPLE OR WIN32)
 ELSE(APPLE OR WIN32)
     OPTION(VISIT_USE_X "Use X11" ON)
 ENDIF(APPLE OR WIN32)
-OPTION(VISIT_USE_GLEW "Use GLEW to call GL functions." ON)
 
 OPTION(VISIT_THREAD "Build VisIt with thread support." OFF)
 OPTION(VISIT_BUILD_AVTEXAMPLES  "Enable building of avtexamples" ON)
@@ -1217,22 +1216,9 @@ IF(NOT DEFINED VISIT_QT5)
                                  AND NOT VISIT_SERVER_COMPONENTS_ONLY)
 ENDIF(NOT DEFINED VISIT_QT5)
 
-# Treat GLEW as a 3rd party builtin.
-IF(VISIT_USE_GLEW)
-    SET(GLEW_FOUND 1)
-    ADD_DEFINITIONS(-DHAVE_LIBGLEW)
-    SET(GLEW_INCLUDE_DIR ${VISIT_SOURCE_DIR}/third_party_builtin/glew/glew/include)
-    SET(GLEW_LIBRARY_DIR ${VISIT_SOURCE_DIR}/lib)
-    SET(GLEW_LIB visitGLEW)
-ELSE(VISIT_USE_GLEW)
-    # We're not using GLEW but we need to substitute GL
-    SET(GLEW_INCLUDE_DIR ${OPENGL_INCLUDE_DIR})
-    VISIT_OPTION_DEFAULT(VISIT_SLIVR false TYPE BOOL)
-ENDIF(VISIT_USE_GLEW)
-
 # Set up the tuvok library if it was enabled.
 IF(VISIT_TUVOK)
-    SET(TUVOK_LIB tuvok ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} GLEW)
+    SET(TUVOK_LIB tuvok ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} ${GLEW_LIBRARY})
 ENDIF(VISIT_TUVOK)
 
 # Set up boost (interval) library

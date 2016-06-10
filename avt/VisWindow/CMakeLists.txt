@@ -86,14 +86,14 @@ IF (NOT WIN32)
             Colleagues/VisWinRendering.C
             Colleagues/VisWinRenderingWithoutWindow.C
             PROPERTIES
-            COMPILE_FLAGS "-I${MESA_INCLUDE_DIR} -I${OPENGL_INCLUDE_DIR} -I${GLEW_INCLUDE_DIR}"
+            COMPILE_FLAGS "-I${MESA_INCLUDE_DIR} -I${OPENGL_INCLUDE_DIR}"
         )
     ELSE(MESA_FOUND)
         SET_SOURCE_FILES_PROPERTIES(
             Colleagues/VisWinRendering.C
             Colleagues/VisWinRenderingWithoutWindow.C
             PROPERTIES
-            COMPILE_FLAGS "-I${OPENGL_INCLUDE_DIR} -I${GLEW_INCLUDE_DIR}"
+            COMPILE_FLAGS "-I${OPENGL_INCLUDE_DIR}"
         )
     ENDIF(MESA_FOUND)
 ELSE (NOT WIN32)
@@ -102,15 +102,15 @@ ELSE (NOT WIN32)
             Colleagues/VisWinRendering.C
             Colleagues/VisWinRenderingWithoutWindow.C
             PROPERTIES
-            COMPILE_FLAGS "-I${MESA_INCLUDE_DIR} -I${GLEW_INCLUDE_DIR}"
+            COMPILE_FLAGS "-I${MESA_INCLUDE_DIR}"
         )
-    ELSE()
-        SET_SOURCE_FILES_PROPERTIES(
-            Colleagues/VisWinRendering.C
-            Colleagues/VisWinRenderingWithoutWindow.C
-            PROPERTIES
-            COMPILE_FLAGS "-I${GLEW_INCLUDE_DIR}"
-        )
+    #ELSE()
+    #    SET_SOURCE_FILES_PROPERTIES(
+    #        Colleagues/VisWinRendering.C
+    #        Colleagues/VisWinRenderingWithoutWindow.C
+    #        PROPERTIES
+    #        COMPILE_FLAGS ""
+    #    )
     ENDIF()
 ENDIF (NOT WIN32)
 
@@ -203,7 +203,7 @@ ${VTK_INCLUDE_DIRS}
 )
 
 # Add link directories
-LINK_DIRECTORIES(${LIBRARY_OUTPUT_DIRECTORY} ${EAVL_LIBRARY_DIR} ${VTK_LIBRARY_DIRS} ${MESA_LIBRARY_DIR} ${GLEW_LIBRARY_DIR})
+LINK_DIRECTORIES(${LIBRARY_OUTPUT_DIRECTORY} ${EAVL_LIBRARY_DIR} ${VTK_LIBRARY_DIRS} ${MESA_LIBRARY_DIR})
 
 #********************************* SERIAL ************************************
 ADD_LIBRARY(avtviswindow_ser ${AVTVISWINDOW_SOURCES})

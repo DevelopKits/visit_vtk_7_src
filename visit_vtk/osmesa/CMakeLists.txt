@@ -40,7 +40,6 @@
 
 SET(VISIT_OSMESA_SOURCES
 vtkOSMesaGLRenderWindow.C
-vtkOSMesaGLExtensionManager.C
 vtkVisItOSMesaRenderingFactory.C
 )
 

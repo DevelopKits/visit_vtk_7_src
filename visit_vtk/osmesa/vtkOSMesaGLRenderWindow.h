@@ -71,13 +71,13 @@
 #ifndef __vtkOSMesaGLRenderWindow_h
 #define __vtkOSMesaGLRenderWindow_h
 
-#include "vtkRenderingOpenGLModule.h" // For export macro
-#include "vtkOpenGLRenderWindow.h"
+#include "visit_vtk_osmesa_exports.h"
+#include <vtkOpenGLRenderWindow.h>
 
 class vtkIdList;
 class vtkOSMesaGLRenderWindowInternal;
 
-class VTKRENDERINGOPENGL_EXPORT vtkOSMesaGLRenderWindow : public vtkOpenGLRenderWindow
+class VISIT_VTK_OSMESA_API vtkOSMesaGLRenderWindow : public vtkOpenGLRenderWindow
 {
 public:
   static vtkOSMesaGLRenderWindow *New();

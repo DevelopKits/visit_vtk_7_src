@@ -38,7 +38,7 @@
 
 
 /*****************************************************************************
-* Adapted from VTK6/Rendering/OpenGL/vtkOSOpenGLRenderWindow
+* Adapted from VTK7/Rendering/OpenGL/vtkOSOpenGLRenderWindow
 * Provides OS Mesa support for VisIt in cases where a VTK build does not.
 *****************************************************************************/
 
@@ -62,30 +62,43 @@ PURPOSE.  See the above copyright notice for more information.
 // OS Mesa support for VisIt, even if a VTK dist does not.
 //*****************************************************************************
 
-#include "vtkOSMesaGLRenderWindow.h"
-#include "vtkOpenGLRenderer.h"
-#include "vtkOpenGLProperty.h"
-#include "vtkOpenGLTexture.h"
-#include "vtkOpenGLCamera.h"
-#include "vtkOpenGLLight.h"
-#include "vtkOpenGLActor.h"
-#include "vtkOpenGLPolyDataMapper.h"
+#include <vtk_glew.h>
 #include <GL/gl.h>
-#include "vtkgl.h"
 
+#ifndef GLAPI
+#define GLAPI extern
+#endif
+
+#ifndef GLAPIENTRY
+#define GLAPIENTRY
+#endif
+
+#ifndef APIENTRY
+#define APIENTRY GLAPIENTRY
+#endif
 #include <GL/osmesa.h>
 
-#include "vtkCommand.h"
-#include "vtkIdList.h"
-#include "vtkObjectFactory.h"
-#include "vtkRendererCollection.h"
-#include "vtkOpenGLExtensionManager.h"
+#include "vtkOSMesaGLRenderWindow.h"
+#include <vtkOpenGLRenderer.h>
+#include <vtkOpenGLProperty.h>
+#include <vtkOpenGLTexture.h>
+#include <vtkOpenGLCamera.h>
+#include <vtkOpenGLLight.h>
+#include <vtkOpenGLActor.h>
 
-#include "vtksys/SystemTools.hxx"
-#include "vtksys/ios/sstream"
+#include <vtkCommand.h>
+#include <vtkIdList.h>
+#include <vtkObjectFactory.h>
+#include <vtkRendererCollection.h>
+
+#include <vtksys/SystemTools.hxx>
+#include <sstream>
 
 class vtkOSMesaGLRenderWindow;
 class vtkRenderWindow;
+
+typedef OSMesaContext GLAPIENTRY (*OSMesaCreateContextAttribs_func)( const int *attribList, OSMesaContext sharelist );
+
 
 class vtkOSMesaGLRenderWindowInternal
 {
@@ -167,7 +180,6 @@ vtkOSMesaGLRenderWindow::~vtkOSMesaGLRenderWindow()
 void vtkOSMesaGLRenderWindow::Frame()
 {
   this->MakeCurrent();
-  glFlush();
 }
 
 //
@@ -195,26 +207,10 @@ void vtkOSMesaGLRenderWindow::CreateAWindow()
 void vtkOSMesaGLRenderWindow::DestroyWindow()
 {
   this->MakeCurrent();
+  this->ReleaseGraphicsResources(this);
 
-  // tell each of the renderers that this render window/graphics context
-  // is being removed (the RendererCollection is removed by vtkRenderWindow's
-  // destructor)
-  vtkRenderer* ren;
-  this->Renderers->InitTraversal();
-  for ( ren = vtkOpenGLRenderer::SafeDownCast(this->Renderers->GetNextItemAsObject());
-        ren != NULL;
-        ren = vtkOpenGLRenderer::SafeDownCast(this->Renderers->GetNextItemAsObject())  )
-    {
-    ren->SetRenderWindow(NULL);
-    ren->SetRenderWindow(this);
-    }
-
-
-  if (this->Capabilities)
-    {
-    delete[] this->Capabilities;
-    this->Capabilities = 0;
-    }
+  delete[] this->Capabilities;
+  this->Capabilities = 0;
 
   this->DestroyOffScreenWindow();
 
@@ -225,7 +221,6 @@ void vtkOSMesaGLRenderWindow::DestroyWindow()
 
 void vtkOSMesaGLRenderWindow::CreateOffScreenWindow(int width, int height)
 {
-
   this->DoubleBuffer = 0;
 
   if (!this->Internal->OffScreenWindow)
@@ -235,7 +230,31 @@ void vtkOSMesaGLRenderWindow::CreateOffScreenWindow(int width, int height)
     }
   if (!this->Internal->OffScreenContextId)
     {
-    this->Internal->OffScreenContextId = OSMesaCreateContext(GL_RGBA, NULL);
+#if (OSMESA_MAJOR_VERSION * 100 + OSMESA_MINOR_VERSION >= 1102) && defined(OSMESA_CONTEXT_MAJOR_VERSION)
+    static const int attribs[] = {
+       OSMESA_FORMAT, OSMESA_RGBA,
+       OSMESA_DEPTH_BITS, 32,
+       OSMESA_STENCIL_BITS, 0,
+       OSMESA_ACCUM_BITS, 0,
+       OSMESA_PROFILE, OSMESA_CORE_PROFILE,
+       OSMESA_CONTEXT_MAJOR_VERSION, 3,
+       OSMESA_CONTEXT_MINOR_VERSION, 2,
+       0 };
+
+    OSMesaCreateContextAttribs_func OSMesaCreateContextAttribs =
+       (OSMesaCreateContextAttribs_func)
+       OSMesaGetProcAddress("OSMesaCreateContextAttribs");
+
+    if (OSMesaCreateContextAttribs != NULL)
+      {
+      this->Internal->OffScreenContextId = OSMesaCreateContextAttribs(attribs, NULL);
+      }
+#endif
+    // if we still have no context fall back to the generic signature
+    if (!this->Internal->OffScreenContextId)
+      {
+      this->Internal->OffScreenContextId = OSMesaCreateContext(GL_RGBA, NULL);
+      }
     }
   this->MakeCurrent();
 
@@ -259,17 +278,15 @@ void vtkOSMesaGLRenderWindow::CreateOffScreenWindow(int width, int height)
 
 void vtkOSMesaGLRenderWindow::DestroyOffScreenWindow()
 {
+  // Release graphic resources.
 
-  // release graphic resources.
-  vtkRenderer *ren;
-  vtkCollectionSimpleIterator rit;
-  this->Renderers->InitTraversal(rit);
-  while ( (ren = this->Renderers->GetNextRenderer(rit)) )
-    {
-    ren->SetRenderWindow(NULL);
-    ren->SetRenderWindow(this);
-    }
-
+  // First release graphics resources on the window itself
+  // since call to Renderer's SetRenderWindow(NULL), just
+  // calls ReleaseGraphicsResources on vtkProps. And also
+  // this call invokes Renderer's ReleaseGraphicsResources
+  // method which only invokes ReleaseGraphicsResources on
+  // rendering passes.
+  this->ReleaseGraphicsResources(this);
 
   if (this->Internal->OffScreenContextId)
     {
@@ -335,6 +352,7 @@ void vtkOSMesaGLRenderWindow::Finalize (void)
 // Change the window to fill the entire screen.
 void vtkOSMesaGLRenderWindow::SetFullScreen(int arg)
 {
+  (void)arg;
   this->Modified();
 }
 
@@ -367,9 +385,8 @@ void vtkOSMesaGLRenderWindow::SetSize(int width,int height)
 {
   if ((this->Size[0] != width)||(this->Size[1] != height))
     {
-    this->Size[0] = width;
-    this->Size[1] = height;
-    this->ResizeOffScreenWindow(width,height);
+    this->Superclass::SetSize(width, height);
+    this->ResizeOffScreenWindow(width, height);
     this->Modified();
     }
 }
@@ -488,10 +505,12 @@ void vtkOSMesaGLRenderWindow::SetParentInfo(char *info)
 
 void vtkOSMesaGLRenderWindow::SetWindowId(void *arg)
 {
+  (void)arg;
 //   this->SetWindowId((Window)arg);
 }
 void vtkOSMesaGLRenderWindow::SetParentId(void *arg)
 {
+  (void)arg;
 //   this->SetParentId((Window)arg);
 }
 
@@ -506,7 +525,7 @@ const char* vtkOSMesaGLRenderWindow::ReportCapabilities()
   const char *glVersion = (const char *) glGetString(GL_VERSION);
   const char *glExtensions = (const char *) glGetString(GL_EXTENSIONS);
 
-  vtksys_ios::ostringstream strm;
+  std::ostringstream strm;
   strm << "OpenGL vendor string:  " << glVendor << endl;
   strm << "OpenGL renderer string:  " << glRenderer << endl;
   strm << "OpenGL version string:  " << glVersion << endl;
@@ -551,6 +570,7 @@ void vtkOSMesaGLRenderWindow::SetWindowName(const char * cname)
 
 void vtkOSMesaGLRenderWindow::SetNextWindowId(void *arg)
 {
+  (void)arg;
 //   this->SetNextWindowId((Window)arg);
 }
 

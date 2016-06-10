@@ -109,7 +109,8 @@ SET(REQ_VTK_MODS
         vtkIOXML
         vtkInteractionStyle
         vtkRenderingAnnotation
-        vtkRenderingOpenGL2)
+        vtkRenderingOpenGL2
+        vtkglew)
 
 IF(R_FOUND)
     SET(REQ_VTK_MODS ${REQ_VTK_MODS} vtkFiltersStatisticsGnuR)
@@ -153,6 +154,10 @@ MESSAGE(STATUS "  VTK_DEFINITIONS=${VTK_DEFINITIONS}")
 MESSAGE(STATUS "  VTK_LIBRARIES=${VTK_LIBRARIES}")
 MESSAGE(STATUS "  VTK_INSTALL_PREFIX=${VTK_INSTALL_PREFIX}")
 MESSAGE(STATUS "  VTK_LIBRARY_DIRS=${VTK_LIBRARY_DIRS}")
+
+# tell visit about vtk's glew
+set(GLEW_LIB vtkglew)
+add_definitions(-DHAVE_LIBGLEW)
 
 # Add install commands for all of the VTK libraries. Is there a better way?
 IF(APPLE)
