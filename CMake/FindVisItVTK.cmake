@@ -157,6 +157,7 @@ MESSAGE(STATUS "  VTK_LIBRARY_DIRS=${VTK_LIBRARY_DIRS}")
 
 # tell visit about vtk's glew
 set(GLEW_LIB vtkglew)
+set(GLEW_INCLUDE_DIR ${VISIT_VTK_DIR}/include/vtk-${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}/vtkglew/include)
 add_definitions(-DHAVE_LIBGLEW)
 
 # Add install commands for all of the VTK libraries. Is there a better way?
