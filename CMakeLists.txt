@@ -716,6 +716,7 @@ IF(APPLE OR WIN32)
 ELSE(APPLE OR WIN32)
     OPTION(VISIT_USE_X "Use X11" ON)
 ENDIF(APPLE OR WIN32)
+OPTION(VISIT_USE_GLEW "Use GLEW to call GL functions." ON)
 
 OPTION(VISIT_THREAD "Build VisIt with thread support." OFF)
 OPTION(VISIT_BUILD_AVTEXAMPLES  "Enable building of avtexamples" ON)

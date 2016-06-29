@@ -156,7 +156,9 @@ MESSAGE(STATUS "  VTK_INSTALL_PREFIX=${VTK_INSTALL_PREFIX}")
 MESSAGE(STATUS "  VTK_LIBRARY_DIRS=${VTK_LIBRARY_DIRS}")
 
 # tell visit about vtk's glew
-set(GLEW_LIB vtkglew)
+# and since all libs linking with glew will also need to link with opengl,
+# tack it onto glew lib
+set(GLEW_LIB vtkglew ${OPENGL_gl_LIBRARY})
 set(GLEW_INCLUDE_DIR ${VISIT_VTK_DIR}/include/vtk-${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}/vtkglew/include)
 add_definitions(-DHAVE_LIBGLEW)
 

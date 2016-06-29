@@ -599,7 +599,7 @@ function apply_vtk_patch
         apply_vtk_600_patch
         apply_vtk_610_patch_2
         if [[ "$OPSYS" == "Linux" ]] ; then
-	   apply_vtk_610_patch
+            apply_vtk_610_patch
         fi
         if [[ $? != 0 ]] ; then
             return 1
@@ -855,7 +855,7 @@ function build_vtk
             vopts="${vopts} -DPYTHON_EXTRA_LIBS:STRING=${VTK_PY_LIBS}"
             vopts="${vopts} -DPYTHON_INCLUDE_DIR:PATH=${pyinc}"
             vopts="${vopts} -DPYTHON_LIBRARY:FILEPATH=${pylib}"
-#            vopts="${vopts} -DPYTHON_UTIL_LIBRARY:FILEPATH="
+            #            vopts="${vopts} -DPYTHON_UTIL_LIBRARY:FILEPATH="
         else
             warn "Forgetting python filters because we are doing a static build."
         fi
