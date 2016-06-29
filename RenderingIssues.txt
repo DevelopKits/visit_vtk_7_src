@@ -1,5 +1,43 @@
+All issues seem worse with OSMesa, at least as I have built it for my local desktop.
+
 Pseudocolor plot:
   1) curve3d -- entire arch is black (lighting/normals incorrect?)
      -dump output matches visit trunk, so is somewhere in the rendering.
      *I exported the silo file to vtk, and created a simple vtk pipeline.
       It renders correctly in the vtk stand alone program.
+
+Mesh Plot:
+  1)  Point glyphs (geometry, like boxes) not drawn in OSMesa context
+      eg OSMesa enabled/built and SaveWindow.  (but tensor plots, which are also glyphed, ARE being drawn ... what's the difference here?)
+
+Curve Plot:
+   'Labels' appear in correct spot but not curve. OSMESA offsreen not drawn.
+   Utilizes multiple renders of same data:
+   lines and/or
+   points (glyphed or not) and/or
+   fill and/or
+   time cue as ball or line
+   
+Label Plot:  
+   Not good 
+
+Spreadsheep Plot:  slice part in the render window is black.
+
+Surface Plot:
+   Not being drawn at all : probably due to custom mapper/renderer
+   But I think this plot can be removed altogether??
+
+Truecolor Plot:
+   With OSMesa, Not being drawn at all.
+
+Vector Plot:
+   Not receiving shading ? 
+   Also, other problems with test #11, #13
+
+Volume Plot:
+   Splatting: black
+   Texturing: black
+   SLIVR:  takes very long time to render a frame
+ 
+   OSMESA Not being drawn at all : probably due to custom mapper/renderer
+
