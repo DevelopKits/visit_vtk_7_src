@@ -45,7 +45,7 @@
 #include <vtkBMPWriter.h>
 #include <vtkImageData.h>
 #include <vtkJPEGWriter.h>
-#include <vtkVisItTIFFWriter.h>
+#include <vtkTIFFWriter.h>
 #include <vtkPostScriptWriter.h>
 #include <vtkPPMWriter.h>
 #include <vtkRGBWriter.h>
@@ -187,8 +187,8 @@ avtImageFileWriter::Write(ImageFileFormat format, const char *filename,
         break;
     case TIFF:
     default:
-        writer = vtkVisItTIFFWriter::New();
-        ((vtkVisItTIFFWriter*)writer)->SetCompression(compression);
+        writer = vtkTIFFWriter::New();
+        ((vtkTIFFWriter*)writer)->SetCompression(compression);
         break;
     }
 

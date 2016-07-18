@@ -42,14 +42,13 @@
 
 #include <avtMeshPlot.h>
 
-#include <vtkProperty.h>
 #include <vtkLookupTable.h>
 
 #include <MeshAttributes.h>
 
 #include <avtMeshFilter.h>
 #include <avtSmoothPolyDataFilter.h>
-#include <avtLinesAndPolysMapper.h>
+#include <avtMeshMapper.h>
 #include <avtVariableLegend.h>
 #include <avtVariablePointGlyphMapper.h>
 
@@ -123,11 +122,6 @@
 //    can sometimes avoid it (and get better performance), but we don't
 //    know that until we're about to execute it.
 //
-//    Kathleen Biagas, Wed May 11 08:51:13 MST 2016
-//    Remove custom renderer in favor of native renderers in VTK-7. Use
-//    new avtLinesAndPolysMapper that sets vtkMapper/vtkActor properties
-//    as necessary to handle lines/polys appropriately.
-//
 // ****************************************************************************
 
 avtMeshPlot::avtMeshPlot()
@@ -137,10 +131,8 @@ avtMeshPlot::avtMeshPlot()
     ghostAndFaceFilter = new avtGhostZoneAndFacelistFilter;
     ghostAndFaceFilter->SetUseFaceFilter(true);
     ghostAndFaceFilter->GhostDataMustBeRemoved();
-    mapper = new avtLinesAndPolysMapper();
 
-    bgColor[0] = bgColor[1] = bgColor[2] = 1.0;  // white
-    fgColor[0] = fgColor[1] = fgColor[2] = 0.0;  // black
+    mapper = new avtMeshMapper();
 
     glyphMapper = new avtVariablePointGlyphMapper;
     
@@ -151,6 +143,9 @@ avtMeshPlot::avtMeshPlot()
     lut->Delete();
     varLegend->SetColorBarVisibility(0);
     varLegend->SetVarRangeVisibility(0);
+
+    bgColor[0] = bgColor[1] = bgColor[2] = 1.0;  // white
+    fgColor[0] = fgColor[1] = fgColor[2] = 0.0;  // black
 
     wireframeRenderingIsInappropriate = false;
 
@@ -195,9 +190,6 @@ avtMeshPlot::avtMeshPlot()
 //
 //    Kathleen Bonnell, Tue Nov  2 10:41:33 PST 2004
 //    Added glyphMapper, removed glyphPoints. 
-//
-//    Kathleen Biagas, Wed May 11 08:55:01 MST 2016
-//    Remove property.
 //
 // ****************************************************************************
 
@@ -338,9 +330,6 @@ avtMeshPlot::SetCellCountMultiplierForSRThreshold(const avtDataObject_p dob)
 //    Brad Whitlock, Mon Jan  7 17:00:39 PST 2013
 //    I added some new glyph types.
 //
-//    Kathleen Biagas, Wed May 11 08:56:00 MST 2016
-//    Send opacity to the mapper instead of property.
-//
 // ****************************************************************************
 
 void
@@ -441,9 +430,6 @@ avtMeshPlot::SetAtts(const AttributeGroup *a)
 //    Kathleen Bonnell, Mon Mar 24 17:48:27 PST 2003 
 //    Added call to SetOpaqueColor. 
 //
-//    Kathleen Biagas, Wed May 11 08:56:00 MST 2016
-//    Send line color to the mapper instead of property.
-//
 // ****************************************************************************
 
 void
@@ -453,7 +439,7 @@ avtMeshPlot::SetMeshColor(const unsigned char *col)
     rgb[0] = (double) col[0] / 255.0;
     rgb[1] = (double) col[1] / 255.0;
     rgb[2] = (double) col[2] / 255.0;
-    mapper->SetEdgeColor(rgb);
+    mapper->SetMeshColor(rgb);
  
     if (wireframeRenderingIsInappropriate)
     {
@@ -475,8 +461,6 @@ avtMeshPlot::SetMeshColor(const unsigned char *col)
 //  Creation:     March 24, 2003
 //
 //  Modifications:
-//    Kathleen Biagas, Wed May 11 08:56:00 MST 2016
-//    Send line color to the mapper instead of property.
 //
 // ****************************************************************************
 
@@ -487,7 +471,7 @@ avtMeshPlot::SetMeshColor(const double *col)
     rgb[0] = col[0]; 
     rgb[1] = col[1];
     rgb[2] = col[2];
-    mapper->SetEdgeColor(rgb);
+    mapper->SetMeshColor(rgb);
  
     if (wireframeRenderingIsInappropriate)
     {
@@ -513,9 +497,6 @@ avtMeshPlot::SetMeshColor(const double *col)
 //    The opaque color should match the mesh color if wireframe rendering
 //    is inappropriate.  Don't allow the color to be set incorrectly.
 //
-//    Kathleen Biagas, Wed May 11 08:56:00 MST 2016
-//    Send surface color to the mapper instead of property.
-//
 // ****************************************************************************
 
 void
@@ -527,7 +508,7 @@ avtMeshPlot::SetOpaqueColor(const unsigned char *col, bool force)
         rgb[0] = (double) col[0] / 255.0;
         rgb[1] = (double) col[1] / 255.0;
         rgb[2] = (double) col[2] / 255.0;
-        mapper->SetColor(rgb);
+        mapper->SetSurfaceColor(rgb);
     }
 }
 
@@ -544,10 +525,6 @@ avtMeshPlot::SetOpaqueColor(const unsigned char *col, bool force)
 //  Programmer:   Kathleen Bonnell
 //  Creation:     March 24, 2003 
 //
-//  Modifications:
-//    Kathleen Biagas, Wed May 11 08:56:00 MST 2016
-//    Send surface color to the mapper instead of property.
-//
 // ****************************************************************************
 
 void
@@ -559,7 +536,7 @@ avtMeshPlot::SetOpaqueColor(const double *col, bool force)
         rgb[0] = col[0];
         rgb[1] = col[1];
         rgb[2] = col[2];
-        mapper->SetColor(rgb);
+        mapper->SetSurfaceColor(rgb);
     }
 }
 
@@ -609,9 +586,6 @@ avtMeshPlot::SetLegend(bool legendOn)
 //    Kathleen Bonnell, Mon Jun 25 09:03:29 PDT 2001 
 //    Set property linewidth instead of mapper line width. 
 //
-//    Kathleen Biagas, Wed May 11 08:56:00 MST 2016
-//    Send mapper line width instead of property.
-//
 // ****************************************************************************
 
 void
@@ -637,9 +611,6 @@ avtMeshPlot::SetLineWidth(_LineWidth lw)
 //
 //    Kathleen Bonnell, Mon Jun 25 09:03:29 PDT 2001 
 //    Set property line style instead of mapper line style. 
-//
-//    Kathleen Biagas, Wed May 11 08:56:00 MST 2016
-//    Send mapper line width instead of property.
 //
 // ****************************************************************************
 
@@ -698,9 +669,6 @@ avtMeshPlot::SetPointSize(float ps)
 //    Kathleen Bonnell, Thu Sep  4 11:15:30 PDT 2003 
 //    Modified to support tri-modal opaque mode. 
 //    
-//    Kathleen Biagas, Wed May 11 09:14:21 PDT 2016
-//    Set mapper's surface visibility.
-//
 // ****************************************************************************
 
 void

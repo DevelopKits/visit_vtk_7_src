@@ -99,6 +99,9 @@ avtLevelsPointGlyphMapper::~avtLevelsPointGlyphMapper()
 //    Brad Whitlock, Thu Aug 25 15:21:23 PST 2005
 //    Added support for point texturing.
 // 
+//    Kathleen Biagas, Tue Jul 12 13:37:48 MST 2016
+//    Comment out point sprites until this can be figured out with vtk-7.
+//
 // ****************************************************************************
 
 void
@@ -119,13 +122,11 @@ avtLevelsPointGlyphMapper::CustomizeMappers(void)
         // anything like this, I have to cast to the concrete types that
         // I care about.
         //
+#if 0
         for (int i = 0; i < nMappers; i++)
         {
             if (mappers[i] != NULL)
             {
-
-// VTK-7 HACK  Remove when determine how to do point sprites with native vtk
-#if 0
                 if(strcmp(mappers[i]->GetClassName(), 
                           "vtkVisItDataSetMapper") == 0)
                 {
@@ -134,9 +135,9 @@ avtLevelsPointGlyphMapper::CustomizeMappers(void)
                          vtkVisItDataSetMapper::TEXTURE_USING_POINTSPRITES :
                          vtkVisItDataSetMapper::TEXTURE_NO_POINTS);
                 }
-#endif
             }
         }
+#endif
 
         if (dataScaling)
             ScaleByVar(scalingVarName);

@@ -27,6 +27,7 @@ HistogramViewerEnginePluginInfo.C
 HistogramViewerPluginInfo.C
 avtHistogramPlot.C
 avtHistogramFilter.C
+avtHistogramMapper.C
 ${COMMON_SOURCES}
 )
 
@@ -35,6 +36,7 @@ HistogramViewerEnginePluginInfo.C
 HistogramEnginePluginInfo.C
 avtHistogramPlot.C
 avtHistogramFilter.C
+avtHistogramMapper.C
 ${COMMON_SOURCES}
 )
 
@@ -78,9 +80,9 @@ ${VISIT_INCLUDE_DIR}/visit_vtk/lightweight
 ${QT_INCLUDE_DIR}
 ${QT_QTCORE_INCLUDE_DIR}
 ${QT_QTGUI_INCLUDE_DIR}
-${EAVL_INCLUDE_DIR} 
-${VTKM_INCLUDE_DIR} 
-${VTK_INCLUDE_DIRS} 
+${EAVL_INCLUDE_DIR}
+${VTKM_INCLUDE_DIR}
+${VTK_INCLUDE_DIRS}
 ${PYINCLUDES}
 ${VISIT_INCLUDE_DIR}/avt/Expressions/MeshQuality
 ${VISIT_INCLUDE_DIR}/avt/Expressions/Abstract

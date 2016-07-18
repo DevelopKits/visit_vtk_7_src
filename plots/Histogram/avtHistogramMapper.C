@@ -37,10 +37,10 @@
 *****************************************************************************/
 
 // ************************************************************************* //
-//                            avtSimpleMapper.C                              //
+//                            avtHistogramMapper.C                           //
 // ************************************************************************* //
 
-#include <avtSimpleMapper.h>
+#include <avtHistogramMapper.h>
 #include <avtTransparencyActor.h>
 
 #include <vtkActor.h>
@@ -50,7 +50,7 @@
 
 
 // ****************************************************************************
-//  Method: avtSimpleMapper constructor
+//  Method: avtHistogramMapper constructor
 //
 //  Programmer: Kathleen Biagas 
 //  Creation:   May 11, 2016 
@@ -59,7 +59,7 @@
 //
 // ****************************************************************************
 
-avtSimpleMapper::avtSimpleMapper() 
+avtHistogramMapper::avtHistogramMapper() 
 {
     edgeVis = true;
     edgeColor[0]    = edgeColor[1]    = edgeColor[2]    = 0.; // black
@@ -71,7 +71,7 @@ avtSimpleMapper::avtSimpleMapper()
 
 
 // ****************************************************************************
-//  Method: avtSimpleMapper destructor
+//  Method: avtHistogramMapper destructor
 //
 //  Programmer: Kathleen Biagas 
 //  Creation:   May 11, 2016 
@@ -80,13 +80,13 @@ avtSimpleMapper::avtSimpleMapper()
 //
 // ****************************************************************************
 
-avtSimpleMapper::~avtSimpleMapper()
+avtHistogramMapper::~avtHistogramMapper()
 {
 }
 
 
 // ****************************************************************************
-//  Method: avtSimpleMapper::SetSurfaceRepresentation
+//  Method: avtHistogramMapper::SetSurfaceRepresentation
 //
 //  Purpose:
 //      Sets the drawable's surface representation.
@@ -100,14 +100,14 @@ avtSimpleMapper::~avtSimpleMapper()
 // ****************************************************************************
 
 void
-avtSimpleMapper::SetSurfaceRepresentation(int globalRep)
+avtHistogramMapper::SetSurfaceRepresentation(int globalRep)
 {
   // This is global rep, don't allow it to set anything for now.
 }
 
 
 // ****************************************************************************
-//  Method: avtSimpleMapper::CustomizeMappers
+//  Method: avtHistogramMapper::CustomizeMappers
 //
 //  Purpose:
 //      A hook from the base class that allows the surface and wireframe
@@ -122,52 +122,38 @@ avtSimpleMapper::SetSurfaceRepresentation(int globalRep)
 // ****************************************************************************
 
 void
-avtSimpleMapper::CustomizeMappers()
+avtHistogramMapper::CustomizeMappers()
 {
-    avtDataObject_p input = GetInput();
-    if (*input == NULL)
-        return;
-
-    avtDataTree_p tree  = GetInputDataTree();
-    if (*tree == NULL)
-        return;
-
-    int nDs = 0;
-    vtkDataSet **ds = tree->GetAllLeaves(nDs);
-
     for (int i = 0 ; i < nMappers ; i++)
     {
-        if (mappers[i] != NULL)
-        {
-            mappers[i]->SetScalarVisibility(false);
-        }
-        if (actors[i] != NULL)
-        {
-            vtkProperty *prop = actors[i]->GetProperty();
-            prop->SetColor(surfaceColor);
-            prop->SetOpacity(opacity);
-            prop->SetAmbient(1.);
-            prop->SetDiffuse(0.);
+        if (mappers[i] == NULL)
+            continue;
 
-            if (edgeVis)
-            {
-                prop->EdgeVisibilityOn();
-                prop->SetEdgeColor(edgeColor);
-                prop->SetLineWidth(lineWidth);
-                // This currently isn't supported with vtk's opengl2 backend
-                prop->SetLineStipplePattern(lineStyle);
-            }
-            else 
-            {
-                prop->EdgeVisibilityOff();
-            }
+        mappers[i]->SetScalarVisibility(false);
+        vtkProperty *prop = actors[i]->GetProperty();
+        prop->SetColor(surfaceColor);
+        prop->SetOpacity(opacity);
+        prop->SetAmbient(1.);
+        prop->SetDiffuse(0.);
+        prop->SetLineWidth(lineWidth);
+        // This currently isn't supported with vtk's opengl2 backend
+        prop->SetLineStipplePattern(lineStyle);
+
+        if (edgeVis)
+        {
+            prop->EdgeVisibilityOn();
+            prop->SetEdgeColor(edgeColor);
+        }
+        else 
+        {
+            prop->EdgeVisibilityOff();
         }
     }
 }
 
 
 // ****************************************************************************
-//  Method: avtSimpleMapper::SetEdgeVisibility
+//  Method: avtHistogramMapper::SetEdgeVisibility
 //
 //  Purpose:
 //      Toggles edge visibility.
@@ -180,7 +166,7 @@ avtSimpleMapper::CustomizeMappers()
 // ****************************************************************************
 
 void
-avtSimpleMapper::SetEdgeVisibility(bool val)
+avtHistogramMapper::SetEdgeVisibility(bool val)
 {
     if (edgeVis != val)
     {
@@ -191,7 +177,7 @@ avtSimpleMapper::SetEdgeVisibility(bool val)
 
 
 // ****************************************************************************
-//  Method: avtSimpleMapper::SetColor
+//  Method: avtHistogramMapper::SetColor
 //
 //  Purpose:
 //      Sets the color for the surface.
@@ -204,7 +190,7 @@ avtSimpleMapper::SetEdgeVisibility(bool val)
 // ****************************************************************************
 
 void
-avtSimpleMapper::SetColor(double rgb[3])
+avtHistogramMapper::SetColor(double rgb[3])
 {
     if (surfaceColor[0] != rgb[0] ||
         surfaceColor[1] != rgb[1] ||
@@ -220,7 +206,7 @@ avtSimpleMapper::SetColor(double rgb[3])
 
 
 // ****************************************************************************
-//  Method: avtSimpleMapper::SetEdgeColor
+//  Method: avtHistogramMapper::SetEdgeColor
 //
 //  Purpose:
 //      Sets the color for the edges.
@@ -233,7 +219,7 @@ avtSimpleMapper::SetColor(double rgb[3])
 // ****************************************************************************
 
 void
-avtSimpleMapper::SetEdgeColor(double rgb[3])
+avtHistogramMapper::SetEdgeColor(double rgb[3])
 {
     if (edgeColor[0] != rgb[0] ||
         edgeColor[1] != rgb[1] ||
@@ -248,7 +234,7 @@ avtSimpleMapper::SetEdgeColor(double rgb[3])
 }
 
 // ****************************************************************************
-//  Method: avtSimpleMapper::SetOpacity
+//  Method: avtHistogramMapper::SetOpacity
 //
 //  Purpose:
 //      Sets the opacity.
@@ -261,7 +247,7 @@ avtSimpleMapper::SetEdgeColor(double rgb[3])
 // ****************************************************************************
 
 void
-avtSimpleMapper::SetOpacity(double val)
+avtHistogramMapper::SetOpacity(double val)
 {
     if (opacity != val)
     {
@@ -273,7 +259,7 @@ avtSimpleMapper::SetOpacity(double val)
 
 
 // ****************************************************************************
-//  Method: avtSimpleMapper::SetLineWidth
+//  Method: avtHistogramMapper::SetLineWidth
 //
 //  Purpose:
 //      Sets the lineWidth.
@@ -286,7 +272,7 @@ avtSimpleMapper::SetOpacity(double val)
 // ****************************************************************************
 
 void
-avtSimpleMapper::SetLineWidth(int lw)
+avtHistogramMapper::SetLineWidth(int lw)
 {
     if (lineWidth != lw)
     {
@@ -298,7 +284,7 @@ avtSimpleMapper::SetLineWidth(int lw)
 
 
 // ****************************************************************************
-//  Method: avtSimpleMapper::SetLineStyle
+//  Method: avtHistogramMapper::SetLineStyle
 //
 //  Purpose:
 //      Sets the lineStyle.
@@ -311,7 +297,7 @@ avtSimpleMapper::SetLineWidth(int lw)
 // ****************************************************************************
 
 void
-avtSimpleMapper::SetLineStyle(int ls)
+avtHistogramMapper::SetLineStyle(int ls)
 {
     if (lineStyle != ls)
     {
@@ -323,7 +309,7 @@ avtSimpleMapper::SetLineStyle(int ls)
 
 
 // ****************************************************************************
-//  Method: avtSimpleMapper::NotifyTransparencyActor
+//  Method: avtHistogramMapper::NotifyTransparencyActor
 //
 //  Purpose:
 //    Informs the transparency actor that its input has changed.
@@ -336,7 +322,7 @@ avtSimpleMapper::SetLineStyle(int ls)
 // ****************************************************************************
 
 void
-avtSimpleMapper::NotifyTransparencyActor()
+avtHistogramMapper::NotifyTransparencyActor()
 {
     if (transparencyActor != NULL)
         transparencyActor->InputWasModified(transparencyIndex);

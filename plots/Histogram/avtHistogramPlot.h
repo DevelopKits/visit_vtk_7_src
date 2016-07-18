@@ -50,7 +50,7 @@
 #include <HistogramAttributes.h>
 
 class     avtHistogramFilter;
-class     avtSimpleMapper;
+class     avtHistogramMapper;
 
 
 // ****************************************************************************
@@ -83,12 +83,12 @@ class avtHistogramPlot : public avtLineDataPlot
     virtual bool                SetForegroundColor(const double *);
 
   protected:
-    HistogramAttributes              atts;
+    HistogramAttributes         atts;
 
-    avtSimpleMapper                 *mapper;
-    avtHistogramFilter              *HistogramFilter;
-    avtFilter                       *amountFilter;
-    double                           fgColor[3];
+    avtHistogramMapper         *mapper;
+    avtHistogramFilter         *HistogramFilter;
+    avtFilter                  *amountFilter;
+    double                      fgColor[3];
 
     virtual avtMapper          *GetMapper(void);
     virtual avtDataObject_p     ApplyOperators(avtDataObject_p);

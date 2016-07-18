@@ -176,6 +176,10 @@ avtMapper::ChangedInput(void)
 //    Jeremy Meredith, Thu Feb 15 11:44:28 EST 2007
 //    Added support for rectilinear grids with an inherent transform.
 //
+//    Kathleen Biagas, Tue Jul 12 13:30:00 MST 2016
+//    Moved setting of transparency actor, drawable out of SetUpMappers to 
+//    here, to ease Override of SetUpMappers.
+//
 // ****************************************************************************
 
 void
@@ -194,6 +198,16 @@ avtMapper::InputIsReady(void)
                        (void*)inatts.GetRectilinearGridTransform(), dummy);
     }
     SetUpMappers();
+    PrepareExtents();
+    CustomizeMappers();
+    SetUpTransparencyActor();
+
+    if (nMappers > 0)
+    {
+        avtGeometryDrawable *gd = new avtGeometryDrawable(nMappers, actors);
+        gd->SetMapper(this);
+        drawable = gd;
+    }
 }
 
 
@@ -239,9 +253,9 @@ avtMapper::ClearSelf(void)
         ((avtGeometryDrawable *)*drawable)->SetMapper(NULL);
 
         //
-        // This probably doesn't need to be done, but it will guarantee that we are
-        // never in an inconsistent state (where we have a valid drawable, but no
-        // mappers).
+        // This probably doesn't need to be done, but it will guarantee that
+        // we are never in an inconsistent state (where we have a valid
+        // drawable, but no mappers).
         //
         drawable = NULL;
     }
@@ -304,6 +318,42 @@ avtMapper::GetDrawable(void)
     }
 
     return drawable;
+}
+
+
+// ****************************************************************************
+//  Method: avtMapper::SetUpTransparencyActor
+//
+//  Purpose:
+//      Sets up the transparancy actor with the current inputs.
+//
+//  Notes:  Pulled from old SetUpMappers method.
+//
+//  Programmer: Kathleen Biagas
+//  Creation:   July 11, 2016 
+//
+//  Modifications:
+//
+// ****************************************************************************
+
+void
+avtMapper::SetUpTransparencyActor()
+{
+    if (transparencyActor != NULL)
+    {
+        vector<vtkDataSet *> d;
+        vector<vtkDataSetMapper *> m;
+        vector<vtkActor *> a;
+        for (int i = 0 ; i < nMappers ; i++)
+        {
+            vtkDataSet *ds = (mappers[i] != NULL ? mappers[i]->GetInput()
+                                                 : NULL);
+            d.push_back(ds);
+            m.push_back(mappers[i]);
+            a.push_back(actors[i]);
+        }
+        transparencyActor->ReplaceInput(transparencyIndex, d, m, a);
+    }
 }
 
 
@@ -382,6 +432,11 @@ avtMapper::GetDrawable(void)
 //    Changed signature of InsertFilters to return vtkAlgorithmOutput, so
 //    connections are set up properly with vtk-6.
 //
+//    Kathleen Biagas, Tue Jul 12 13:31:09 MST 2016
+//    Removed wireframe/surface/points specific settings.  
+//    Moved setting of transparency actor, drawable to InputIsReader 
+//    to make it easier for base classes to Override this method.
+//
 // ****************************************************************************
 
 void
@@ -394,10 +449,13 @@ avtMapper::SetUpMappers(void)
     }
 
     avtDataTree_p tree = GetInputDataTree();
+    if (*tree == NULL)
+    {
+        EXCEPTION0(NoInputException);
+    }
    
     vector<string> labels;
-    if (*tree != NULL)
-        tree->GetAllLabels(labels);
+    tree->GetAllLabels(labels);
     if (!labels.empty() )
     {
         SetLabels(labels, true);
@@ -412,28 +470,22 @@ avtMapper::SetUpMappers(void)
     }
 
     vtkDataSet **children = NULL;
-    if (*tree != NULL)
-        children = tree->GetAllLeaves(nMappers);
-    else
-        nMappers = 0;
+    children = tree->GetAllLeaves(nMappers);
 
     mappers  = new vtkDataSetMapper*[nMappers];
     actors   = new vtkActor*[nMappers];
 
-    for (int j = 0 ; j < nMappers ; j++)
-    {
-        mappers[j] = NULL;
-        actors[j]  = NULL;
-    }
     SetUpFilters(nMappers);
+
     for (int i = 0; i < nMappers; i++)
     {
         // We might have some dummy data (SR-mode).  If so, just continue.
-        if (children[i] == NULL)
+        if (children[i] == NULL || children[i]->GetNumberOfCells() <= 0)
+        {
+            mappers[i] = NULL;
+            actors[i]  = NULL;
             continue;
-        if (children[i]->GetNumberOfCells() <= 0)
-            continue;
-
+        }
         mappers[i] = CreateMapper();
         vtkAlgorithmOutput * outputPort = InsertFilters(children[i], i);
         if (outputPort != NULL)
@@ -441,38 +493,14 @@ avtMapper::SetUpMappers(void)
         else
             mappers[i]->SetInputData(children[i]);
         if (immediateMode)
-        {
             mappers[i]->ImmediateModeRenderingOn();
-        }
         actors[i]  = vtkActor::New();
         actors[i]->SetMapper(mappers[i]);
     }
+
     // this was allocated in GetAllLeaves, need to free it now
     if (children != NULL)
         delete [] children;
-
-    PrepareExtents();
-
-    CustomizeMappers();
-
-    if (transparencyActor != NULL)
-    {
-        vector<vtkDataSet *> d;
-        vector<vtkDataSetMapper *> m;
-        vector<vtkActor *> a;
-        for (int i = 0 ; i < nMappers ; i++)
-        {
-            vtkDataSet *ds = (mappers[i] != NULL ? mappers[i]->GetInput()
-                                                 : NULL);
-            d.push_back(ds);
-            m.push_back(mappers[i]);
-            a.push_back(actors[i]);
-        }
-        transparencyActor->ReplaceInput(transparencyIndex, d, m, a);
-    }
-    avtGeometryDrawable *gd = new avtGeometryDrawable(nMappers, actors);
-    gd->SetMapper(this);
-    drawable = gd;
 }
 
 
@@ -1172,60 +1200,28 @@ avtMapper::SetSpecularProperties(bool flag, double coeff, double power,
 }
 
 
+
 // ****************************************************************************
-//  Method: avtMapper::SetSurfaceRepresentation
+//  Method: avtMapper::InvalidateTransparencyCache
 //
 //  Purpose:
-//      Sets the drawable's surface representation.
+//      Invalidates transparency cache.
 //
-//  Arguments:
-//      rep : The new surface representation.
+//  Notes:
+//      Can be used by plots when transparency cache won't be invalidated
+//      through normal methods.  Eg during a SetColorTable call from viewer.
 //
-//  Programmer: Brad Whitlock
-//  Creation:   Mon Sep 23 15:58:48 PST 2002
+//  Programmer: Kathleen Biagas
+//  Creation:   April 13, 2016
 //
 //  Modifications:
-//    Kathleen Bonnell, Sat Oct 19 15:07:04 PDT 2002 
-//    Disable lighting for Wireframe and Points representation.
-//
-//    Kathleen Bonnell, Thu Sep  2 11:44:09 PDT 2004 
-//    Moved from avtGeometryDrawable so that derived mappers may override. 
 //
 // ****************************************************************************
 
 void
-avtMapper::SetSurfaceRepresentation(int rep)
+avtMapper::InvalidateTransparencyCache()
 {
-    for (int i = 0 ; i < nMappers ; i++)
-    {
-        if (actors[i] != NULL)
-        {
-            vtkProperty *prop = actors[i]->GetProperty();
-            if(prop != NULL)
-            {
-                int actorRep = prop->GetRepresentation();
-                if(rep == 0 && actorRep != VTK_SURFACE)
-                {
-                    prop->SetRepresentation(VTK_SURFACE);
-                    if (GetLighting())
-                    {
-                        prop->SetAmbient(GetGlobalAmbientCoefficient());
-                        prop->SetDiffuse(1.);
-                    }
-                }
-                else if(rep == 1 && actorRep != VTK_WIREFRAME)
-                {
-                    prop->SetRepresentation(VTK_WIREFRAME);
-                    prop->SetAmbient(1.);
-                    prop->SetDiffuse(0.);
-                }
-                else if(rep == 2 && actorRep != VTK_POINTS)
-                {
-                    prop->SetRepresentation(VTK_POINTS);
-                    prop->SetAmbient(1.);
-                    prop->SetDiffuse(0.);
-                }
-            }
-        }
-    }
+    if (transparencyActor != NULL)
+        transparencyActor->InvalidateTransparencyCache();
 }
+

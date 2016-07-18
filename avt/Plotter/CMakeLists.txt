@@ -91,7 +91,6 @@ CONFIGURE_FILE(
 
 SET(AVTPLOTTER_OPENGL_SOURCES
 avtOpenGLExtensionManager.C 
-avtOpenGLSurfaceAndWireframeRenderer.C 
 vtk/vtkOpenGLTexturedBackgroundMapper.C 
 )
 
@@ -141,15 +140,12 @@ avtLevelsMapper.C
 avtLevelsPointGlyphMapper.C
 avtLightList.C
 avtLineoutActor.C
-avtLinesAndPolysMapper.C
 avtMapper.C
 avtPickActor.C
 avtPlot.C
 avtPlotMetaData.C
 avtPointGlypher.C
-avtSimpleMapper.C
 avtSoftwareShader.C
-avtSurfaceAndWireframeRenderer.C
 avtTensorGlyphMapper.C
 avtTheater.C
 avtTransparencyActor.C

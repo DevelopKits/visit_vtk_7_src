@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -37,56 +37,71 @@
 *****************************************************************************/
 
 // ************************************************************************* //
-//                    avtSurfaceAndWireframeMapper.h                         //
+//                              avtMeshMapper.h                              //
 // ************************************************************************* //
 
-#ifndef AVT_SURFACEANDWIREFRAMEMAPPER_H
-#define AVT_SURFACEANDWIREFRAMEMAPPER_H
+#ifndef AVT_MESHMAPPER_H
+#define AVT_MESHMAPPER_H
 
-#include <plotter_exports.h>
-#include <avtSimpleMapper.h>
-
+#include <avtMapper.h>
+#include <string>
+#include <vector>
 
 // ****************************************************************************
-//  Class:  avtSurfaceAndWireframeMapper
+//  Class:  avtMeshMapper
 //
 //  Purpose:
-//      This takes geometry and makes a drawable by mapping the variable to 
-//      colors.
+//      Mesh plot specific mapper.
 //
-//      Specializes avtMapper by allowing wireframe representation to be
-//      drawn at same time as surface.
-//
-//  Programmer: Kathleen Biagas 
-//  Creation:   May 11, 2016 
+//  Programmer: Kathleen Biagas
+//  Creation:   June 29, 2016
 //
 //  Modifications:
-//    Kathleen Biagas, Wed May 11 14:19:56 MST 2016
-//    Derive from avtSimpleMapper.
 //
 // ****************************************************************************
 
-class PLOTTER_API avtSurfaceAndWireframeMapper : public avtSimpleMapper
+class avtMeshMapper : public avtMapper
 {
   public:
-                               avtSurfaceAndWireframeMapper();
-    virtual                   ~avtSurfaceAndWireframeMapper();
+                               avtMeshMapper();
+    virtual                   ~avtMeshMapper();
+
+    // these are called from avtMapper
+    virtual void               SetSurfaceRepresentation(int rep) {;}
+    virtual bool               GetLighting(void) { return false; }
+
+    void                       InvalidateTransparencyCache(void);
 
 
-    virtual bool               GetLighting(void);
-    virtual void               SetSurfaceRepresentation(int rep);
+    // these are called from the plot
 
-    void                       SetIgnoreLighting(bool val)
-                                   { ignoreLighting = val; }
+    void                       SetMeshColor(double rgb[3]);
+    void                       SetSurfaceColor(double rgb[3]);
 
-    void                       SetSurfaceVisibility(bool val);
+    void                       SetOpacity(double val);
+    void                       SetLineWidth(int lw);
+    void                       SetLineStyle(int ls);
+    void                       SetSurfaceVisibility(bool);
+
 
 
   protected:
-    bool                       ignoreLighting;
-    bool                       surfaceVis;
-
+    // these are called from avtMapper
     virtual void               CustomizeMappers(void);
+    virtual void               SetLabels(std::vector<std::string> &, bool);
+
+  private:
+
+    bool surfaceVis;
+    int lineWidth;
+    int lineStyle;
+    double opacity;
+    double linesColor[3];
+    double polysColor[3];
+    std::vector<std::string> labels;
+
+    void                       NotifyTransparencyActor(void);
+
 };
 
 

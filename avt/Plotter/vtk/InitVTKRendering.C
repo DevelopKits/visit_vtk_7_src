@@ -38,10 +38,6 @@
 
 #include <InitVTKRendering.h>
 
-// VTK-7 HACK remove when determine custom mapper no longer needed
-#if 0
-#include <vtkVisItDataSetMapper.h>
-#endif
 #include <vtkToolkits.h>
 #include <vtkVisItRectilinearGrid.h>
 #include <vtkVisItStructuredGrid.h>
@@ -81,7 +77,6 @@ class vtkVisItGraphicsFactory : public vtkObjectFactory
 //
 // Necessary for each object that will override a vtkObject.
 //
-//VTK_CREATE_CREATE_FUNCTION(vtkVisItDataSetMapper);
 VTK_CREATE_CREATE_FUNCTION(vtkVisItRectilinearGrid);
 VTK_CREATE_CREATE_FUNCTION(vtkVisItStructuredGrid);
 
@@ -130,13 +125,6 @@ vtkVisItGraphicsFactory::GetVTKSourceVersion()
 //
 vtkVisItGraphicsFactory::vtkVisItGraphicsFactory()
 {
-// VTK-7 HACK remove when determine custom mapper no longer needed
-#if 0
-  this->RegisterOverride("vtkDataSetMapper", "vtkVisItDataSetMapper",
-                         "vtkVisItDataSetMapper override vtkDataSetMapper",
-                         1,
-                         vtkObjectFactoryCreatevtkVisItDataSetMapper);
-#endif
   this->RegisterOverride("vtkRectilinearGrid", "vtkVisItRectilinearGrid",
                          "vtkVisItRectilinearGrid override vtkRectilinearGrid",
                          1,
@@ -188,7 +176,8 @@ InitVTKRendering::Initialize(void)
     if (avtCallback::UseManta())
     {
       printf("Initializing Manta\n");
-      //register manta overrides.  This factory overrides actors, lights and other state to pass of polygonal data to manta.
+      // register manta overrides.  This factory overrides actors, lights and
+      // other state to pass of polygonal data to manta.
       vtkMantaObjectFactory* mfactory = vtkMantaObjectFactory::New();
       vtkObjectFactory::RegisterFactory(mfactory);
       mfactory->Delete();

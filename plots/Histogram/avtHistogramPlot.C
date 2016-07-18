@@ -45,7 +45,7 @@
 #include <LineAttributes.h>
 
 #include <avtHistogramFilter.h>
-#include <avtSimpleMapper.h>
+#include <avtHistogramMapper.h>
 
 #ifdef ENGINE
 #include <avtExpressionFilter.h>
@@ -75,7 +75,7 @@ avtHistogramPlot::avtHistogramPlot()
     HistogramFilter = NULL;
     amountFilter = NULL;
 
-    mapper = new avtSimpleMapper();
+    mapper = new avtHistogramMapper();
 
     fgColor[0] = 0.;
     fgColor[1] = 0.;

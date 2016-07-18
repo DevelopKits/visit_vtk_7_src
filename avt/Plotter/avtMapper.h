@@ -37,7 +37,7 @@
 *****************************************************************************/
 
 // ************************************************************************* //
-//                                    avtMapper.h                            //
+//                             avtMapper.h                                   //
 // ************************************************************************* //
 
 #ifndef AVT_MAPPER_H
@@ -120,8 +120,12 @@ class   ColorAttribute;
 //    Kathleen Biagas, Wed Feb 6 19:38:27 PDT 2013
 //    Changed signature of InsertFilters.
 //
-//    Kathleen Biagas, Tue May 10 18:26:48 PDT 2016
-//    Remove unused SetTransparencyActor.
+//    Kathleen Biagas, Wed Apr 13 18:02:22 MST 2016
+//    Added InvalidateTransparencyCache.
+//
+//    Kathleen Biagas, Tue Jul 12 13:27:25 MST 2016
+//    Simplify this class by removind surface/wireframe/points settings.
+//    Add SetUpTransparencyActor.
 //
 // ****************************************************************************
 
@@ -142,7 +146,7 @@ class PLOTTER_API avtMapper : public avtTerminatingDatasetSink
     virtual void               GlobalLightingOff(void);
     virtual void               GlobalSetAmbientCoefficient(const double);
     double                     GetGlobalAmbientCoefficient() 
-                                   { return globalAmbient; };
+                                   { return globalAmbient; }
 
     void                       SetImmediateModeRendering(bool val);
     bool                       GetImmediateModeRendering();
@@ -150,11 +154,11 @@ class PLOTTER_API avtMapper : public avtTerminatingDatasetSink
     int                        SetTransparencyActor(avtTransparencyActor *);
 
     void                       SetSpecularIsInappropriate(bool val)
-                                   { specularIsInappropriate = val; };
+                                   { specularIsInappropriate = val; }
     bool                       GetSpecularIsInappropriate()
-                                   { return specularIsInappropriate; };
+                                   { return specularIsInappropriate; }
 
-    virtual void               SetSurfaceRepresentation(int rep);
+    virtual void               SetSurfaceRepresentation(int rep) {;}
     virtual void               SetSpecularProperties(bool,double,double,
                                                      const ColorAttribute&);
 
@@ -167,6 +171,8 @@ class PLOTTER_API avtMapper : public avtTerminatingDatasetSink
 
     virtual void               ReducedDetailModeOn() {; }
     virtual bool               ReducedDetailModeOff() { return false; }
+
+    void                       InvalidateTransparencyCache(void);
 
   protected:
     bool                       immediateMode;
@@ -185,6 +191,7 @@ class PLOTTER_API avtMapper : public avtTerminatingDatasetSink
     void                       SetUpMappers(void);
     void                       SetDefaultRange(void);
     void                       PrepareExtents(void);
+    void                       SetUpTransparencyActor();
 
     virtual void               ChangedInput(void);
     virtual void               CustomizeMappers(void) = 0;

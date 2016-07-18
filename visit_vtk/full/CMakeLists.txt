@@ -48,6 +48,9 @@
 #   Burlen Loring, Sun Oct 18 00:47:57 PDT 2015
 #   Added vtkDepthSortPolyData2
 #
+#   Kathleen Biagas, Mon Jul 18 09:57:06 PDT 2016
+#   Remove vtkVisItTIFFWriter (in favor of using VTK's directly).
+#
 #****************************************************************************/
 
 SET(VISIT_VTK_SOURCES
@@ -99,7 +102,6 @@ vtkVisItStreamLine.C
 vtkVisItStructuredGrid.C
 vtkVisItStructuredGridNormals.C
 vtkVisItTubeFilter.C
-vtkVisItTIFFWriter.C
 vtkVisItTensorGlyph.C
 vtkVolumeFromCSGVolume.C
 vtkVolumeFromVolume.C

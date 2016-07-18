@@ -214,7 +214,10 @@ avtMeshFilter::ExecuteDataTree(avtDataRepresentation *inDR)
     int topoDim = datts.GetTopologicalDimension();
 
     if (topoDim == 0) 
+    {
+        label = std::string("points_") + label; 
         return new avtDataTree(inDS, domain, label);
+    }
 
     vtkLinesFromOriginalCells *lineFilter = vtkLinesFromOriginalCells::New();
     vtkGeometryFilter *geometryFilter = vtkGeometryFilter::New();

@@ -153,6 +153,9 @@ avtVariableMapper::~avtVariableMapper()
 //    Tell our mapper whether or not the scene is 3D.  (This is needed so
 //    the rectilinear grid mapper can decide whether or not to do lighting.)
 //
+//    Kathleen Biagas, Tue Jul 12 13:34:19 MST 2016
+//    Removed vtkVisItDataSetMapper.
+//
 // ****************************************************************************
 
 void
@@ -201,16 +204,6 @@ avtVariableMapper::CustomizeMappers(void)
 
             // Turn on color texturing in the mapper.
             mappers[i]->SetInterpolateScalarsBeforeMapping(colorTexturingFlag?1:0);
-
-// VTK-7 HACK remove if/when determine custom mapper no longer needed
-#if 0
-            if(strcmp(mappers[i]->GetClassName(), "vtkVisItDataSetMapper")==0)
-            {
-                vtkVisItDataSetMapper *m = (vtkVisItDataSetMapper *)mappers[i];
-                m->SetSceneIs3D(GetInput()->GetInfo().GetAttributes().
-                                                   GetSpatialDimension() == 3);
-            }
-#endif
         }
         if (actors[i] != NULL)
         {

@@ -37,27 +37,26 @@
 *****************************************************************************/
 
 // ************************************************************************* //
-//                            avtSimpleMapper.h                              //
+//                            avtHistogramMapper.h                           //
 // ************************************************************************* //
 
-#ifndef AVT_SIMPLEMAPPER_H
-#define AVT_SIMPLEMAPPER_H
+#ifndef AVT_HISTOGRAMMAPPER_H
+#define AVT_HISTOGRAMMAPPER_H
 
-#include <plotter_exports.h>
 #include <avtMapper.h>
 
 
 // ****************************************************************************
-//  Class:  avtSimpleMapper
+//  Class:  avtHistogramMapper
 //
 //  Purpose:
 //      Does not map scalars to colors, all actors colored by single color.
 //      Allows changing edge colors and edge visibility
 //  
-//      Specializes avtMapper by allowing wireframe representation to be
-//      drawn at same time as surface.
+//      Specializes avtMapper by allowing edges to be drawn at same time
+//      as surface.
 //
-//      Surface and lines/edges can have different colors.
+//      Surface and edges can have different colors.
 //
 //      Ignores Lighting.
 //
@@ -68,11 +67,11 @@
 //
 // ****************************************************************************
 
-class PLOTTER_API avtSimpleMapper : public avtMapper
+class avtHistogramMapper : public avtMapper
 {
   public:
-                               avtSimpleMapper();
-    virtual                   ~avtSimpleMapper();
+                               avtHistogramMapper();
+    virtual                   ~avtHistogramMapper();
 
 
     // From avtMapper
