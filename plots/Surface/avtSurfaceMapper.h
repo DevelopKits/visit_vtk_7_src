@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -37,64 +37,82 @@
 *****************************************************************************/
 
 // ************************************************************************* //
-//                           avtWireframeFilter.h                            //
+//                           avtSurfaceMapper.h                              //
 // ************************************************************************* //
 
-#ifndef AVT_WIREFRAME_FILTER_H
-#define AVT_WIREFRAME_FILTER_H
+#ifndef AVT_SURFACEMAPPER_H
+#define AVT_SURFACEMAPPER_H
 
-#include <avtDataTreeIterator.h>
+#include <avtMapper.h>
+#include <string>
+#include <vector>
 
-#include <SurfaceAttributes.h>
-
-class vtkDataSet;
-class vtkAppendPolyData;
-class vtkUniqueFeatureEdges;
-class vtkGeometryFilter;
-
+class vtkLookupTable;
 
 // ****************************************************************************
-//  Class: avtWireframeFilter
+//  Class:  avtSurfaceMapper
 //
 //  Purpose:
-//    A filter that turns a 2d dataset into a 3d dataset based upon
-//    scaled point or cell data. 
+//      Surface plot specific mapper.
 //
-//  Programmer: Kathleen Bonnell 
-//  Creation:   May 24, 2004
+//  Programmer: Kathleen Biagas
+//  Creation:   July 18, 2016
 //
 //  Modifications:
 //
-//    Hank Childs, Fri Jul 30 12:09:16 PDT 2004
-//    Moved PostExecute to avtSurfaceFilter.
-//
-//    Eric Brugger, Tue Aug 19 11:22:06 PDT 2014
-//    Modified the class to work with avtDataRepresentation.
-//
 // ****************************************************************************
 
-class avtWireframeFilter : public avtDataTreeIterator
+class avtSurfaceMapper : public avtMapper
 {
   public:
-                            avtWireframeFilter(const AttributeGroup*);
-    virtual                ~avtWireframeFilter();
+                               avtSurfaceMapper();
+    virtual                   ~avtSurfaceMapper();
 
-    static avtFilter       *Create(const AttributeGroup*);
+    // these are called from avtMapper
+    virtual void               SetSurfaceRepresentation(int rep);
+    virtual bool               GetLighting(void) { return !ignoreLighting; }
 
-    virtual const char     *GetType(void)  { return "avtWireframeFilter"; };
-    virtual const char     *GetDescription(void)
-                            { return "Creating wireframe of surface."; };
 
-    virtual void            ReleaseData(void);
-    virtual bool            Equivalent(const AttributeGroup*);
+    // these are called from the plot
+
+    void                       SetEdgeVisibility(bool);
+    void                       SetEdgeColor(double rgb[3]);
+    void                       SetLineWidth(int lw);
+    void                       SetLineStyle(int ls);
+    void                       SetSurfaceColor(double rgb[3]);
+
+
+    void                       CanApplyGlobalRepresentation(bool);
+    void                       SetRepresentation(bool);
+    void                       SetIgnoreLighting(bool);
+    void                       SetLookupTable(vtkLookupTable *);
+
+    void                       SetScalarVisibility(bool);
+    void                       SetScalarRange(double, double);
+    bool                       GetDataRange(double &rmin, double &rmax);
+    bool                       GetCurrentDataRange(double &rmin, double &rmax);
 
   protected:
-    SurfaceAttributes       atts;
-    vtkGeometryFilter      *geoFilter;
-    vtkAppendPolyData      *appendFilter;
-    vtkUniqueFeatureEdges  *edgesFilter;
+    // these are called from avtMapper
+    virtual void               CustomizeMappers(void);
 
-    virtual avtDataRepresentation *ExecuteData(avtDataRepresentation *);
+  private:
+
+    bool            edgeVis;
+    bool            scalarVis;
+    int             lineWidth;
+    int             lineStyle;
+    double          edgeColor[3];
+    double          surfaceColor[3];
+    bool            canApplyGlobalRep;
+    bool            ignoreLighting;
+    bool            wireMode;
+    vtkLookupTable *lut;
+    double          scalarRange[2];
+
+    void                       NotifyTransparencyActor(void);
+
+
 };
 
 
