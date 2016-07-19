@@ -10,6 +10,12 @@
     <LIBS components="EPar">
       avtexpressions_par
     </LIBS>
+    <Files components="V">
+      avtHistogramMapper.C
+    </Files>
+    <Files components="E">
+      avtHistogramMapper.C
+    </Files>
     <Attribute name="HistogramAttributes" purpose="Attributes for Histogram Plot" persistent="true" keyframe="true" exportAPI="" exportInclude="" codefile="HistogramAttributes.code">
       <Enum name="OutputType">
         Curve
