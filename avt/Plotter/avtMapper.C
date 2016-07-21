@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -180,6 +180,10 @@ avtMapper::ChangedInput(void)
 //    Moved setting of transparency actor, drawable out of SetUpMappers to 
 //    here, to ease Override of SetUpMappers.
 //
+//    Kathleen Biagas, Thu Jul 21 09:15:34 PDT 2016
+//    Create GeometryDrawable, even if we have no mappers. Helps the pipeline
+//    behave in a more user-friendly manner.
+//
 // ****************************************************************************
 
 void
@@ -202,12 +206,9 @@ avtMapper::InputIsReady(void)
     CustomizeMappers();
     SetUpTransparencyActor();
 
-    if (nMappers > 0)
-    {
-        avtGeometryDrawable *gd = new avtGeometryDrawable(nMappers, actors);
-        gd->SetMapper(this);
-        drawable = gd;
-    }
+    avtGeometryDrawable *gd = new avtGeometryDrawable(nMappers, actors);
+    gd->SetMapper(this);
+    drawable = gd;
 }
 
 
