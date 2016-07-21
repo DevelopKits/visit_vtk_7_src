@@ -159,6 +159,8 @@ avtMeshMapper::CustomizeMappers()
 //  Creation:   June 16, 2016
 //
 //  Modifications:
+//    Kathleen Biagas, Thu Jul 21 12:31:10 MST 2016
+//    Enusre transparancyActor exists before calling its methods.
 //
 // ****************************************************************************
 
@@ -182,8 +184,11 @@ avtMeshMapper::SetSurfaceVisibility(bool val)
             }
         }
         // need to tell the transparencyActor that visibility changed
-        transparencyActor->ReplaceActorVisibility(transparencyIndex, v);
-        NotifyTransparencyActor();
+        if (transparencyActor != NULL)
+        {
+            transparencyActor->ReplaceActorVisibility(transparencyIndex, v);
+            NotifyTransparencyActor();
+        }
 
         for (int i = 0; i < nMappers; ++i)
         {
