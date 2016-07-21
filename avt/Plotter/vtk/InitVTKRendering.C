@@ -44,9 +44,6 @@
 
 #include <vtkObjectFactory.h>
 #include <vtkVersion.h>
-#if !defined(_WIN32)
-#include <vtkGraphicsFactory.h>
-#endif
 
 
 #include <vtk/InitVTKRenderingConfig.h>
