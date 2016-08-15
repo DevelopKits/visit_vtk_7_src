@@ -64,7 +64,6 @@ Consider the leaveDomains SLs and the balancing at the same time.
 #include <vtkPolyData.h>
 #include <vtkSphereSource.h>
 #include <vtkPointSource.h>
-#include <vtkVisItStreamLine.h>
 #include <vtkGlyph3D.h>
 
 #include <vtkVisItInterpolatedVelocityField.h>

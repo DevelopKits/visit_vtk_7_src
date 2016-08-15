@@ -62,8 +62,6 @@ Consider the leaveDomains ICs and the balancing at the same time.
 #include <vtkDataSet.h>
 #include <vtkInformation.h>
 
-#include <vtkVisItStreamLine.h>
-
 #include <avtCallback.h>
 #include <avtCellLocatorClassic.h>
 #include <avtCellLocatorBIH.h>
@@ -128,6 +126,14 @@ Consider the leaveDomains ICs and the balancing at the same time.
 #endif
 #include <windows.h>
 #endif
+
+
+// Note the direction is based on the VTK definitions in:
+// Filters/FlowPaths/vtkStreamer.h  (now deprecated, so defined here).
+#define VTK_INTEGRATE_FORWARD  0
+#define VTK_INTEGRATE_BACKWARD 1
+#define VTK_INTEGRATE_BOTH_DIRECTIONS     2
+
 
 bool PRINT = false;
 
@@ -1074,10 +1080,11 @@ void
 avtPICSFilter::SetIntegrationDirection(int dir)
 {
     // Note the direction is based on the VTK definitions in:
-    // Filters/FlowPaths/vtkStreamer.h 
+    // Filters/FlowPaths/vtkStreamer.h  (now deprecated, so defined at top
+    // of this file
     // #define VTK_INTEGRATE_FORWARD  0
     // #define VTK_INTEGRATE_BACKWARD 1
-    // #define VTK_INTEGRATE_BOTH     2
+    // #define VTK_INTEGRATE_BOTH_DIRECTIONS     2
 
     // The directionless attribute is specific to VisIt.
     // #define VTK_INTEGRATE_FORWARD_DIRECTIONLESS  3

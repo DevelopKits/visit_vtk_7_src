@@ -58,6 +58,7 @@
 #include <vtkFloatArray.h>
 #include <vtkIdList.h>
 #include <vtkIdTypeArray.h>
+#include <vtkInformation.h>
 #include <vtkIntArray.h>
 #include <vtkLongArray.h>
 #include <vtkLongLongArray.h>
@@ -9919,6 +9920,10 @@ MakePHZonelistFromZonelistArbFragment(const int *nl, int shapecnt)
 //    so that the same code used to detect zoo-type elements in DBphzonelists
 //    can be used to detect them here too. Also, fixed a problem with ghost
 //    zone variable in presence of arbitrary polyhedra.
+//
+//    Kathleen Biagas, Mon Aug 15 14:09:55 PDT 2016
+//    VTK-7, API for updating GhostLevel changed.
+//
 // ****************************************************************************
 
 void
@@ -10348,7 +10353,8 @@ avtSiloFileFormat::ReadInConnectivity(vtkUnstructuredGrid *ugrid,
         ghostZones->SetName("avtGhostZones");
         ugrid->GetCellData()->AddArray(ghostZones);
         ghostZones->Delete();
-        vtkStreamingDemandDrivenPipeline::SetUpdateGhostLevel(ugrid->GetInformation(), 0);
+        ugrid->GetInformation()->Set(
+         vtkStreamingDemandDrivenPipeline::UPDATE_NUMBER_OF_GHOST_LEVELS(), 0);
     }
 }
 
@@ -10840,6 +10846,10 @@ ArbInsertArbitrary(vtkUnstructuredGrid *ugrid, int nsdims, DBphzonelist *phzl, i
 //    Mark C. Miller, Wed Jul 11 10:57:26 PDT 2012
 //    Changed interface to support repeated calls for different segments of
 //    the same zonelist.
+//
+//    Kathleen Biagas, Mon Aug 15 14:09:55 PDT 2016
+//    VTK-7, API for updating GhostLevel changed.
+//
 // ****************************************************************************
 void
 avtSiloFileFormat::ReadInArbConnectivity(const char *meshname,
@@ -11472,7 +11482,8 @@ avtSiloFileFormat::ReadInArbConnectivity(const char *meshname,
         ghostZones->SetName("avtGhostZones");
         ugrid->GetCellData()->AddArray(ghostZones);
         ghostZones->Delete();
-        vtkStreamingDemandDrivenPipeline::SetUpdateGhostLevel(ugrid->GetInformation(), 0);
+        ugrid->GetInformation()->Set(
+         vtkStreamingDemandDrivenPipeline::UPDATE_NUMBER_OF_GHOST_LEVELS(), 0);
     }
 
     //
@@ -12312,6 +12323,9 @@ avtSiloFileFormat::CreateCurvilinearMesh(DBquadmesh *qm)
 //    Hank Childs, Fri Aug 27 17:22:19 PDT 2004
 //    Rename ghost data array.
 //
+//    Kathleen Biagas, Mon Aug 15 14:09:55 PDT 2016
+//    VTK-7, API for updating GhostLevel changed.
+//
 // ****************************************************************************
 
 void 
@@ -12425,7 +12439,8 @@ avtSiloFileFormat::GetQuadGhostZones(DBquadmesh *qm, vtkDataSet *ds)
         ds->GetFieldData()->AddArray(realDims);
         ds->GetFieldData()->CopyFieldOn("avtRealDims");
         realDims->Delete();
-        vtkStreamingDemandDrivenPipeline::SetUpdateGhostLevel(ds->GetInformation(), 0);
+        ds->GetInformation()->Set(
+         vtkStreamingDemandDrivenPipeline::UPDATE_NUMBER_OF_GHOST_LEVELS(), 0);
     }
 }
 

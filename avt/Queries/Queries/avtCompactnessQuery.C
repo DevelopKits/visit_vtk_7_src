@@ -47,6 +47,7 @@
 #include <vtkDataSet.h>
 #include <vtkDataSetRemoveGhostCells.h>
 #include <vtkGeometryFilter.h>
+#include <vtkInformation.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataRelevantPointsFilter.h>
 #include <vtkStreamingDemandDrivenPipeline.h>
@@ -500,6 +501,9 @@ avtCompactnessQuery::PostExecute(void)
 //    Kathleen Biagas, Tue Apr 22 07:46:17 MST 2014
 //    Use double instead of float.
 //
+//    Kathleen Biagas, Mon Aug 15 14:09:55 PDT 2016
+//    VTK-7, API for updating GhostLevel changed.
+//
 // ****************************************************************************
 
 void
@@ -583,7 +587,8 @@ avtCompactnessQuery::Execute1(vtkDataSet *ds, const int dom)
 
     geomFilter->SetInputData(ds);
     boundaryFilter->SetInputConnection(geomFilter->GetOutputPort());
-    vtkStreamingDemandDrivenPipeline::SetUpdateGhostLevel(boundaryFilter->GetInformation(), 2);
+    boundaryFilter->GetInformation()->Set(
+        vtkStreamingDemandDrivenPipeline::UPDATE_NUMBER_OF_GHOST_LEVELS(), 2);
 
     gzFilter1->SetInputConnection(boundaryFilter->GetOutputPort());
     gzFilter1->Update();

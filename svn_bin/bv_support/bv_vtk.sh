@@ -476,6 +476,7 @@ function build_vtk
         vopts="${vopts} -DBUILD_SHARED_LIBS:BOOL=ON"
     fi
     vopts="${vopts} -DVTK_DEBUG_LEAKS:BOOL=${vtk_debug_leaks}"
+    vopts="${vopts} -DVTK_LEGACY_REMOVE:BOOL=true"
     vopts="${vopts} -DBUILD_TESTING:BOOL=false"
     vopts="${vopts} -DBUILD_DOCUMENTATION:BOOL=false"
     vopts="${vopts} -DCMAKE_C_COMPILER:STRING=${C_COMPILER}"
