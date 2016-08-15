@@ -10256,7 +10256,7 @@ avtSiloFileFormat::ReadInConnectivity(vtkUnstructuredGrid *ugrid,
                 continue;
             }
             unsigned int ocdata[2] = {domain, i};
-            oca->InsertNextTupleValue(ocdata);
+            oca->InsertNextTypedTuple(ocdata);
             cellReMap->push_back(i);
         }
         oca->Delete();
@@ -10450,7 +10450,7 @@ ArbInsertTriangle(vtkUnstructuredGrid *ugrid, int *nids, unsigned int ocdata[2],
     ugrid->InsertNextCell(VTK_TRIANGLE, 3, ids);
     vtkUnsignedIntArray *oca = vtkUnsignedIntArray::SafeDownCast(
         ugrid->GetCellData()->GetArray("avtOriginalCellNumbers"));
-    oca->InsertNextTupleValue(ocdata);
+    oca->InsertNextTypedTuple(ocdata);
     cellReMap->push_back(ocdata[1]);
 }
 
@@ -10482,7 +10482,7 @@ ArbInsertQuadrilateral(vtkUnstructuredGrid *ugrid, int *nids, unsigned int ocdat
     ugrid->InsertNextCell(VTK_QUAD, 4, ids);
     vtkUnsignedIntArray *oca = vtkUnsignedIntArray::SafeDownCast(
         ugrid->GetCellData()->GetArray("avtOriginalCellNumbers"));
-    oca->InsertNextTupleValue(ocdata);
+    oca->InsertNextTypedTuple(ocdata);
     cellReMap->push_back(ocdata[1]);
 }
 
@@ -10517,7 +10517,7 @@ ArbInsertTet(vtkUnstructuredGrid *ugrid, int *nids, unsigned int ocdata[2],
     ugrid->InsertNextCell(VTK_TETRA, 4, ids);
     vtkUnsignedIntArray *oca = vtkUnsignedIntArray::SafeDownCast(
         ugrid->GetCellData()->GetArray("avtOriginalCellNumbers"));
-    oca->InsertNextTupleValue(ocdata);
+    oca->InsertNextTypedTuple(ocdata);
     cellReMap->push_back(ocdata[1]);
 }
 
@@ -10575,7 +10575,7 @@ ArbInsertPyramid(vtkUnstructuredGrid *ugrid, int *nids, unsigned int ocdata[2],
     }
     vtkUnsignedIntArray *oca = vtkUnsignedIntArray::SafeDownCast(
         ugrid->GetCellData()->GetArray("avtOriginalCellNumbers"));
-    oca->InsertNextTupleValue(ocdata);
+    oca->InsertNextTypedTuple(ocdata);
     cellReMap->push_back(ocdata[1]);
 }
 
@@ -10602,7 +10602,7 @@ ArbInsertWedge(vtkUnstructuredGrid *ugrid, int *nids, unsigned int ocdata[2],
     ugrid->InsertNextCell(VTK_WEDGE, 6, ids);
     vtkUnsignedIntArray *oca = vtkUnsignedIntArray::SafeDownCast(
         ugrid->GetCellData()->GetArray("avtOriginalCellNumbers"));
-    oca->InsertNextTupleValue(ocdata);
+    oca->InsertNextTypedTuple(ocdata);
     cellReMap->push_back(ocdata[1]);
 }
 
@@ -10631,7 +10631,7 @@ ArbInsertHex(vtkUnstructuredGrid *ugrid, int *nids, unsigned int ocdata[2],
     ugrid->InsertNextCell(VTK_HEXAHEDRON, 8, ids);
     vtkUnsignedIntArray *oca = vtkUnsignedIntArray::SafeDownCast(
         ugrid->GetCellData()->GetArray("avtOriginalCellNumbers"));
-    oca->InsertNextTupleValue(ocdata);
+    oca->InsertNextTypedTuple(ocdata);
     cellReMap->push_back(ocdata[1]);
 }
 
