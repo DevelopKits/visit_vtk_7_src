@@ -4,11 +4,11 @@
       ${GLEW_INCLUDE_DIR}
     </CXXFLAGS>
     <Files components="V">
-      avtMoleculeRenderer.C
-      avtOpenGLMoleculeRenderer.C
-      avtOpenGLAtomTexturer2D.C
-      avtOpenGLAtomTexturer3D.C
       avtMoleculeFilter.C
+      avtMoleculeMapper.C
+      vtkVisItMoleculeMapper.cxx
+      vtkOpenGLVisItMoleculeMapper.cxx
+      vtkOpenGLVisItSphereMapper.cxx
     </Files>
     <LIBS components="V">
       ${GLEW_LIB}
@@ -16,11 +16,11 @@
       avtplotter_ser
     </LIBS>
     <Files components="E">
-      avtMoleculeRenderer.C
-      avtOpenGLMoleculeRenderer.C
-      avtOpenGLAtomTexturer2D.C
-      avtOpenGLAtomTexturer3D.C
       avtMoleculeFilter.C
+      avtMoleculeMapper.C
+      vtkVisItMoleculeMapper.cxx
+      vtkOpenGLVisItMoleculeMapper.cxx
+      vtkOpenGLVisItSphereMapper.cxx
     </Files>
     <LIBS components="ESer">
       ${GLEW_LIB}

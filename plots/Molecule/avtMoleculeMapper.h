@@ -37,86 +37,61 @@
 *****************************************************************************/
 
 // ************************************************************************* //
-//                           avtMoleculePlot.h                               //
+//                            avtMoleculeMapper.h                            //
 // ************************************************************************* //
 
-#ifndef AVT_MOLECULE_PLOT_H
-#define AVT_MOLECULE_PLOT_H
+#ifndef AVT_MOLECULEMAPPER_H
+#define AVT_MOLECULEMAPPER_H
 
-#include <avtPlot.h>
+#include <avtMapper.h>
 #include <MoleculeAttributes.h>
-#include <avtLevelsLegend.h>
 
-class avtVariableLegend;
-class avtLevelsLegend;
-class avtLookupTable;
-class avtMoleculeFilter;
-class avtMoleculeMapper;
-class avtExtractMolInfoFilter;
+
+class vtkLookupTable;
 
 // ****************************************************************************
-//  Method: avtMoleculePlot
+//  Class:  avtMoleculeMapper
 //
 //  Purpose:
-//      A concrete type of avtPlot for molecules.
+//      Utilizes vtkVisItMoleculeMapper instead of vtkDataSetMapper.
 //
-//  Programmer: Jeremy Meredith
-//  Creation:   Februray 14, 2006
+//  Programmer: Kathleen Biagas 
+//  Creation:   July 22, 2016 
 //
 //  Modifications:
-//    Jeremy Meredith, Tue Aug 29 13:19:09 EDT 2006
-//    Changed to point data plot.
 //
 // ****************************************************************************
 
-class
-avtMoleculePlot : public avtPointDataPlot
+class avtMoleculeMapper : public avtMapper
 {
   public:
-    avtMoleculePlot();
-    virtual        ~avtMoleculePlot();
+                               avtMoleculeMapper();
+    virtual                   ~avtMoleculeMapper();
 
-    static avtPlot *Create();
 
-    virtual const char *GetName(void) { return "MoleculePlot"; };
+    // From avtMapper
+    void                       SetSurfaceRepresentation(int);
 
-    virtual void    SetAtts(const AttributeGroup*);
-    virtual void    GetDataExtents(std::vector<double> &);
-    virtual void    ReleaseData(void);
-    virtual bool    SetColorTable(const char *ctName);
+    // this class, called from avtPlot
+    void                       SetRange(double, double);
+    void                       SetAtts(const AttributeGroup *);
+    void                       SetLookupTable(vtkLookupTable *);
+    void                       SetLevelsLUT(vtkLookupTable *);
+    void                       SetIs2D(bool val);
 
-    void            SetLegend(bool);
-    void            SetLegendRange(void);
+    bool                       GetCurrentDataRange(double &, double &);
+    void                       InvalidateColors();
 
-    avtContract_p EnhanceSpecification(avtContract_p);
   protected:
-    MoleculeAttributes       atts;
+    MoleculeAttributes         atts;
+    vtkLookupTable            *lut;
+    vtkLookupTable            *levelsLUT;
+    double                     vmin;
+    double                     vmax;
+    bool                       is2D;
 
-    avtMoleculeMapper       *mapper;
-
-    avtMoleculeFilter       *moleculeFilter;
-    avtExtractMolInfoFilter *extractMolInfoFilter;
-
-    avtLevelsLegend         *levelsLegend;
-    avtLegend_p              levelsLegendRefPtr;
-
-    avtVariableLegend       *variableLegend;
-    avtLegend_p              variableLegendRefPtr;
-
-    avtLookupTable          *levelsLUT;
-    avtLookupTable          *variableLUT;
-
-    LevelColorMap            elementColorMap;
-    LevelColorMap            residueColorMap;
-    LevelColorMap            blankColorMap;
-
-    virtual avtMapper       *GetMapper(void);
-    virtual avtDataObject_p  ApplyOperators(avtDataObject_p);
-    virtual avtDataObject_p  ApplyRenderingTransformation(avtDataObject_p);
-    virtual void             CustomizeBehavior(void);
-    virtual void             CustomizeMapper(avtDataObjectInformation &);
-    virtual avtLegend_p      GetLegend(void);
-    void                     CreateLegendColorMaps();
+    virtual void               CustomizeMappers(void);
+    virtual vtkDataSetMapper  *CreateMapper(void);
 };
 
 

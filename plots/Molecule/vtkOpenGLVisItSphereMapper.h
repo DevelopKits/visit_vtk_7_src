@@ -36,90 +36,88 @@
 *
 *****************************************************************************/
 
-// ************************************************************************* //
-//                           avtMoleculePlot.h                               //
-// ************************************************************************* //
+#ifndef vtkOpenGLVisItSphereMapper_h
+#define vtkOpenGLVisItSphereMapper_h
 
-#ifndef AVT_MOLECULE_PLOT_H
-#define AVT_MOLECULE_PLOT_H
-
-#include <avtPlot.h>
-#include <MoleculeAttributes.h>
-#include <avtLevelsLegend.h>
-
-class avtVariableLegend;
-class avtLevelsLegend;
-class avtLookupTable;
-class avtMoleculeFilter;
-class avtMoleculeMapper;
-class avtExtractMolInfoFilter;
+#include <vtkOpenGLPolyDataMapper.h>
 
 // ****************************************************************************
-//  Method: avtMoleculePlot
+//  Class:  vtkOpenGLVisItSphereMapper.h
 //
 //  Purpose:
-//      A concrete type of avtPlot for molecules.
+//    Draws spheres using imposters.
+//    It uses vtkOpenGLVisItSphereMapper to do the rendering.
 //
-//  Programmer: Jeremy Meredith
-//  Creation:   Februray 14, 2006
+//  Notes:
+//    Taken from vtkOpenGLSphereMapper. 
+//
+//  Programmer: Kathleen Biagas 
+//  Creation:   July 22, 2016 
 //
 //  Modifications:
-//    Jeremy Meredith, Tue Aug 29 13:19:09 EDT 2006
-//    Changed to point data plot.
 //
 // ****************************************************************************
 
-class
-avtMoleculePlot : public avtPointDataPlot
+class vtkOpenGLVisItSphereMapper : public vtkOpenGLPolyDataMapper
 {
-  public:
-    avtMoleculePlot();
-    virtual        ~avtMoleculePlot();
+public:
+  static vtkOpenGLVisItSphereMapper* New();
+  vtkTypeMacro(vtkOpenGLVisItSphereMapper, vtkOpenGLPolyDataMapper)
+  void PrintSelf(ostream& os, vtkIndent indent);
 
-    static avtPlot *Create();
+  // Description:
+  // Convenience method to set the array to scale with.
+  vtkSetStringMacro(ScaleArray);
 
-    virtual const char *GetName(void) { return "MoleculePlot"; };
+  // Description:
+  // This calls RenderPiece (twice when transparent)
+  virtual void Render(vtkRenderer *ren, vtkActor *act);
 
-    virtual void    SetAtts(const AttributeGroup*);
-    virtual void    GetDataExtents(std::vector<double> &);
-    virtual void    ReleaseData(void);
-    virtual bool    SetColorTable(const char *ctName);
+protected:
+  vtkOpenGLVisItSphereMapper();
+  ~vtkOpenGLVisItSphereMapper();
 
-    void            SetLegend(bool);
-    void            SetLegendRange(void);
+  // Description:
+  // Create the basic shaders before replacement
+  virtual void GetShaderTemplate(
+    std::map<vtkShader::Type, vtkShader *> shaders,
+    vtkRenderer *ren, vtkActor *act);
 
-    avtContract_p EnhanceSpecification(avtContract_p);
-  protected:
-    MoleculeAttributes       atts;
+  // Description:
+  // Perform string replacments on the shader templates
+  virtual void ReplaceShaderValues(
+    std::map<vtkShader::Type, vtkShader *> shaders,
+    vtkRenderer *ren, vtkActor *act);
 
-    avtMoleculeMapper       *mapper;
+  // Description:
+  // Set the shader parameters related to the Camera
+  virtual void SetCameraShaderParameters(vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act);
 
-    avtMoleculeFilter       *moleculeFilter;
-    avtExtractMolInfoFilter *extractMolInfoFilter;
+  // Description:
+  // Set the shader parameters related to the actor/mapper
+  virtual void SetMapperShaderParameters(vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act);
 
-    avtLevelsLegend         *levelsLegend;
-    avtLegend_p              levelsLegendRefPtr;
+  const char *ScaleArray;
 
-    avtVariableLegend       *variableLegend;
-    avtLegend_p              variableLegendRefPtr;
+  // Description:
+  // Does the VBO/IBO need to be rebuilt
+  virtual bool GetNeedToRebuildBufferObjects(vtkRenderer *ren, vtkActor *act);
 
-    avtLookupTable          *levelsLUT;
-    avtLookupTable          *variableLUT;
+  // Description:
+  // Update the VBO to contain point based values
+  virtual void BuildBufferObjects(vtkRenderer *ren, vtkActor *act);
 
-    LevelColorMap            elementColorMap;
-    LevelColorMap            residueColorMap;
-    LevelColorMap            blankColorMap;
+  virtual void RenderPieceDraw(vtkRenderer *ren, vtkActor *act);
 
-    virtual avtMapper       *GetMapper(void);
-    virtual avtDataObject_p  ApplyOperators(avtDataObject_p);
-    virtual avtDataObject_p  ApplyRenderingTransformation(avtDataObject_p);
-    virtual void             CustomizeBehavior(void);
-    virtual void             CustomizeMapper(avtDataObjectInformation &);
-    virtual avtLegend_p      GetLegend(void);
-    void                     CreateLegendColorMaps();
+  // LLNL customization, used in place of call to MapScalars.
+  void SetColors(void);
+
+  // used for transparency
+  bool Invert;
+
+private:
+  vtkOpenGLVisItSphereMapper(const vtkOpenGLVisItSphereMapper&) ;
+  void operator=(const vtkOpenGLVisItSphereMapper&) ;
 };
 
-
 #endif
-
-

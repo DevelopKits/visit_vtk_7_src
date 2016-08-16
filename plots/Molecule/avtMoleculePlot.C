@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -48,8 +48,8 @@
 #include <avtLookupTable.h>
 #include <MoleculeAttributes.h>
 #include <avtFeatureEdgesFilter.h>
-#include <avtUserDefinedMapper.h>
 #include <avtMoleculeFilter.h>
+#include <avtMoleculeMapper.h>
 #include <avtCallback.h>
 #include <AtomicProperties.h>
 
@@ -80,11 +80,7 @@ using std::vector;
 
 avtMoleculePlot::avtMoleculePlot()
 {
-    renderer = avtMoleculeRenderer::New();
-
-    avtCustomRenderer_p cr;
-    CopyTo(cr, renderer);
-    mapper  = new avtUserDefinedMapper(cr);
+    mapper  = new avtMoleculeMapper();
 
     levelsLegend  = new avtLevelsLegend;
     levelsLegend->SetTitle("Molecule");
@@ -148,7 +144,6 @@ avtMoleculePlot::~avtMoleculePlot()
         variableLUT = NULL;
     }
 
-    renderer = NULL;
     //
     // Do not delete the levelsLegend since it is being held by levLegendRefPtr.
     //
@@ -195,7 +190,7 @@ avtMoleculePlot::Create()
 void
 avtMoleculePlot::SetAtts(const AttributeGroup *a)
 {
-    renderer->SetAtts(a);
+    mapper->SetAtts(a);
     needsRecalculation =
         atts.ChangesRequireRecalculation(*(const MoleculeAttributes*)a);
     if (avtCallback::UseManta())  //Temporary fix to force updates
@@ -285,7 +280,7 @@ avtMoleculePlot::SetColorTable(const char *ctName)
         cct == ctName)
     {
         match = true;
-        renderer->InvalidateColors();
+        mapper->InvalidateColors();
         SetLegendRange();
     }
 
@@ -433,7 +428,7 @@ avtMoleculePlot::CustomizeBehavior(void)
       }
       else
       {
-        behavior->SetLegend(variableLegendRefPtr);
+          behavior->SetLegend(variableLegendRefPtr);
       }
     }
     else
@@ -466,7 +461,7 @@ avtMoleculePlot::CustomizeBehavior(void)
 void
 avtMoleculePlot::CustomizeMapper(avtDataObjectInformation &info)
 {
-    renderer->SetIs2D(info.GetAttributes().GetSpatialDimension() == 2);
+    mapper->SetIs2D(info.GetAttributes().GetSpatialDimension() == 2);
 }
 
 
@@ -687,7 +682,8 @@ avtMoleculePlot::SetLegendRange()
     if (atts.GetMaxFlag())
         max = atts.GetScalarMax();
     variableLegend->SetRange(min,max);
-    renderer->SetRange(min,max);
+
+    mapper->SetRange(min,max);
 
     if (atts.GetContinuousColorTable() == "Default")
         variableLUT->SetColorTable(NULL, false);
@@ -749,8 +745,8 @@ avtMoleculePlot::SetLegendRange()
             }
             levelsLegend->SetLabelColorMap(residueColorMap);
 
-            // Make the renderer use the levelsLUT for colors.
-            renderer->SetLevelsLUT(levelsLUT);
+            // Make the mapper use the levelsLUT for colors.
+            mapper->SetLevelsLUT(levelsLUT->GetLookupTable());
         }
         else if (varName == "restype" ||
                  (varName.length()>8 && varName.substr(varName.length()-8) == "/restype"))
@@ -787,7 +783,7 @@ avtMoleculePlot::SetLegendRange()
             numcolors = NumberOfKnownResidues();
 
             levelsLegend->SetLabelColorMap(residueColorMap);
-            renderer->SetLevelsLUT(0);
+            mapper->SetLevelsLUT(0);
         }
         else
         {

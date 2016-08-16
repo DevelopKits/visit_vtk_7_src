@@ -13,6 +13,45 @@ SET(LIBI_SOURCES
 MoleculePluginInfo.C
 )
 
+
+SET(MOLECULE_OPENGL_SOURCES
+vtkOpenGLVisItMoleculeMapper.cxx
+vtkOpenGLVisItSphereMapper.cxx
+)
+
+# set up process for creating opengl overrides for the base vtk mapper
+# this plot will use
+include(${VISIT_SOURCE_DIR}/CMake/VisItObjectFactory.cmake)
+visit_add_override(VisItMolecule vtkVisItMoleculeMapper vtkOpenGLVisItMoleculeMapper)
+visit_object_factory_configure(VisItMolecule "${visit_module_overrides}")
+
+# shader files
+set(MOLECULE_SHADER_FILES
+    glsl/vtkVisItSphereMapperVS.glsl
+)
+
+unset(shader_h_files)
+foreach(file ${MOLECULE_SHADER_FILES})
+  get_filename_component(file_we ${file} NAME_WE)
+  set(src  ${CMAKE_CURRENT_SOURCE_DIR}/${file})
+  set(res  ${CMAKE_CURRENT_BINARY_DIR}/${file_we}.cxx)
+  set(resh ${CMAKE_CURRENT_BINARY_DIR}/${file_we}.h)
+  list(APPEND shader_h_files ${resh})
+  add_custom_command(
+    OUTPUT ${res} ${resh}
+    DEPENDS ${src} vtkEncodeString
+    COMMAND vtkEncodeString
+    ARGS ${res} ${src} ${file_we}
+    --build-header VISIT_MOLECULE_API ${CMAKE_CURRENT_SOURCE_DIR}/glsl/molecule_export.h    
+    )
+  list(APPEND MOLECULE_OPENGL_SOURCES ${res})
+  unset(src)
+  unset(res)
+  unset(resh)
+endforeach()
+
+
+
 SET(LIBG_SOURCES
 MoleculeGUIPluginInfo.C
 QvisMoleculePlotWindow.C
@@ -22,40 +61,33 @@ SET(LIBG_MOC_SOURCES
 QvisMoleculePlotWindow.h
 )
 
+
 SET(LIBV_SOURCES
 MoleculeViewerEnginePluginInfo.C
 MoleculeViewerPluginInfo.C
 avtMoleculePlot.C
-avtMoleculeRenderer.C
-avtOpenGLMoleculeRenderer.C
-avtOpenGLAtomTexturer2D.C
-avtOpenGLAtomTexturer3D.C
 avtMoleculeFilter.C
+avtMoleculeMapper.C
+vtkVisItMoleculeMapper.cxx
+${MOLECULE_OPENGL_SOURCES}
+${CMAKE_CURRENT_BINARY_DIR}/VisItMoleculeObjectFactory.C
 ${COMMON_SOURCES}
 )
-
-IF(VISIT_MANTA)
-    SET(LIBV_SOURCES ${LIBV_SOURCES} avtMantaMoleculeRenderer.C)
-ENDIF(VISIT_MANTA)
 
 SET(LIBE_SOURCES
 MoleculeViewerEnginePluginInfo.C
 MoleculeEnginePluginInfo.C
 avtMoleculePlot.C
-avtMoleculeRenderer.C
-avtOpenGLMoleculeRenderer.C
-avtOpenGLAtomTexturer2D.C
-avtOpenGLAtomTexturer3D.C
 avtMoleculeFilter.C
+avtMoleculeMapper.C
+vtkVisItMoleculeMapper.cxx
+${MOLECULE_OPENGL_SOURCES}
+${CMAKE_CURRENT_BINARY_DIR}/VisItMoleculeObjectFactory.C
 ${COMMON_SOURCES}
 )
 
-IF(VISIT_MANTA)
-    SET(LIBE_SOURCES ${LIBE_SOURCES} avtMantaMoleculeRenderer.C)
-ENDIF(VISIT_MANTA)
-
 IF (NOT WIN32)
-    SET_SOURCE_FILES_PROPERTIES(avtOpenGLAtomTexturer2D.C avtOpenGLAtomTexturer3D.C avtOpenGLMoleculeRenderer.C 
+    SET_SOURCE_FILES_PROPERTIES(${MOLECULE_OPENGL_SOURCES}
         PROPERTIES
         COMPILE_FLAGS "-I ${OPENGL_INCLUDE_DIR}"
     )
@@ -100,20 +132,16 @@ ${VISIT_INCLUDE_DIR}/visit_vtk/lightweight
 ${QT_INCLUDE_DIR}
 ${QT_QTCORE_INCLUDE_DIR}
 ${QT_QTGUI_INCLUDE_DIR}
-${EAVL_INCLUDE_DIR} 
-${VTKM_INCLUDE_DIR} 
-${VTK_INCLUDE_DIRS} 
+${EAVL_INCLUDE_DIR}
+${VTKM_INCLUDE_DIR}
+${VTK_INCLUDE_DIRS}
 ${PYINCLUDES}
 ${GLEW_INCLUDE_DIR}
 )
 
-IF(VISIT_MANTA)
-    INCLUDE_DIRECTORIES(${VISIT_INCLUDE_DIR}/avt/Plotter/Manta)
-ENDIF(VISIT_MANTA)
+LINK_DIRECTORIES(${VISIT_LIBRARY_DIR} ${QT_LIBRARY_DIR} ${QWT_LIBRARY_DIR} ${GLEW_LIBRARY_DIR} ${EAVL_LIBRARY_DIR} ${VTKM_LIBRARY_DIR} ${VTK_LIBRARY_DIRS} )
 
 
-
-LINK_DIRECTORIES(${VISIT_LIBRARY_DIR} ${QT_LIBRARY_DIR} ${GLEW_LIBRARY_DIR} ${EAVL_LIBRARY_DIR} ${VTKM_LIBRARY_DIR} ${VTK_LIBRARY_DIRS} )
 
 ADD_LIBRARY(IMoleculePlot ${LIBI_SOURCES})
 TARGET_LINK_LIBRARIES(IMoleculePlot visitcommon)

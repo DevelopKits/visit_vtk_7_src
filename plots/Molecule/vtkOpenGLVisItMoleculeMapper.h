@@ -37,89 +37,67 @@
 *****************************************************************************/
 
 // ************************************************************************* //
-//                           avtMoleculePlot.h                               //
+//                        vtkOpenGLVisItMoleculeMapper.h                     //
 // ************************************************************************* //
 
-#ifndef AVT_MOLECULE_PLOT_H
-#define AVT_MOLECULE_PLOT_H
+#ifndef vtkOpenGLVisItMoleculeMapper_h
+#define vtkOpenGLVisItMoleculeMapper_h
 
-#include <avtPlot.h>
-#include <MoleculeAttributes.h>
-#include <avtLevelsLegend.h>
+#include "vtkVisItMoleculeMapper.h"
+#include <vtkNew.h> // For vtkNew
 
-class avtVariableLegend;
-class avtLevelsLegend;
-class avtLookupTable;
-class avtMoleculeFilter;
-class avtMoleculeMapper;
-class avtExtractMolInfoFilter;
+class vtkOpenGLVisItSphereMapper;
 
 // ****************************************************************************
-//  Method: avtMoleculePlot
+//  Class:  vtkOpenGLVisItMoleculeMapper.h
 //
 //  Purpose:
-//      A concrete type of avtPlot for molecules.
+//    An accelerated class for rendering molecule atoms.
+//    It uses vtkOpenGLVisItSphereMapper to do the rendering.
 //
-//  Programmer: Jeremy Meredith
-//  Creation:   Februray 14, 2006
+//  Notes:
+//    Taken from vtkOpenGLMoleculeMapper, with Fast Bond mapping removed.
+//
+//  Programmer: Kathleen Biagas 
+//  Creation:   July 22, 2016 
 //
 //  Modifications:
-//    Jeremy Meredith, Tue Aug 29 13:19:09 EDT 2006
-//    Changed to point data plot.
 //
 // ****************************************************************************
 
-class
-avtMoleculePlot : public avtPointDataPlot
+class vtkOpenGLVisItMoleculeMapper : public vtkVisItMoleculeMapper
 {
-  public:
-    avtMoleculePlot();
-    virtual        ~avtMoleculePlot();
+public:
+  static vtkOpenGLVisItMoleculeMapper* New();
+  vtkTypeMacro(vtkOpenGLVisItMoleculeMapper, vtkVisItMoleculeMapper)
 
-    static avtPlot *Create();
+  // Description:
+  // Reimplemented from base class
+  virtual void Render(vtkRenderer *, vtkActor *);
+  virtual void RenderPiece(vtkRenderer *, vtkActor *);
+  virtual void ReleaseGraphicsResources(vtkWindow *);
 
-    virtual const char *GetName(void) { return "MoleculePlot"; };
+  // Description:
+  // provide access to the underlying mappers
+  vtkOpenGLVisItSphereMapper *GetFastAtomMapper() {
+      return this->FastAtomMapper.Get(); }
 
-    virtual void    SetAtts(const AttributeGroup*);
-    virtual void    GetDataExtents(std::vector<double> &);
-    virtual void    ReleaseData(void);
-    virtual bool    SetColorTable(const char *ctName);
+  // LLNL customization
+  virtual void InvalidateColors();
 
-    void            SetLegend(bool);
-    void            SetLegendRange(void);
+protected:
+  vtkOpenGLVisItMoleculeMapper();
+  ~vtkOpenGLVisItMoleculeMapper();
 
-    avtContract_p EnhanceSpecification(avtContract_p);
-  protected:
-    MoleculeAttributes       atts;
+  virtual void UpdateAtomPolyData();
 
-    avtMoleculeMapper       *mapper;
+  // Description:
+  // Internal mappers
+  vtkNew<vtkOpenGLVisItSphereMapper> FastAtomMapper;
 
-    avtMoleculeFilter       *moleculeFilter;
-    avtExtractMolInfoFilter *extractMolInfoFilter;
-
-    avtLevelsLegend         *levelsLegend;
-    avtLegend_p              levelsLegendRefPtr;
-
-    avtVariableLegend       *variableLegend;
-    avtLegend_p              variableLegendRefPtr;
-
-    avtLookupTable          *levelsLUT;
-    avtLookupTable          *variableLUT;
-
-    LevelColorMap            elementColorMap;
-    LevelColorMap            residueColorMap;
-    LevelColorMap            blankColorMap;
-
-    virtual avtMapper       *GetMapper(void);
-    virtual avtDataObject_p  ApplyOperators(avtDataObject_p);
-    virtual avtDataObject_p  ApplyRenderingTransformation(avtDataObject_p);
-    virtual void             CustomizeBehavior(void);
-    virtual void             CustomizeMapper(avtDataObjectInformation &);
-    virtual avtLegend_p      GetLegend(void);
-    void                     CreateLegendColorMaps();
+private:
+  vtkOpenGLVisItMoleculeMapper(const vtkOpenGLVisItMoleculeMapper&) ;
+  void operator=(const vtkOpenGLVisItMoleculeMapper&) ;
 };
 
-
 #endif
-
-
