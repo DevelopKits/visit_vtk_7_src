@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -3166,6 +3166,10 @@ ViewerPlot::GetReader() const
 //    Removed maintain data; moved maintain view from Global settings
 //    (Main window) to per-window Window Information (View window).
 //
+//    Kathleen Biagas, Tue Aug 23 11:30:47 PDT 2016
+//    Moved call to Set the plot's atts after sething the varname, so plots
+//    could utilize the varname.
+//
 // ****************************************************************************
 
 void
@@ -3331,7 +3335,6 @@ ViewerPlot::CreateActor(bool createNew,
         }
     }
 
-    plotList[cacheIndex]->SetAtts(curPlotAtts);
 
     // Set the variable name first as there may be multiple legends
     // and the variable name determines which legend is used.
@@ -3345,6 +3348,8 @@ ViewerPlot::CreateActor(bool createNew,
       plotList[cacheIndex]->SetPlotTitle(plotDescription.c_str());
     else
       plotList[cacheIndex]->SetPlotTitle(GetMenuName());
+
+    plotList[cacheIndex]->SetAtts(curPlotAtts);
 
     plotList[cacheIndex]->SetBackgroundColor(bgColor);
     plotList[cacheIndex]->SetForegroundColor(fgColor);

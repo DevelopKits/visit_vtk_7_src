@@ -4,21 +4,33 @@ function bv_vtk_initialize
     export ON_VTK="on"
     export FORCE_VTK="no"
     export USE_SYSTEM_VTK="no"
+    add_extra_commandline_args "vtk" "system-vtk" 0 "Using system VTK (exp)"
     add_extra_commandline_args "vtk" "alt-vtk-dir" 1 "Use alternate VTK (exp)"
 }
 
 function bv_vtk_enable
 {
-DO_VTK="yes"
-ON_VTK="on"
-FORCE_VTK="yes"
+    DO_VTK="yes"
+    ON_VTK="on"
+    FORCE_VTK="yes"
 }
 
 function bv_vtk_disable
 {
-DO_VTK="no"
-ON_VTK="off"
-FORCE_VTK="no"
+    DO_VTK="no"
+    ON_VTK="off"
+    FORCE_VTK="no"
+}
+
+function bv_vtk_system_vtk
+{
+    TEST=`which vtk-config`
+    [ $? != 0 ] && error "System vtk-config not found, cannot configure vtk"
+
+    bv_vtk_enable
+    USE_SYSTEM_VTK="yes"
+    SYSTEM_VTK_DIR="$1"
+    info "Using System VTK: $SYSTEM_VTK_DIR"
 }
 
 function bv_vtk_alt_vtk_dir
@@ -31,58 +43,60 @@ function bv_vtk_alt_vtk_dir
 
 function bv_vtk_depends_on
 {
- depends_on="cmake"
+    depends_on="cmake"
 
- if [[ "$DO_PYTHON" == "yes" ]]; then
-      depends_on="${depends_on} python"
- fi
+    if [[ "$DO_PYTHON" == "yes" ]]; then
+        depends_on="${depends_on} python"
+    fi
 
- if [[ "$DO_R" == "yes" ]]; then
-      depends_on="${depends_on} R"
- fi
+    if [[ "$DO_R" == "yes" ]]; then
+        depends_on="${depends_on} R"
+    fi
 
- # Only depend on Qt if we're not doing server-only builds.
- if [[ "$DO_DBIO_ONLY" != "yes" ]]; then
-     if [[ "$DO_ENGINE_ONLY" != "yes" ]]; then
-         if [[ "$DO_SERVER_COMPONENTS_ONLY" != "yes" ]]; then 
-             depends_on="${depends_on} qt"
-         fi
-     fi
- fi
+    # Only depend on Qt if we're not doing server-only builds.
+    if [[ "$DO_DBIO_ONLY" != "yes" ]]; then
+        if [[ "$DO_ENGINE_ONLY" != "yes" ]]; then
+            if [[ "$DO_SERVER_COMPONENTS_ONLY" != "yes" ]]; then 
+                depends_on="${depends_on} qt"
+            fi
+        fi
+    fi
 
- echo ${depends_on}
+    echo ${depends_on}
 }
 
 function bv_vtk_force
 {
-  if [[ "$FORCE_VTK" == "yes" ]]; then
-     return 0;
-  fi
-  return 1;
+    if [[ "$FORCE_VTK" == "yes" ]]; then
+        return 0;
+    fi
+    return 1;
 }
 
 function bv_vtk_info
 {
-export VTK_FILE=${VTK_FILE:-"vtk-master.tar.gz"}
-export VTK_VERSION=${VTK_VERSION:-"7.1.0"}
-export VTK_SHORT_VERSION=${VTK_SHORT_VERSION:-"7.1"}
-export VTK_COMPATIBILITY_VERSION=${VTK_SHORT_VERSION}
-export VTK_BUILD_DIR=${VTK_BUILD_DIR:-"vtk-master"}
-export VTK_INSTALL_DIR=${VTK_INSTALL_DIR:-"vtk"}
-export VTK_MD5_CHECKSUM=""
-export VTK_SHA256_CHECKSUM=""
+    export VTK_FILE=${VTK_FILE:-"VTK-b509718.tar.gz"}
+    export VTK_VERSION=${VTK_VERSION:-"7.1.0"}
+    export VTK_SHORT_VERSION=${VTK_SHORT_VERSION:-"7.1"}
+    export VTK_COMPATIBILITY_VERSION=${VTK_SHORT_VERSION}
+    export VTK_BUILD_DIR=${VTK_BUILD_DIR:-"VTK-b509718"}
+    export VTK_INSTALL_DIR=${VTK_INSTALL_DIR:-"vtk"}
+    export VTK_MD5_CHECKSUM=""
+    export VTK_SHA256_CHECKSUM=""
 }
 
 function bv_vtk_print
 {
-printf "%s%s\n" "VTK_FILE=" "${VTK_FILE}"
-printf "%s%s\n" "VTK_VERSION=" "${VTK_VERSION}"
-printf "%s%s\n" "VTK_BUILD_DIR=" "${VTK_BUILD_DIR}"
+    printf "%s%s\n" "VTK_FILE=" "${VTK_FILE}"
+    printf "%s%s\n" "VTK_VERSION=" "${VTK_VERSION}"
+    printf "%s%s\n" "VTK_BUILD_DIR=" "${VTK_BUILD_DIR}"
 }
 
 function bv_vtk_print_usage
 {
-printf "%-15s %s [%s]\n" "--vtk" "Build VTK" "built by default unless --no-thirdparty flag is used"
+    printf "%-15s %s [%s]\n" "--vtk" "Build VTK" "built by default unless --no-thirdparty flag is used"
+    printf "%-15s %s [%s]\n" "--system-vtk" "Use the system installed VTK"
+    printf "%-15s %s [%s]\n" "--alt-vtk-dir" "Use VTK from an alternative directory"
 }
 
 function bv_vtk_host_profile
@@ -94,9 +108,9 @@ function bv_vtk_host_profile
 
     echo "SETUP_APP_VERSION(VTK $VTK_VERSION)" >> $HOSTCONF
     if [[ "$USE_SYSTEM_VTK" == "yes" ]]; then
-            echo "VISIT_OPTION_DEFAULT(VISIT_VTK_DIR $SYSTEM_VTK_DIR)" >> $HOSTCONF
+        echo "VISIT_OPTION_DEFAULT(VISIT_VTK_DIR $SYSTEM_VTK_DIR)" >> $HOSTCONF
     else
-            echo "VISIT_OPTION_DEFAULT(VISIT_VTK_DIR \${VISITHOME}/${VTK_INSTALL_DIR}/\${VTK_VERSION}/\${VISITARCH})" >> $HOSTCONF
+        echo "VISIT_OPTION_DEFAULT(VISIT_VTK_DIR \${VISITHOME}/${VTK_INSTALL_DIR}/\${VTK_VERSION}/\${VISITARCH})" >> $HOSTCONF
     fi
 }
 
@@ -387,8 +401,14 @@ function build_vtk
             ensure_built_or_ready $VTK_INSTALL_DIR    $VTK_VERSION    $VTK_BUILD_DIR    $VTK_FILE
         fi
     fi
+
+    #
+    # Prepare the build dir using src file.
+    #
     prepare_build_dir $VTK_BUILD_DIR $VTK_FILE
     untarred_vtk=$?
+    # 0, already exists, 1 untarred src, 2 error
+
     if [[ $untarred_vtk == -1 ]] ; then
         warn "Unable to prepare VTK build directory. Giving Up!"
         return 1
@@ -406,14 +426,18 @@ function build_vtk
             return 1
         else
             warn "Patch failed, but continuing.  I believe that this script\n" \
-                 "tried to apply a patch to an existing directory which had " \
-                 "already been patched ... that is, that the patch is " \
+                 "tried to apply a patch to an existing directory that had\n" \
+                 "already been patched ... that is, the patch is\n" \
                  "failing harmlessly on a second application."
         fi
     fi
+
     # move back up to the start dir 
     cd "$START_DIR"
 
+    #
+    # Configure VTK
+    #
     info "Configuring VTK . . ."
 
     # Make a build directory for an out-of-source build.. Change the
@@ -434,7 +458,6 @@ function build_vtk
     #
     # Setup paths and libs for python for the VTK build.
     #
-
     if [[ "$OPSYS" == "Darwin" ]]; then
         if [[ "${VISIT_PYTHON_DIR}/lib" != "/usr/lib" ]]; then
             export DYLD_LIBRARY_PATH="${VISIT_PYTHON_DIR}/lib/:$DYLD_LIBRARY_PATH"
@@ -604,7 +627,7 @@ function build_vtk
     #
     info "Building VTK . . . (~20 minutes)"
     env DYLD_LIBRARY_PATH=`pwd`/bin $MAKE $MAKE_OPT_FLAGS || \
-      error "VTK did not build correctly.  Giving up."
+        error "VTK did not build correctly.  Giving up."
 
     info "Installing VTK . . . "
     $MAKE install || error "VTK did not install correctly."
@@ -664,4 +687,3 @@ function bv_vtk_build
         info "Done building VTK"
     fi
 }
-
