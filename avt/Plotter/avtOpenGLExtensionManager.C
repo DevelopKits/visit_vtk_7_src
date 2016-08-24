@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -87,7 +87,6 @@ static bool initialized = false;
 
 bool initialize(bool force)
 {
-#ifdef HAVE_LIBGLEW
     if(initialized && !force) // Bail early if we've already been here.
     {
         return true;
@@ -98,18 +97,13 @@ bool initialize(bool force)
     else
         cerr << "GLEW initialization failed: " << glewGetErrorString(err) << endl;
 
-#endif
     return initialized;
 }
 
 bool
 supported(const char *key)
 {
-#ifdef HAVE_LIBGLEW
-    return glewIsSupported(key);
-#else
-    return true;
-#endif
+    return glewIsSupported(key)?true:false;
 }
 
 }; /* glew */ }; /* avt */

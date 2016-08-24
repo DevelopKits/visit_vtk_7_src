@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -43,17 +43,7 @@
 #define AVT_OPENGL_EXTENSION_MANAGER_H
 #include <plotter_exports.h>
 
-#ifdef HAVE_LIBGLEW
-// We don't need it in this header, but include GLEW here for ease of use.
-// GLEW must be included before any OpenGL headers, and if clients want this
-// file then *not* including GLEW wouldn't make any sense!
-//#include <GL/glew.h>
 #include <vtk_glew.h>
-#else
-// We're not using GLEW for OpenGL. Use straight OpenGL.
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-#endif
 
 namespace avt {
 namespace glew {
