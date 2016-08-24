@@ -51,9 +51,12 @@
 class     avtLookupTable;
 class     avtPseudocolorFilter;
 class     avtShiftCenteringFilter;
-class     avtVariableMapper;
+class     avtPseudocolorMapper;
 class     avtVariablePointGlyphMapper;
 class     avtVariableLegend;
+class     avtPolylineAddEndPointsFilter;
+class     avtPolylineToRibbonFilter;
+class     avtPolylineToTubeFilter;
 class     avtStaggeringFilter;
 
 // ****************************************************************************
@@ -141,6 +144,10 @@ class     avtStaggeringFilter;
 //    Add VariableMapper as points and surfaces no longer handled by the
 //    same mapper.
 //
+//    Kathleen Biagas, Wed Aug 24 15:42:56 PDT 2016
+//    Change use of avtVariableMapper to avtPseudcolorMapper, a specialization
+//    of avtVariableMapper that utilizes a special vtk mapper.
+//
 // ****************************************************************************
 
 class avtPseudocolorPlot : public avtSurfaceDataPlot
@@ -169,22 +176,25 @@ class avtPseudocolorPlot : public avtSurfaceDataPlot
 
   protected:
     avtVariablePointGlyphMapper   *glyphMapper;
-    avtVariableMapper             *mapper;
-    avtVariableLegend          *varLegend;
-    avtLegend_p                 varLegendRefPtr;
-    PseudocolorAttributes       atts;
-    avtPseudocolorFilter       *pcfilter;
-    avtStaggeringFilter        *staggeringFilter;
-    avtShiftCenteringFilter    *filter;
-    bool                        colorsInitialized;
-    int                         topoDim;
-    avtLookupTable             *avtLUT;
-    bool                        colorTableIsFullyOpaque;
+    avtPseudocolorMapper          *mapper;
+    avtVariableLegend             *varLegend;
+    avtLegend_p                    varLegendRefPtr;
+    PseudocolorAttributes          atts;
+    avtPseudocolorFilter          *pcfilter;
+    avtPolylineAddEndPointsFilter *polylineAddEndPointsFilter;
+    avtPolylineToRibbonFilter     *polylineToRibbonFilter;
+    avtPolylineToTubeFilter       *polylineToTubeFilter;
+    avtStaggeringFilter           *staggeringFilter;
+    avtShiftCenteringFilter       *filter;
+    bool                           colorsInitialized;
+    int                            topoDim;
+    avtLookupTable                *avtLUT;
+    bool                           colorTableIsFullyOpaque;
 
     virtual avtMapper          *GetMapper(void);
     virtual avtDataObject_p     ApplyOperators(avtDataObject_p);
     virtual avtDataObject_p     ApplyRenderingTransformation(avtDataObject_p);
-//  virtual avtContract_p       EnhanceSpecification(avtContract_p);
+    // virtual avtContract_p       EnhanceSpecification(avtContract_p);
     virtual void                CustomizeBehavior(void);
     virtual int                 GetSmoothingLevel();
 
@@ -195,9 +205,31 @@ class avtPseudocolorPlot : public avtSurfaceDataPlot
 private:
     void                        SetLegendRanges(void);
     void                        SetPointGlyphSize();
+
+    double GetBBoxSize( double *bbox )
+    {
+        double vol = 1;
+        int    numDims = 0;
+        if (bbox[1] > bbox[0])
+        {
+            vol *= (bbox[1]-bbox[0]);
+            numDims++;
+        }
+        if (bbox[3] > bbox[2])
+        {
+            vol *= (bbox[3]-bbox[2]);
+            numDims++;
+        }
+        if (bbox[5] > bbox[4])
+        {
+            vol *= (bbox[5]-bbox[4]);
+            numDims++;
+        }
+
+        double length = pow(vol, 1.0/numDims);
+        return length;
+    }
+
 };
 
-
 #endif
-
-

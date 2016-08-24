@@ -36,29 +36,69 @@
 *
 *****************************************************************************/
 
-#ifndef PY_PSEUDOCOLORATTRIBUTES_H
-#define PY_PSEUDOCOLORATTRIBUTES_H
-#include <Python.h>
-#include <PseudocolorAttributes.h>
+// ************************************************************************* //
+//                           avtPolylineAddEndPointsFilter.h                 //
+// ************************************************************************* //
 
+#ifndef AVT_POLYLINE_ADD_END_POINTS_FILTER_H
+#define AVT_POLYLINE_ADD_END_POINTS_FILTER_H
+
+#include <filters_exports.h>
+
+#include <avtDataTreeIterator.h>
+
+// ****************************************************************************
+//  Class: avtPolylineAddEndPointsFilter
 //
-// Functions exposed to the VisIt module.
+//  Purpose:
+//    Connects individual line cells into a polyline cell.
 //
-#define PSEUDOCOLORATTRIBUTES_NMETH 102
-void           PyPseudocolorAttributes_StartUp(PseudocolorAttributes *subj, void *data);
-void           PyPseudocolorAttributes_CloseDown();
-PyMethodDef *  PyPseudocolorAttributes_GetMethodTable(int *nMethods);
-bool           PyPseudocolorAttributes_Check(PyObject *obj);
-PseudocolorAttributes *  PyPseudocolorAttributes_FromPyObject(PyObject *obj);
-PyObject *     PyPseudocolorAttributes_New();
-PyObject *     PyPseudocolorAttributes_Wrap(const PseudocolorAttributes *attr);
-void           PyPseudocolorAttributes_SetParent(PyObject *obj, PyObject *parent);
-void           PyPseudocolorAttributes_SetDefaults(const PseudocolorAttributes *atts);
-std::string    PyPseudocolorAttributes_GetLogString();
-std::string    PyPseudocolorAttributes_ToString(const PseudocolorAttributes *, const char *);
-PyObject *     PyPseudocolorAttributes_getattr(PyObject *self, char *name);
-int            PyPseudocolorAttributes_setattr(PyObject *self, char *name, PyObject *args);
-extern PyMethodDef PyPseudocolorAttributes_methods[PSEUDOCOLORATTRIBUTES_NMETH];
+//  Programmer: Brad Whitlock
+//  Creation:   Thu Aug 27 11:50:35 PDT 2009
+//
+//  Modifications:
+//    Eric Brugger, Mon Jul 21 13:51:03 PDT 2014
+//    Modified the class to work with avtDataRepresentation.
+//
+// ****************************************************************************
+
+class AVTFILTERS_API avtPolylineAddEndPointsFilter : virtual public avtDataTreeIterator
+{
+  public:
+    enum EndPointType
+    {
+        None,
+        Heads,
+        Tails,
+        Both
+    };
+    enum EndPointStyle
+    {
+        Spheres,
+        Cones
+    };
+    
+                             avtPolylineAddEndPointsFilter();
+    virtual                 ~avtPolylineAddEndPointsFilter();
+
+    virtual const char      *GetType(void) { return "avtPolylineAddEndPointsFilter"; };
+    virtual const char      *GetDescription(void)
+                                 { return "Add end points to polylines"; };
+
+    int type;
+    int style;
+    int resolution;
+
+    double radius;
+    double ratio;
+
+    bool varyRadius;
+    std::string radiusVar;
+    double radiusFactor;
+              
+  protected:
+    virtual avtDataRepresentation *ExecuteData(avtDataRepresentation *);
+    virtual void                   UpdateDataObjectInfo(void);
+};
 
 #endif
-

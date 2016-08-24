@@ -27,6 +27,8 @@ PseudocolorViewerEnginePluginInfo.C
 PseudocolorViewerPluginInfo.C
 avtPseudocolorPlot.C
 avtPseudocolorFilter.C
+avtPseudocolorMapper.C
+vtkMultiRepMapper.C
 ${COMMON_SOURCES}
 )
 
@@ -35,6 +37,8 @@ PseudocolorViewerEnginePluginInfo.C
 PseudocolorEnginePluginInfo.C
 avtPseudocolorPlot.C
 avtPseudocolorFilter.C
+avtPseudocolorMapper.C
+vtkMultiRepMapper.C
 ${COMMON_SOURCES}
 )
 
@@ -78,13 +82,11 @@ ${VISIT_INCLUDE_DIR}/visit_vtk/lightweight
 ${QT_INCLUDE_DIR}
 ${QT_QTCORE_INCLUDE_DIR}
 ${QT_QTGUI_INCLUDE_DIR}
-${EAVL_INCLUDE_DIR} 
-${VTKM_INCLUDE_DIR} 
-${VTK_INCLUDE_DIRS} 
+${EAVL_INCLUDE_DIR}
+${VTKM_INCLUDE_DIR}
+${VTK_INCLUDE_DIRS}
 ${PYINCLUDES}
 )
-
-
 
 LINK_DIRECTORIES(${VISIT_LIBRARY_DIR} ${QT_LIBRARY_DIR} ${GLEW_LIBRARY_DIR} ${EAVL_LIBRARY_DIR} ${VTKM_LIBRARY_DIR} ${VTK_LIBRARY_DIRS} )
 

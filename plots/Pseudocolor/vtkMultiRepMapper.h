@@ -36,29 +36,57 @@
 *
 *****************************************************************************/
 
-#ifndef PY_PSEUDOCOLORATTRIBUTES_H
-#define PY_PSEUDOCOLORATTRIBUTES_H
-#include <Python.h>
-#include <PseudocolorAttributes.h>
+#ifndef vtkMultiRepMapper_h
+#define vtkMultiRepMapper_h
 
+
+#include <vtkDataSetMapper.h>
+
+// A Mapper that allows multiple representations (Surface, Wireframe, Points)
+// to be drawn at the same time, via multi-pass renders.
 //
-// Functions exposed to the VisIt module.
-//
-#define PSEUDOCOLORATTRIBUTES_NMETH 102
-void           PyPseudocolorAttributes_StartUp(PseudocolorAttributes *subj, void *data);
-void           PyPseudocolorAttributes_CloseDown();
-PyMethodDef *  PyPseudocolorAttributes_GetMethodTable(int *nMethods);
-bool           PyPseudocolorAttributes_Check(PyObject *obj);
-PseudocolorAttributes *  PyPseudocolorAttributes_FromPyObject(PyObject *obj);
-PyObject *     PyPseudocolorAttributes_New();
-PyObject *     PyPseudocolorAttributes_Wrap(const PseudocolorAttributes *attr);
-void           PyPseudocolorAttributes_SetParent(PyObject *obj, PyObject *parent);
-void           PyPseudocolorAttributes_SetDefaults(const PseudocolorAttributes *atts);
-std::string    PyPseudocolorAttributes_GetLogString();
-std::string    PyPseudocolorAttributes_ToString(const PseudocolorAttributes *, const char *);
-PyObject *     PyPseudocolorAttributes_getattr(PyObject *self, char *name);
-int            PyPseudocolorAttributes_setattr(PyObject *self, char *name, PyObject *args);
-extern PyMethodDef PyPseudocolorAttributes_methods[PSEUDOCOLORATTRIBUTES_NMETH];
+class vtkMultiRepMapper : public vtkDataSetMapper
+{
+public:
+  static vtkMultiRepMapper *New();
+  vtkTypeMacro(vtkMultiRepMapper, vtkDataSetMapper)
+  void PrintSelf(ostream& os, vtkIndent indent);
+
+  void Render(vtkRenderer *ren, vtkActor *act);
+
+  vtkSetMacro(DrawSurface, bool);
+  vtkGetMacro(DrawSurface, bool);
+  vtkBooleanMacro(DrawSurface, bool);
+
+  vtkSetMacro(DrawWireframe, bool);
+  vtkGetMacro(DrawWireframe, bool);
+  vtkBooleanMacro(DrawWireframe, bool);
+
+  vtkSetMacro(DrawPoints, bool);
+  vtkGetMacro(DrawPoints, bool);
+  vtkBooleanMacro(DrawPoints, bool);
+
+  vtkSetVector3Macro(WireframeColor, double);
+  vtkGetVector3Macro(WireframeColor, double);
+
+  vtkSetVector3Macro(PointsColor, double);
+  vtkGetVector3Macro(PointsColor, double);
+
+
+protected:
+  vtkMultiRepMapper();
+ ~vtkMultiRepMapper();
+
+  bool DrawSurface;
+  bool DrawWireframe;
+  bool DrawPoints;
+  double WireframeColor[3];
+  double PointsColor[3];
+  bool currentScalarVis;
+
+private:
+  vtkMultiRepMapper(const vtkMultiRepMapper&) VTK_DELETE_FUNCTION;
+  void operator=(const vtkMultiRepMapper&) VTK_DELETE_FUNCTION;
+};
 
 #endif
-

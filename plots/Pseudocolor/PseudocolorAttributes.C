@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -272,7 +272,7 @@ PseudocolorAttributes::LineType_FromString(const std::string &s, PseudocolorAttr
 //
 
 static const char *EndPointType_strings[] = {
-"None", "Tails", "Heads", 
+"None", "Heads", "Tails", 
 "Both"};
 
 std::string
@@ -415,21 +415,24 @@ void PseudocolorAttributes::Init()
     pointType = Point;
     pointSizeVarEnabled = false;
     pointSizePixels = 2;
-    lineType = Line;
     lineStyle = 0;
+    lineType = Line;
     lineWidth = 0;
-    tubeDisplayDensity = 10;
+    tubeResolution = 10;
     tubeRadiusSizeType = FractionOfBBox;
     tubeRadiusAbsolute = 0.125;
     tubeRadiusBBox = 0.005;
     tubeRadiusVarEnabled = false;
-    tubeRadiusVarFactor = 10;
+    tubeRadiusVarRatio = 10;
     endPointType = None;
     endPointStyle = Spheres;
     endPointRadiusSizeType = FractionOfBBox;
-    endPointRadiusAbsolute = 1;
-    endPointRadiusBBox = 0.005;
-    endPointRatio = 2;
+    endPointRadiusAbsolute = 0.125;
+    endPointRadiusBBox = 0.05;
+    endPointResolution = 10;
+    endPointRatio = 5;
+    endPointRadiusVarEnabled = false;
+    endPointRadiusVarRatio = 10;
     renderSurfaces = 1;
     renderWireframe = 0;
     renderPoints = 0;
@@ -479,28 +482,34 @@ void PseudocolorAttributes::Copy(const PseudocolorAttributes &obj)
     pointSizeVarEnabled = obj.pointSizeVarEnabled;
     pointSizeVar = obj.pointSizeVar;
     pointSizePixels = obj.pointSizePixels;
-    lineType = obj.lineType;
     lineStyle = obj.lineStyle;
+    lineType = obj.lineType;
     lineWidth = obj.lineWidth;
-    tubeDisplayDensity = obj.tubeDisplayDensity;
+    tubeResolution = obj.tubeResolution;
     tubeRadiusSizeType = obj.tubeRadiusSizeType;
     tubeRadiusAbsolute = obj.tubeRadiusAbsolute;
     tubeRadiusBBox = obj.tubeRadiusBBox;
     tubeRadiusVarEnabled = obj.tubeRadiusVarEnabled;
     tubeRadiusVar = obj.tubeRadiusVar;
-    tubeRadiusVarFactor = obj.tubeRadiusVarFactor;
+    tubeRadiusVarRatio = obj.tubeRadiusVarRatio;
     endPointType = obj.endPointType;
     endPointStyle = obj.endPointStyle;
     endPointRadiusSizeType = obj.endPointRadiusSizeType;
     endPointRadiusAbsolute = obj.endPointRadiusAbsolute;
     endPointRadiusBBox = obj.endPointRadiusBBox;
+    endPointResolution = obj.endPointResolution;
     endPointRatio = obj.endPointRatio;
+    endPointRadiusVarEnabled = obj.endPointRadiusVarEnabled;
+    endPointRadiusVar = obj.endPointRadiusVar;
+    endPointRadiusVarRatio = obj.endPointRadiusVarRatio;
     renderSurfaces = obj.renderSurfaces;
     renderWireframe = obj.renderWireframe;
     renderPoints = obj.renderPoints;
     smoothingLevel = obj.smoothingLevel;
     legendFlag = obj.legendFlag;
     lightingFlag = obj.lightingFlag;
+    wireframeColor = obj.wireframeColor;
+    pointColor = obj.pointColor;
 
     PseudocolorAttributes::SelectAll();
 }
@@ -527,7 +536,8 @@ const AttributeGroup::private_tmfs_t PseudocolorAttributes::TmfsStruct = {PSEUDO
 
 PseudocolorAttributes::PseudocolorAttributes() : 
     AttributeSubject(PseudocolorAttributes::TypeMapFormatString),
-    colorTableName("hot"), pointSizeVar("default")
+    colorTableName("hot"), pointSizeVar("default"), 
+    wireframeColor(0, 0, 0, 0), pointColor(0, 0, 0, 0)
 {
     PseudocolorAttributes::Init();
 }
@@ -549,7 +559,8 @@ PseudocolorAttributes::PseudocolorAttributes() :
 
 PseudocolorAttributes::PseudocolorAttributes(private_tmfs_t tmfs) : 
     AttributeSubject(tmfs.tmfs),
-    colorTableName("hot"), pointSizeVar("default")
+    colorTableName("hot"), pointSizeVar("default"), 
+    wireframeColor(0, 0, 0, 0), pointColor(0, 0, 0, 0)
 {
     PseudocolorAttributes::Init();
 }
@@ -682,28 +693,34 @@ PseudocolorAttributes::operator == (const PseudocolorAttributes &obj) const
             (pointSizeVarEnabled == obj.pointSizeVarEnabled) &&
             (pointSizeVar == obj.pointSizeVar) &&
             (pointSizePixels == obj.pointSizePixels) &&
-            (lineType == obj.lineType) &&
             (lineStyle == obj.lineStyle) &&
+            (lineType == obj.lineType) &&
             (lineWidth == obj.lineWidth) &&
-            (tubeDisplayDensity == obj.tubeDisplayDensity) &&
+            (tubeResolution == obj.tubeResolution) &&
             (tubeRadiusSizeType == obj.tubeRadiusSizeType) &&
             (tubeRadiusAbsolute == obj.tubeRadiusAbsolute) &&
             (tubeRadiusBBox == obj.tubeRadiusBBox) &&
             (tubeRadiusVarEnabled == obj.tubeRadiusVarEnabled) &&
             (tubeRadiusVar == obj.tubeRadiusVar) &&
-            (tubeRadiusVarFactor == obj.tubeRadiusVarFactor) &&
+            (tubeRadiusVarRatio == obj.tubeRadiusVarRatio) &&
             (endPointType == obj.endPointType) &&
             (endPointStyle == obj.endPointStyle) &&
             (endPointRadiusSizeType == obj.endPointRadiusSizeType) &&
             (endPointRadiusAbsolute == obj.endPointRadiusAbsolute) &&
             (endPointRadiusBBox == obj.endPointRadiusBBox) &&
+            (endPointResolution == obj.endPointResolution) &&
             (endPointRatio == obj.endPointRatio) &&
+            (endPointRadiusVarEnabled == obj.endPointRadiusVarEnabled) &&
+            (endPointRadiusVar == obj.endPointRadiusVar) &&
+            (endPointRadiusVarRatio == obj.endPointRadiusVarRatio) &&
             (renderSurfaces == obj.renderSurfaces) &&
             (renderWireframe == obj.renderWireframe) &&
             (renderPoints == obj.renderPoints) &&
             (smoothingLevel == obj.smoothingLevel) &&
             (legendFlag == obj.legendFlag) &&
-            (lightingFlag == obj.lightingFlag));
+            (lightingFlag == obj.lightingFlag) &&
+            (wireframeColor == obj.wireframeColor) &&
+            (pointColor == obj.pointColor));
 }
 
 // ****************************************************************************
@@ -847,50 +864,56 @@ PseudocolorAttributes::NewInstance(bool copy) const
 void
 PseudocolorAttributes::SelectAll()
 {
-    Select(ID_scaling,                (void *)&scaling);
-    Select(ID_skewFactor,             (void *)&skewFactor);
-    Select(ID_limitsMode,             (void *)&limitsMode);
-    Select(ID_minFlag,                (void *)&minFlag);
-    Select(ID_min,                    (void *)&min);
-    Select(ID_maxFlag,                (void *)&maxFlag);
-    Select(ID_max,                    (void *)&max);
-    Select(ID_centering,              (void *)&centering);
-    Select(ID_colorTableName,         (void *)&colorTableName);
-    Select(ID_invertColorTable,       (void *)&invertColorTable);
-    Select(ID_opacityType,            (void *)&opacityType);
-    Select(ID_opacityVariable,        (void *)&opacityVariable);
-    Select(ID_opacity,                (void *)&opacity);
-    Select(ID_opacityVarMin,          (void *)&opacityVarMin);
-    Select(ID_opacityVarMax,          (void *)&opacityVarMax);
-    Select(ID_opacityVarMinFlag,      (void *)&opacityVarMinFlag);
-    Select(ID_opacityVarMaxFlag,      (void *)&opacityVarMaxFlag);
-    Select(ID_pointSize,              (void *)&pointSize);
-    Select(ID_pointType,              (void *)&pointType);
-    Select(ID_pointSizeVarEnabled,    (void *)&pointSizeVarEnabled);
-    Select(ID_pointSizeVar,           (void *)&pointSizeVar);
-    Select(ID_pointSizePixels,        (void *)&pointSizePixels);
-    Select(ID_lineType,               (void *)&lineType);
-    Select(ID_lineStyle,              (void *)&lineStyle);
-    Select(ID_lineWidth,              (void *)&lineWidth);
-    Select(ID_tubeDisplayDensity,     (void *)&tubeDisplayDensity);
-    Select(ID_tubeRadiusSizeType,     (void *)&tubeRadiusSizeType);
-    Select(ID_tubeRadiusAbsolute,     (void *)&tubeRadiusAbsolute);
-    Select(ID_tubeRadiusBBox,         (void *)&tubeRadiusBBox);
-    Select(ID_tubeRadiusVarEnabled,   (void *)&tubeRadiusVarEnabled);
-    Select(ID_tubeRadiusVar,          (void *)&tubeRadiusVar);
-    Select(ID_tubeRadiusVarFactor,    (void *)&tubeRadiusVarFactor);
-    Select(ID_endPointType,           (void *)&endPointType);
-    Select(ID_endPointStyle,          (void *)&endPointStyle);
-    Select(ID_endPointRadiusSizeType, (void *)&endPointRadiusSizeType);
-    Select(ID_endPointRadiusAbsolute, (void *)&endPointRadiusAbsolute);
-    Select(ID_endPointRadiusBBox,     (void *)&endPointRadiusBBox);
-    Select(ID_endPointRatio,          (void *)&endPointRatio);
-    Select(ID_renderSurfaces,         (void *)&renderSurfaces);
-    Select(ID_renderWireframe,        (void *)&renderWireframe);
-    Select(ID_renderPoints,           (void *)&renderPoints);
-    Select(ID_smoothingLevel,         (void *)&smoothingLevel);
-    Select(ID_legendFlag,             (void *)&legendFlag);
-    Select(ID_lightingFlag,           (void *)&lightingFlag);
+    Select(ID_scaling,                  (void *)&scaling);
+    Select(ID_skewFactor,               (void *)&skewFactor);
+    Select(ID_limitsMode,               (void *)&limitsMode);
+    Select(ID_minFlag,                  (void *)&minFlag);
+    Select(ID_min,                      (void *)&min);
+    Select(ID_maxFlag,                  (void *)&maxFlag);
+    Select(ID_max,                      (void *)&max);
+    Select(ID_centering,                (void *)&centering);
+    Select(ID_colorTableName,           (void *)&colorTableName);
+    Select(ID_invertColorTable,         (void *)&invertColorTable);
+    Select(ID_opacityType,              (void *)&opacityType);
+    Select(ID_opacityVariable,          (void *)&opacityVariable);
+    Select(ID_opacity,                  (void *)&opacity);
+    Select(ID_opacityVarMin,            (void *)&opacityVarMin);
+    Select(ID_opacityVarMax,            (void *)&opacityVarMax);
+    Select(ID_opacityVarMinFlag,        (void *)&opacityVarMinFlag);
+    Select(ID_opacityVarMaxFlag,        (void *)&opacityVarMaxFlag);
+    Select(ID_pointSize,                (void *)&pointSize);
+    Select(ID_pointType,                (void *)&pointType);
+    Select(ID_pointSizeVarEnabled,      (void *)&pointSizeVarEnabled);
+    Select(ID_pointSizeVar,             (void *)&pointSizeVar);
+    Select(ID_pointSizePixels,          (void *)&pointSizePixels);
+    Select(ID_lineStyle,                (void *)&lineStyle);
+    Select(ID_lineType,                 (void *)&lineType);
+    Select(ID_lineWidth,                (void *)&lineWidth);
+    Select(ID_tubeResolution,           (void *)&tubeResolution);
+    Select(ID_tubeRadiusSizeType,       (void *)&tubeRadiusSizeType);
+    Select(ID_tubeRadiusAbsolute,       (void *)&tubeRadiusAbsolute);
+    Select(ID_tubeRadiusBBox,           (void *)&tubeRadiusBBox);
+    Select(ID_tubeRadiusVarEnabled,     (void *)&tubeRadiusVarEnabled);
+    Select(ID_tubeRadiusVar,            (void *)&tubeRadiusVar);
+    Select(ID_tubeRadiusVarRatio,       (void *)&tubeRadiusVarRatio);
+    Select(ID_endPointType,             (void *)&endPointType);
+    Select(ID_endPointStyle,            (void *)&endPointStyle);
+    Select(ID_endPointRadiusSizeType,   (void *)&endPointRadiusSizeType);
+    Select(ID_endPointRadiusAbsolute,   (void *)&endPointRadiusAbsolute);
+    Select(ID_endPointRadiusBBox,       (void *)&endPointRadiusBBox);
+    Select(ID_endPointResolution,       (void *)&endPointResolution);
+    Select(ID_endPointRatio,            (void *)&endPointRatio);
+    Select(ID_endPointRadiusVarEnabled, (void *)&endPointRadiusVarEnabled);
+    Select(ID_endPointRadiusVar,        (void *)&endPointRadiusVar);
+    Select(ID_endPointRadiusVarRatio,   (void *)&endPointRadiusVarRatio);
+    Select(ID_renderSurfaces,           (void *)&renderSurfaces);
+    Select(ID_renderWireframe,          (void *)&renderWireframe);
+    Select(ID_renderPoints,             (void *)&renderPoints);
+    Select(ID_smoothingLevel,           (void *)&smoothingLevel);
+    Select(ID_legendFlag,               (void *)&legendFlag);
+    Select(ID_lightingFlag,             (void *)&lightingFlag);
+    Select(ID_wireframeColor,           (void *)&wireframeColor);
+    Select(ID_pointColor,               (void *)&pointColor);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1055,16 +1078,16 @@ PseudocolorAttributes::CreateNode(DataNode *parentNode, bool completeSave, bool 
         node->AddNode(new DataNode("pointSizePixels", pointSizePixels));
     }
 
-    if(completeSave || !FieldsEqual(ID_lineType, &defaultObject))
-    {
-        addToParent = true;
-        node->AddNode(new DataNode("lineType", LineType_ToString(lineType)));
-    }
-
     if(completeSave || !FieldsEqual(ID_lineStyle, &defaultObject))
     {
         addToParent = true;
         node->AddNode(new DataNode("lineStyle", lineStyle));
+    }
+
+    if(completeSave || !FieldsEqual(ID_lineType, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("lineType", LineType_ToString(lineType)));
     }
 
     if(completeSave || !FieldsEqual(ID_lineWidth, &defaultObject))
@@ -1073,10 +1096,10 @@ PseudocolorAttributes::CreateNode(DataNode *parentNode, bool completeSave, bool 
         node->AddNode(new DataNode("lineWidth", lineWidth));
     }
 
-    if(completeSave || !FieldsEqual(ID_tubeDisplayDensity, &defaultObject))
+    if(completeSave || !FieldsEqual(ID_tubeResolution, &defaultObject))
     {
         addToParent = true;
-        node->AddNode(new DataNode("tubeDisplayDensity", tubeDisplayDensity));
+        node->AddNode(new DataNode("tubeResolution", tubeResolution));
     }
 
     if(completeSave || !FieldsEqual(ID_tubeRadiusSizeType, &defaultObject))
@@ -1109,10 +1132,10 @@ PseudocolorAttributes::CreateNode(DataNode *parentNode, bool completeSave, bool 
         node->AddNode(new DataNode("tubeRadiusVar", tubeRadiusVar));
     }
 
-    if(completeSave || !FieldsEqual(ID_tubeRadiusVarFactor, &defaultObject))
+    if(completeSave || !FieldsEqual(ID_tubeRadiusVarRatio, &defaultObject))
     {
         addToParent = true;
-        node->AddNode(new DataNode("tubeRadiusVarFactor", tubeRadiusVarFactor));
+        node->AddNode(new DataNode("tubeRadiusVarRatio", tubeRadiusVarRatio));
     }
 
     if(completeSave || !FieldsEqual(ID_endPointType, &defaultObject))
@@ -1145,10 +1168,34 @@ PseudocolorAttributes::CreateNode(DataNode *parentNode, bool completeSave, bool 
         node->AddNode(new DataNode("endPointRadiusBBox", endPointRadiusBBox));
     }
 
+    if(completeSave || !FieldsEqual(ID_endPointResolution, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("endPointResolution", endPointResolution));
+    }
+
     if(completeSave || !FieldsEqual(ID_endPointRatio, &defaultObject))
     {
         addToParent = true;
         node->AddNode(new DataNode("endPointRatio", endPointRatio));
+    }
+
+    if(completeSave || !FieldsEqual(ID_endPointRadiusVarEnabled, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("endPointRadiusVarEnabled", endPointRadiusVarEnabled));
+    }
+
+    if(completeSave || !FieldsEqual(ID_endPointRadiusVar, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("endPointRadiusVar", endPointRadiusVar));
+    }
+
+    if(completeSave || !FieldsEqual(ID_endPointRadiusVarRatio, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("endPointRadiusVarRatio", endPointRadiusVarRatio));
     }
 
     if(completeSave || !FieldsEqual(ID_renderSurfaces, &defaultObject))
@@ -1187,6 +1234,22 @@ PseudocolorAttributes::CreateNode(DataNode *parentNode, bool completeSave, bool 
         node->AddNode(new DataNode("lightingFlag", lightingFlag));
     }
 
+        DataNode *wireframeColorNode = new DataNode("wireframeColor");
+        if(wireframeColor.CreateNode(wireframeColorNode, completeSave, true))
+        {
+            addToParent = true;
+            node->AddNode(wireframeColorNode);
+        }
+        else
+            delete wireframeColorNode;
+        DataNode *pointColorNode = new DataNode("pointColor");
+        if(pointColor.CreateNode(pointColorNode, completeSave, true))
+        {
+            addToParent = true;
+            node->AddNode(pointColorNode);
+        }
+        else
+            delete pointColorNode;
 
     // Add the node to the parent node.
     if(addToParent || forceAdd)
@@ -1337,6 +1400,8 @@ PseudocolorAttributes::SetFromNode(DataNode *parentNode)
         SetPointSizeVar(node->AsString());
     if((node = searchNode->GetNode("pointSizePixels")) != 0)
         SetPointSizePixels(node->AsInt());
+    if((node = searchNode->GetNode("lineStyle")) != 0)
+        SetLineStyle(node->AsInt());
     if((node = searchNode->GetNode("lineType")) != 0)
     {
         // Allow enums to be int or string in the config file
@@ -1353,12 +1418,10 @@ PseudocolorAttributes::SetFromNode(DataNode *parentNode)
                 SetLineType(value);
         }
     }
-    if((node = searchNode->GetNode("lineStyle")) != 0)
-        SetLineStyle(node->AsInt());
     if((node = searchNode->GetNode("lineWidth")) != 0)
         SetLineWidth(node->AsInt());
-    if((node = searchNode->GetNode("tubeDisplayDensity")) != 0)
-        SetTubeDisplayDensity(node->AsInt());
+    if((node = searchNode->GetNode("tubeResolution")) != 0)
+        SetTubeResolution(node->AsInt());
     if((node = searchNode->GetNode("tubeRadiusSizeType")) != 0)
     {
         // Allow enums to be int or string in the config file
@@ -1383,8 +1446,8 @@ PseudocolorAttributes::SetFromNode(DataNode *parentNode)
         SetTubeRadiusVarEnabled(node->AsBool());
     if((node = searchNode->GetNode("tubeRadiusVar")) != 0)
         SetTubeRadiusVar(node->AsString());
-    if((node = searchNode->GetNode("tubeRadiusVarFactor")) != 0)
-        SetTubeRadiusVarFactor(node->AsDouble());
+    if((node = searchNode->GetNode("tubeRadiusVarRatio")) != 0)
+        SetTubeRadiusVarRatio(node->AsDouble());
     if((node = searchNode->GetNode("endPointType")) != 0)
     {
         // Allow enums to be int or string in the config file
@@ -1437,8 +1500,16 @@ PseudocolorAttributes::SetFromNode(DataNode *parentNode)
         SetEndPointRadiusAbsolute(node->AsDouble());
     if((node = searchNode->GetNode("endPointRadiusBBox")) != 0)
         SetEndPointRadiusBBox(node->AsDouble());
+    if((node = searchNode->GetNode("endPointResolution")) != 0)
+        SetEndPointResolution(node->AsInt());
     if((node = searchNode->GetNode("endPointRatio")) != 0)
         SetEndPointRatio(node->AsDouble());
+    if((node = searchNode->GetNode("endPointRadiusVarEnabled")) != 0)
+        SetEndPointRadiusVarEnabled(node->AsBool());
+    if((node = searchNode->GetNode("endPointRadiusVar")) != 0)
+        SetEndPointRadiusVar(node->AsString());
+    if((node = searchNode->GetNode("endPointRadiusVarRatio")) != 0)
+        SetEndPointRadiusVarRatio(node->AsDouble());
     if((node = searchNode->GetNode("renderSurfaces")) != 0)
         SetRenderSurfaces(node->AsInt());
     if((node = searchNode->GetNode("renderWireframe")) != 0)
@@ -1451,6 +1522,10 @@ PseudocolorAttributes::SetFromNode(DataNode *parentNode)
         SetLegendFlag(node->AsBool());
     if((node = searchNode->GetNode("lightingFlag")) != 0)
         SetLightingFlag(node->AsBool());
+    if((node = searchNode->GetNode("wireframeColor")) != 0)
+        wireframeColor.SetFromNode(node);
+    if((node = searchNode->GetNode("pointColor")) != 0)
+        pointColor.SetFromNode(node);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1612,17 +1687,17 @@ PseudocolorAttributes::SetPointSizePixels(int pointSizePixels_)
 }
 
 void
-PseudocolorAttributes::SetLineType(PseudocolorAttributes::LineType lineType_)
-{
-    lineType = lineType_;
-    Select(ID_lineType, (void *)&lineType);
-}
-
-void
 PseudocolorAttributes::SetLineStyle(int lineStyle_)
 {
     lineStyle = lineStyle_;
     Select(ID_lineStyle, (void *)&lineStyle);
+}
+
+void
+PseudocolorAttributes::SetLineType(PseudocolorAttributes::LineType lineType_)
+{
+    lineType = lineType_;
+    Select(ID_lineType, (void *)&lineType);
 }
 
 void
@@ -1633,10 +1708,10 @@ PseudocolorAttributes::SetLineWidth(int lineWidth_)
 }
 
 void
-PseudocolorAttributes::SetTubeDisplayDensity(int tubeDisplayDensity_)
+PseudocolorAttributes::SetTubeResolution(int tubeResolution_)
 {
-    tubeDisplayDensity = tubeDisplayDensity_;
-    Select(ID_tubeDisplayDensity, (void *)&tubeDisplayDensity);
+    tubeResolution = tubeResolution_;
+    Select(ID_tubeResolution, (void *)&tubeResolution);
 }
 
 void
@@ -1675,10 +1750,10 @@ PseudocolorAttributes::SetTubeRadiusVar(const std::string &tubeRadiusVar_)
 }
 
 void
-PseudocolorAttributes::SetTubeRadiusVarFactor(double tubeRadiusVarFactor_)
+PseudocolorAttributes::SetTubeRadiusVarRatio(double tubeRadiusVarRatio_)
 {
-    tubeRadiusVarFactor = tubeRadiusVarFactor_;
-    Select(ID_tubeRadiusVarFactor, (void *)&tubeRadiusVarFactor);
+    tubeRadiusVarRatio = tubeRadiusVarRatio_;
+    Select(ID_tubeRadiusVarRatio, (void *)&tubeRadiusVarRatio);
 }
 
 void
@@ -1717,10 +1792,38 @@ PseudocolorAttributes::SetEndPointRadiusBBox(double endPointRadiusBBox_)
 }
 
 void
+PseudocolorAttributes::SetEndPointResolution(int endPointResolution_)
+{
+    endPointResolution = endPointResolution_;
+    Select(ID_endPointResolution, (void *)&endPointResolution);
+}
+
+void
 PseudocolorAttributes::SetEndPointRatio(double endPointRatio_)
 {
     endPointRatio = endPointRatio_;
     Select(ID_endPointRatio, (void *)&endPointRatio);
+}
+
+void
+PseudocolorAttributes::SetEndPointRadiusVarEnabled(bool endPointRadiusVarEnabled_)
+{
+    endPointRadiusVarEnabled = endPointRadiusVarEnabled_;
+    Select(ID_endPointRadiusVarEnabled, (void *)&endPointRadiusVarEnabled);
+}
+
+void
+PseudocolorAttributes::SetEndPointRadiusVar(const std::string &endPointRadiusVar_)
+{
+    endPointRadiusVar = endPointRadiusVar_;
+    Select(ID_endPointRadiusVar, (void *)&endPointRadiusVar);
+}
+
+void
+PseudocolorAttributes::SetEndPointRadiusVarRatio(double endPointRadiusVarRatio_)
+{
+    endPointRadiusVarRatio = endPointRadiusVarRatio_;
+    Select(ID_endPointRadiusVarRatio, (void *)&endPointRadiusVarRatio);
 }
 
 void
@@ -1763,6 +1866,20 @@ PseudocolorAttributes::SetLightingFlag(bool lightingFlag_)
 {
     lightingFlag = lightingFlag_;
     Select(ID_lightingFlag, (void *)&lightingFlag);
+}
+
+void
+PseudocolorAttributes::SetWireframeColor(const ColorAttribute &wireframeColor_)
+{
+    wireframeColor = wireframeColor_;
+    Select(ID_wireframeColor, (void *)&wireframeColor);
+}
+
+void
+PseudocolorAttributes::SetPointColor(const ColorAttribute &pointColor_)
+{
+    pointColor = pointColor_;
+    Select(ID_pointColor, (void *)&pointColor);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1919,16 +2036,16 @@ PseudocolorAttributes::GetPointSizePixels() const
     return pointSizePixels;
 }
 
-PseudocolorAttributes::LineType
-PseudocolorAttributes::GetLineType() const
-{
-    return LineType(lineType);
-}
-
 int
 PseudocolorAttributes::GetLineStyle() const
 {
     return lineStyle;
+}
+
+PseudocolorAttributes::LineType
+PseudocolorAttributes::GetLineType() const
+{
+    return LineType(lineType);
 }
 
 int
@@ -1938,9 +2055,9 @@ PseudocolorAttributes::GetLineWidth() const
 }
 
 int
-PseudocolorAttributes::GetTubeDisplayDensity() const
+PseudocolorAttributes::GetTubeResolution() const
 {
-    return tubeDisplayDensity;
+    return tubeResolution;
 }
 
 PseudocolorAttributes::SizeType
@@ -1980,9 +2097,9 @@ PseudocolorAttributes::GetTubeRadiusVar()
 }
 
 double
-PseudocolorAttributes::GetTubeRadiusVarFactor() const
+PseudocolorAttributes::GetTubeRadiusVarRatio() const
 {
-    return tubeRadiusVarFactor;
+    return tubeRadiusVarRatio;
 }
 
 PseudocolorAttributes::EndPointType
@@ -2015,10 +2132,40 @@ PseudocolorAttributes::GetEndPointRadiusBBox() const
     return endPointRadiusBBox;
 }
 
+int
+PseudocolorAttributes::GetEndPointResolution() const
+{
+    return endPointResolution;
+}
+
 double
 PseudocolorAttributes::GetEndPointRatio() const
 {
     return endPointRatio;
+}
+
+bool
+PseudocolorAttributes::GetEndPointRadiusVarEnabled() const
+{
+    return endPointRadiusVarEnabled;
+}
+
+const std::string &
+PseudocolorAttributes::GetEndPointRadiusVar() const
+{
+    return endPointRadiusVar;
+}
+
+std::string &
+PseudocolorAttributes::GetEndPointRadiusVar()
+{
+    return endPointRadiusVar;
+}
+
+double
+PseudocolorAttributes::GetEndPointRadiusVarRatio() const
+{
+    return endPointRadiusVarRatio;
 }
 
 int
@@ -2057,6 +2204,30 @@ PseudocolorAttributes::GetLightingFlag() const
     return lightingFlag;
 }
 
+const ColorAttribute &
+PseudocolorAttributes::GetWireframeColor() const
+{
+    return wireframeColor;
+}
+
+ColorAttribute &
+PseudocolorAttributes::GetWireframeColor()
+{
+    return wireframeColor;
+}
+
+const ColorAttribute &
+PseudocolorAttributes::GetPointColor() const
+{
+    return pointColor;
+}
+
+ColorAttribute &
+PseudocolorAttributes::GetPointColor()
+{
+    return pointColor;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Select property methods
 ///////////////////////////////////////////////////////////////////////////////
@@ -2085,6 +2256,24 @@ PseudocolorAttributes::SelectTubeRadiusVar()
     Select(ID_tubeRadiusVar, (void *)&tubeRadiusVar);
 }
 
+void
+PseudocolorAttributes::SelectEndPointRadiusVar()
+{
+    Select(ID_endPointRadiusVar, (void *)&endPointRadiusVar);
+}
+
+void
+PseudocolorAttributes::SelectWireframeColor()
+{
+    Select(ID_wireframeColor, (void *)&wireframeColor);
+}
+
+void
+PseudocolorAttributes::SelectPointColor()
+{
+    Select(ID_pointColor, (void *)&pointColor);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Keyframing methods
 ///////////////////////////////////////////////////////////////////////////////
@@ -2109,50 +2298,56 @@ PseudocolorAttributes::GetFieldName(int index) const
 {
     switch (index)
     {
-    case ID_scaling:                return "scaling";
-    case ID_skewFactor:             return "skewFactor";
-    case ID_limitsMode:             return "limitsMode";
-    case ID_minFlag:                return "minFlag";
-    case ID_min:                    return "min";
-    case ID_maxFlag:                return "maxFlag";
-    case ID_max:                    return "max";
-    case ID_centering:              return "centering";
-    case ID_colorTableName:         return "colorTableName";
-    case ID_invertColorTable:       return "invertColorTable";
-    case ID_opacityType:            return "opacityType";
-    case ID_opacityVariable:        return "opacityVariable";
-    case ID_opacity:                return "opacity";
-    case ID_opacityVarMin:          return "opacityVarMin";
-    case ID_opacityVarMax:          return "opacityVarMax";
-    case ID_opacityVarMinFlag:      return "opacityVarMinFlag";
-    case ID_opacityVarMaxFlag:      return "opacityVarMaxFlag";
-    case ID_pointSize:              return "pointSize";
-    case ID_pointType:              return "pointType";
-    case ID_pointSizeVarEnabled:    return "pointSizeVarEnabled";
-    case ID_pointSizeVar:           return "pointSizeVar";
-    case ID_pointSizePixels:        return "pointSizePixels";
-    case ID_lineType:               return "lineType";
-    case ID_lineStyle:              return "lineStyle";
-    case ID_lineWidth:              return "lineWidth";
-    case ID_tubeDisplayDensity:     return "tubeDisplayDensity";
-    case ID_tubeRadiusSizeType:     return "tubeRadiusSizeType";
-    case ID_tubeRadiusAbsolute:     return "tubeRadiusAbsolute";
-    case ID_tubeRadiusBBox:         return "tubeRadiusBBox";
-    case ID_tubeRadiusVarEnabled:   return "tubeRadiusVarEnabled";
-    case ID_tubeRadiusVar:          return "tubeRadiusVar";
-    case ID_tubeRadiusVarFactor:    return "tubeRadiusVarFactor";
-    case ID_endPointType:           return "endPointType";
-    case ID_endPointStyle:          return "endPointStyle";
-    case ID_endPointRadiusSizeType: return "endPointRadiusSizeType";
-    case ID_endPointRadiusAbsolute: return "endPointRadiusAbsolute";
-    case ID_endPointRadiusBBox:     return "endPointRadiusBBox";
-    case ID_endPointRatio:          return "endPointRatio";
-    case ID_renderSurfaces:         return "renderSurfaces";
-    case ID_renderWireframe:        return "renderWireframe";
-    case ID_renderPoints:           return "renderPoints";
-    case ID_smoothingLevel:         return "smoothingLevel";
-    case ID_legendFlag:             return "legendFlag";
-    case ID_lightingFlag:           return "lightingFlag";
+    case ID_scaling:                  return "scaling";
+    case ID_skewFactor:               return "skewFactor";
+    case ID_limitsMode:               return "limitsMode";
+    case ID_minFlag:                  return "minFlag";
+    case ID_min:                      return "min";
+    case ID_maxFlag:                  return "maxFlag";
+    case ID_max:                      return "max";
+    case ID_centering:                return "centering";
+    case ID_colorTableName:           return "colorTableName";
+    case ID_invertColorTable:         return "invertColorTable";
+    case ID_opacityType:              return "opacityType";
+    case ID_opacityVariable:          return "opacityVariable";
+    case ID_opacity:                  return "opacity";
+    case ID_opacityVarMin:            return "opacityVarMin";
+    case ID_opacityVarMax:            return "opacityVarMax";
+    case ID_opacityVarMinFlag:        return "opacityVarMinFlag";
+    case ID_opacityVarMaxFlag:        return "opacityVarMaxFlag";
+    case ID_pointSize:                return "pointSize";
+    case ID_pointType:                return "pointType";
+    case ID_pointSizeVarEnabled:      return "pointSizeVarEnabled";
+    case ID_pointSizeVar:             return "pointSizeVar";
+    case ID_pointSizePixels:          return "pointSizePixels";
+    case ID_lineStyle:                return "lineStyle";
+    case ID_lineType:                 return "lineType";
+    case ID_lineWidth:                return "lineWidth";
+    case ID_tubeResolution:           return "tubeResolution";
+    case ID_tubeRadiusSizeType:       return "tubeRadiusSizeType";
+    case ID_tubeRadiusAbsolute:       return "tubeRadiusAbsolute";
+    case ID_tubeRadiusBBox:           return "tubeRadiusBBox";
+    case ID_tubeRadiusVarEnabled:     return "tubeRadiusVarEnabled";
+    case ID_tubeRadiusVar:            return "tubeRadiusVar";
+    case ID_tubeRadiusVarRatio:       return "tubeRadiusVarRatio";
+    case ID_endPointType:             return "endPointType";
+    case ID_endPointStyle:            return "endPointStyle";
+    case ID_endPointRadiusSizeType:   return "endPointRadiusSizeType";
+    case ID_endPointRadiusAbsolute:   return "endPointRadiusAbsolute";
+    case ID_endPointRadiusBBox:       return "endPointRadiusBBox";
+    case ID_endPointResolution:       return "endPointResolution";
+    case ID_endPointRatio:            return "endPointRatio";
+    case ID_endPointRadiusVarEnabled: return "endPointRadiusVarEnabled";
+    case ID_endPointRadiusVar:        return "endPointRadiusVar";
+    case ID_endPointRadiusVarRatio:   return "endPointRadiusVarRatio";
+    case ID_renderSurfaces:           return "renderSurfaces";
+    case ID_renderWireframe:          return "renderWireframe";
+    case ID_renderPoints:             return "renderPoints";
+    case ID_smoothingLevel:           return "smoothingLevel";
+    case ID_legendFlag:               return "legendFlag";
+    case ID_lightingFlag:             return "lightingFlag";
+    case ID_wireframeColor:           return "wireframeColor";
+    case ID_pointColor:               return "pointColor";
     default:  return "invalid index";
     }
 }
@@ -2177,50 +2372,56 @@ PseudocolorAttributes::GetFieldType(int index) const
 {
     switch (index)
     {
-    case ID_scaling:                return FieldType_enum;
-    case ID_skewFactor:             return FieldType_double;
-    case ID_limitsMode:             return FieldType_enum;
-    case ID_minFlag:                return FieldType_bool;
-    case ID_min:                    return FieldType_double;
-    case ID_maxFlag:                return FieldType_bool;
-    case ID_max:                    return FieldType_double;
-    case ID_centering:              return FieldType_enum;
-    case ID_colorTableName:         return FieldType_colortable;
-    case ID_invertColorTable:       return FieldType_bool;
-    case ID_opacityType:            return FieldType_enum;
-    case ID_opacityVariable:        return FieldType_string;
-    case ID_opacity:                return FieldType_double;
-    case ID_opacityVarMin:          return FieldType_double;
-    case ID_opacityVarMax:          return FieldType_double;
-    case ID_opacityVarMinFlag:      return FieldType_bool;
-    case ID_opacityVarMaxFlag:      return FieldType_bool;
-    case ID_pointSize:              return FieldType_double;
-    case ID_pointType:              return FieldType_enum;
-    case ID_pointSizeVarEnabled:    return FieldType_bool;
-    case ID_pointSizeVar:           return FieldType_variablename;
-    case ID_pointSizePixels:        return FieldType_int;
-    case ID_lineType:               return FieldType_enum;
-    case ID_lineStyle:              return FieldType_linestyle;
-    case ID_lineWidth:              return FieldType_linewidth;
-    case ID_tubeDisplayDensity:     return FieldType_int;
-    case ID_tubeRadiusSizeType:     return FieldType_enum;
-    case ID_tubeRadiusAbsolute:     return FieldType_double;
-    case ID_tubeRadiusBBox:         return FieldType_double;
-    case ID_tubeRadiusVarEnabled:   return FieldType_bool;
-    case ID_tubeRadiusVar:          return FieldType_string;
-    case ID_tubeRadiusVarFactor:    return FieldType_double;
-    case ID_endPointType:           return FieldType_enum;
-    case ID_endPointStyle:          return FieldType_enum;
-    case ID_endPointRadiusSizeType: return FieldType_enum;
-    case ID_endPointRadiusAbsolute: return FieldType_double;
-    case ID_endPointRadiusBBox:     return FieldType_double;
-    case ID_endPointRatio:          return FieldType_double;
-    case ID_renderSurfaces:         return FieldType_int;
-    case ID_renderWireframe:        return FieldType_int;
-    case ID_renderPoints:           return FieldType_int;
-    case ID_smoothingLevel:         return FieldType_int;
-    case ID_legendFlag:             return FieldType_bool;
-    case ID_lightingFlag:           return FieldType_bool;
+    case ID_scaling:                  return FieldType_enum;
+    case ID_skewFactor:               return FieldType_double;
+    case ID_limitsMode:               return FieldType_enum;
+    case ID_minFlag:                  return FieldType_bool;
+    case ID_min:                      return FieldType_double;
+    case ID_maxFlag:                  return FieldType_bool;
+    case ID_max:                      return FieldType_double;
+    case ID_centering:                return FieldType_enum;
+    case ID_colorTableName:           return FieldType_colortable;
+    case ID_invertColorTable:         return FieldType_bool;
+    case ID_opacityType:              return FieldType_enum;
+    case ID_opacityVariable:          return FieldType_string;
+    case ID_opacity:                  return FieldType_double;
+    case ID_opacityVarMin:            return FieldType_double;
+    case ID_opacityVarMax:            return FieldType_double;
+    case ID_opacityVarMinFlag:        return FieldType_bool;
+    case ID_opacityVarMaxFlag:        return FieldType_bool;
+    case ID_pointSize:                return FieldType_double;
+    case ID_pointType:                return FieldType_enum;
+    case ID_pointSizeVarEnabled:      return FieldType_bool;
+    case ID_pointSizeVar:             return FieldType_variablename;
+    case ID_pointSizePixels:          return FieldType_int;
+    case ID_lineStyle:                return FieldType_linestyle;
+    case ID_lineType:                 return FieldType_enum;
+    case ID_lineWidth:                return FieldType_linewidth;
+    case ID_tubeResolution:           return FieldType_int;
+    case ID_tubeRadiusSizeType:       return FieldType_enum;
+    case ID_tubeRadiusAbsolute:       return FieldType_double;
+    case ID_tubeRadiusBBox:           return FieldType_double;
+    case ID_tubeRadiusVarEnabled:     return FieldType_bool;
+    case ID_tubeRadiusVar:            return FieldType_string;
+    case ID_tubeRadiusVarRatio:       return FieldType_double;
+    case ID_endPointType:             return FieldType_enum;
+    case ID_endPointStyle:            return FieldType_enum;
+    case ID_endPointRadiusSizeType:   return FieldType_enum;
+    case ID_endPointRadiusAbsolute:   return FieldType_double;
+    case ID_endPointRadiusBBox:       return FieldType_double;
+    case ID_endPointResolution:       return FieldType_int;
+    case ID_endPointRatio:            return FieldType_double;
+    case ID_endPointRadiusVarEnabled: return FieldType_bool;
+    case ID_endPointRadiusVar:        return FieldType_string;
+    case ID_endPointRadiusVarRatio:   return FieldType_double;
+    case ID_renderSurfaces:           return FieldType_int;
+    case ID_renderWireframe:          return FieldType_int;
+    case ID_renderPoints:             return FieldType_int;
+    case ID_smoothingLevel:           return FieldType_int;
+    case ID_legendFlag:               return FieldType_bool;
+    case ID_lightingFlag:             return FieldType_bool;
+    case ID_wireframeColor:           return FieldType_color;
+    case ID_pointColor:               return FieldType_color;
     default:  return FieldType_unknown;
     }
 }
@@ -2245,50 +2446,56 @@ PseudocolorAttributes::GetFieldTypeName(int index) const
 {
     switch (index)
     {
-    case ID_scaling:                return "enum";
-    case ID_skewFactor:             return "double";
-    case ID_limitsMode:             return "enum";
-    case ID_minFlag:                return "bool";
-    case ID_min:                    return "double";
-    case ID_maxFlag:                return "bool";
-    case ID_max:                    return "double";
-    case ID_centering:              return "enum";
-    case ID_colorTableName:         return "colortable";
-    case ID_invertColorTable:       return "bool";
-    case ID_opacityType:            return "enum";
-    case ID_opacityVariable:        return "string";
-    case ID_opacity:                return "double";
-    case ID_opacityVarMin:          return "double";
-    case ID_opacityVarMax:          return "double";
-    case ID_opacityVarMinFlag:      return "bool";
-    case ID_opacityVarMaxFlag:      return "bool";
-    case ID_pointSize:              return "double";
-    case ID_pointType:              return "enum";
-    case ID_pointSizeVarEnabled:    return "bool";
-    case ID_pointSizeVar:           return "variablename";
-    case ID_pointSizePixels:        return "int";
-    case ID_lineType:               return "enum";
-    case ID_lineStyle:              return "linestyle";
-    case ID_lineWidth:              return "linewidth";
-    case ID_tubeDisplayDensity:     return "int";
-    case ID_tubeRadiusSizeType:     return "enum";
-    case ID_tubeRadiusAbsolute:     return "double";
-    case ID_tubeRadiusBBox:         return "double";
-    case ID_tubeRadiusVarEnabled:   return "bool";
-    case ID_tubeRadiusVar:          return "string";
-    case ID_tubeRadiusVarFactor:    return "double";
-    case ID_endPointType:           return "enum";
-    case ID_endPointStyle:          return "enum";
-    case ID_endPointRadiusSizeType: return "enum";
-    case ID_endPointRadiusAbsolute: return "double";
-    case ID_endPointRadiusBBox:     return "double";
-    case ID_endPointRatio:          return "double";
-    case ID_renderSurfaces:         return "int";
-    case ID_renderWireframe:        return "int";
-    case ID_renderPoints:           return "int";
-    case ID_smoothingLevel:         return "int";
-    case ID_legendFlag:             return "bool";
-    case ID_lightingFlag:           return "bool";
+    case ID_scaling:                  return "enum";
+    case ID_skewFactor:               return "double";
+    case ID_limitsMode:               return "enum";
+    case ID_minFlag:                  return "bool";
+    case ID_min:                      return "double";
+    case ID_maxFlag:                  return "bool";
+    case ID_max:                      return "double";
+    case ID_centering:                return "enum";
+    case ID_colorTableName:           return "colortable";
+    case ID_invertColorTable:         return "bool";
+    case ID_opacityType:              return "enum";
+    case ID_opacityVariable:          return "string";
+    case ID_opacity:                  return "double";
+    case ID_opacityVarMin:            return "double";
+    case ID_opacityVarMax:            return "double";
+    case ID_opacityVarMinFlag:        return "bool";
+    case ID_opacityVarMaxFlag:        return "bool";
+    case ID_pointSize:                return "double";
+    case ID_pointType:                return "enum";
+    case ID_pointSizeVarEnabled:      return "bool";
+    case ID_pointSizeVar:             return "variablename";
+    case ID_pointSizePixels:          return "int";
+    case ID_lineStyle:                return "linestyle";
+    case ID_lineType:                 return "enum";
+    case ID_lineWidth:                return "linewidth";
+    case ID_tubeResolution:           return "int";
+    case ID_tubeRadiusSizeType:       return "enum";
+    case ID_tubeRadiusAbsolute:       return "double";
+    case ID_tubeRadiusBBox:           return "double";
+    case ID_tubeRadiusVarEnabled:     return "bool";
+    case ID_tubeRadiusVar:            return "string";
+    case ID_tubeRadiusVarRatio:       return "double";
+    case ID_endPointType:             return "enum";
+    case ID_endPointStyle:            return "enum";
+    case ID_endPointRadiusSizeType:   return "enum";
+    case ID_endPointRadiusAbsolute:   return "double";
+    case ID_endPointRadiusBBox:       return "double";
+    case ID_endPointResolution:       return "int";
+    case ID_endPointRatio:            return "double";
+    case ID_endPointRadiusVarEnabled: return "bool";
+    case ID_endPointRadiusVar:        return "string";
+    case ID_endPointRadiusVarRatio:   return "double";
+    case ID_renderSurfaces:           return "int";
+    case ID_renderWireframe:          return "int";
+    case ID_renderPoints:             return "int";
+    case ID_smoothingLevel:           return "int";
+    case ID_legendFlag:               return "bool";
+    case ID_lightingFlag:             return "bool";
+    case ID_wireframeColor:           return "color";
+    case ID_pointColor:               return "color";
     default:  return "invalid index";
     }
 }
@@ -2425,14 +2632,14 @@ PseudocolorAttributes::FieldsEqual(int index_, const AttributeGroup *rhs) const
         retval = (pointSizePixels == obj.pointSizePixels);
         }
         break;
-    case ID_lineType:
-        {  // new scope
-        retval = (lineType == obj.lineType);
-        }
-        break;
     case ID_lineStyle:
         {  // new scope
         retval = (lineStyle == obj.lineStyle);
+        }
+        break;
+    case ID_lineType:
+        {  // new scope
+        retval = (lineType == obj.lineType);
         }
         break;
     case ID_lineWidth:
@@ -2440,9 +2647,9 @@ PseudocolorAttributes::FieldsEqual(int index_, const AttributeGroup *rhs) const
         retval = (lineWidth == obj.lineWidth);
         }
         break;
-    case ID_tubeDisplayDensity:
+    case ID_tubeResolution:
         {  // new scope
-        retval = (tubeDisplayDensity == obj.tubeDisplayDensity);
+        retval = (tubeResolution == obj.tubeResolution);
         }
         break;
     case ID_tubeRadiusSizeType:
@@ -2470,9 +2677,9 @@ PseudocolorAttributes::FieldsEqual(int index_, const AttributeGroup *rhs) const
         retval = (tubeRadiusVar == obj.tubeRadiusVar);
         }
         break;
-    case ID_tubeRadiusVarFactor:
+    case ID_tubeRadiusVarRatio:
         {  // new scope
-        retval = (tubeRadiusVarFactor == obj.tubeRadiusVarFactor);
+        retval = (tubeRadiusVarRatio == obj.tubeRadiusVarRatio);
         }
         break;
     case ID_endPointType:
@@ -2500,9 +2707,29 @@ PseudocolorAttributes::FieldsEqual(int index_, const AttributeGroup *rhs) const
         retval = (endPointRadiusBBox == obj.endPointRadiusBBox);
         }
         break;
+    case ID_endPointResolution:
+        {  // new scope
+        retval = (endPointResolution == obj.endPointResolution);
+        }
+        break;
     case ID_endPointRatio:
         {  // new scope
         retval = (endPointRatio == obj.endPointRatio);
+        }
+        break;
+    case ID_endPointRadiusVarEnabled:
+        {  // new scope
+        retval = (endPointRadiusVarEnabled == obj.endPointRadiusVarEnabled);
+        }
+        break;
+    case ID_endPointRadiusVar:
+        {  // new scope
+        retval = (endPointRadiusVar == obj.endPointRadiusVar);
+        }
+        break;
+    case ID_endPointRadiusVarRatio:
+        {  // new scope
+        retval = (endPointRadiusVarRatio == obj.endPointRadiusVarRatio);
         }
         break;
     case ID_renderSurfaces:
@@ -2533,6 +2760,16 @@ PseudocolorAttributes::FieldsEqual(int index_, const AttributeGroup *rhs) const
     case ID_lightingFlag:
         {  // new scope
         retval = (lightingFlag == obj.lightingFlag);
+        }
+        break;
+    case ID_wireframeColor:
+        {  // new scope
+        retval = (wireframeColor == obj.wireframeColor);
+        }
+        break;
+    case ID_pointColor:
+        {  // new scope
+        retval = (pointColor == obj.pointColor);
         }
         break;
     default: retval = false;
@@ -2578,30 +2815,62 @@ PseudocolorAttributes::ChangesRequireRecalculation(const PseudocolorAttributes &
    bool needSecondaryVar = (obj.pointType != Point &&
                             obj.pointType != Sphere &&
                             obj.pointSizeVarEnabled &&
-                            pointSizeVar != obj.pointSizeVar &&
+                            obj.pointSizeVar != pointSizeVar &&
                             obj.pointSizeVar != "default" && 
                             obj.pointSizeVar != "" &&
                             obj.pointSizeVar != "\0") ||
 
                            (obj.lineType == Tube &&
                             obj.tubeRadiusVarEnabled &&
-                            tubeRadiusVar != obj.tubeRadiusVar &&
+                            obj.tubeRadiusVar != tubeRadiusVar &&
                             obj.tubeRadiusVar != "default" && 
                             obj.tubeRadiusVar != "" &&
                             obj.tubeRadiusVar != "\0") ||
 
+                           (obj.endPointType != None &&
+                            obj.endPointRadiusVarEnabled &&
+                            obj.endPointRadiusVar != endPointRadiusVar &&
+                            obj.endPointRadiusVar != "default" && 
+                            obj.endPointRadiusVar != "" &&
+                            obj.endPointRadiusVar != "\0") ||
+
                            (obj.opacityType == VariableRange &&
-                            opacityVariable != obj.opacityVariable &&
+                            obj.opacityVariable != opacityVariable &&
                             obj.opacityVariable != "default" && 
                             obj.opacityVariable != "" &&
                             obj.opacityVariable != "\0");
 
+
+    bool geometryChange =  (lineType             != obj.lineType ||
+                            tubeRadiusSizeType   != obj.tubeRadiusSizeType ||
+                            tubeRadiusAbsolute   != obj.tubeRadiusAbsolute ||
+                            tubeRadiusBBox       != obj.tubeRadiusBBox ||
+                            tubeRadiusVarEnabled != obj.tubeRadiusVarEnabled ||
+                            tubeRadiusVar        != obj.tubeRadiusVar ||
+                            tubeRadiusVarRatio   != obj.tubeRadiusVarRatio ||
+                            tubeResolution       != obj.tubeResolution ||
+
+                            endPointType             != obj.endPointType ||
+                            endPointStyle            != obj.endPointStyle ||
+                            endPointRadiusAbsolute   != obj.endPointRadiusAbsolute ||
+                            endPointRadiusBBox       != obj.endPointRadiusBBox ||
+                            endPointRatio            != obj.endPointRatio ||
+                            endPointRadiusVarEnabled != obj.endPointRadiusVarEnabled ||
+                            endPointRadiusVar        != obj.endPointRadiusVar ||
+                            endPointRadiusVarRatio   != obj.endPointRadiusVarRatio ||
+                            endPointResolution       != obj.endPointResolution ||
+                            0 );
+
+                           
     return (centering != obj.centering ||
             needSecondaryVar ||
+            geometryChange ||
             smoothingLevel != obj.smoothingLevel ||
-//            renderSurfaces != obj.renderSurfaces ||
-//            renderWireframe != obj.renderWireframe ||
-//            renderPoints != obj.renderPoints ||
+            renderSurfaces != obj.renderSurfaces ||
+            renderWireframe != obj.renderWireframe ||
+            renderPoints != obj.renderPoints ||
+            wireframeColor != obj.wireframeColor ||
+            pointColor != obj.pointColor ||
             0);
 
 }

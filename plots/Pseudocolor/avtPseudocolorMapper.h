@@ -36,29 +36,61 @@
 *
 *****************************************************************************/
 
-#ifndef PY_PSEUDOCOLORATTRIBUTES_H
-#define PY_PSEUDOCOLORATTRIBUTES_H
-#include <Python.h>
-#include <PseudocolorAttributes.h>
+// ************************************************************************* //
+//                       avtPseudocolorMapper.h                              //
+// ************************************************************************* //
 
+#ifndef AVT_PSEUDOCOLORMAPPER_H
+#define AVT_PSEUDOCOLORMAPPER_H
+
+#include <avtVariableMapper.h>
+
+// ****************************************************************************
+//  Class:  avtPseudocolorMapper
 //
-// Functions exposed to the VisIt module.
+//  Purpose:
+//      Pseudocolor plot specific mapper, that utilizes a specialized
+//      vtkDataSetMapper allowing Multiple representations of the same dataset
+//      to be rendered at the same time( eg Surface, Wireframe, and Points).
 //
-#define PSEUDOCOLORATTRIBUTES_NMETH 102
-void           PyPseudocolorAttributes_StartUp(PseudocolorAttributes *subj, void *data);
-void           PyPseudocolorAttributes_CloseDown();
-PyMethodDef *  PyPseudocolorAttributes_GetMethodTable(int *nMethods);
-bool           PyPseudocolorAttributes_Check(PyObject *obj);
-PseudocolorAttributes *  PyPseudocolorAttributes_FromPyObject(PyObject *obj);
-PyObject *     PyPseudocolorAttributes_New();
-PyObject *     PyPseudocolorAttributes_Wrap(const PseudocolorAttributes *attr);
-void           PyPseudocolorAttributes_SetParent(PyObject *obj, PyObject *parent);
-void           PyPseudocolorAttributes_SetDefaults(const PseudocolorAttributes *atts);
-std::string    PyPseudocolorAttributes_GetLogString();
-std::string    PyPseudocolorAttributes_ToString(const PseudocolorAttributes *, const char *);
-PyObject *     PyPseudocolorAttributes_getattr(PyObject *self, char *name);
-int            PyPseudocolorAttributes_setattr(PyObject *self, char *name, PyObject *args);
-extern PyMethodDef PyPseudocolorAttributes_methods[PSEUDOCOLORATTRIBUTES_NMETH];
+//  Programmer: Kathleen Biagas
+//  Creation:   August 24, 2016 
+//
+//  Modifications:
+//
+// ****************************************************************************
+
+class avtPseudocolorMapper : public avtVariableMapper
+{
+  public:
+                               avtPseudocolorMapper();
+    virtual                   ~avtPseudocolorMapper();
+
+
+    void                       SetDrawSurface(bool);
+    void                       SetDrawWireframe(bool);
+    void                       SetDrawPoints(bool);
+    void                       SetWireframeColor(double rgb[3]);
+    void                       SetPointsColor(double rgb[3]);
+
+
+
+
+  protected:
+    // these are called from avtMapper
+    virtual vtkDataSetMapper  *CreateMapper(void);
+    virtual void               CustomizeMappers(void);
+
+  private:
+
+    bool   drawSurface;
+    bool   drawWireframe;
+    bool   drawPoints;
+    double wireframeColor[3];
+    double pointsColor[3];
+};
+
 
 #endif
+
 

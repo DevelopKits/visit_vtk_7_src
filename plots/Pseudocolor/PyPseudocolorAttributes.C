@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -40,6 +40,7 @@
 #include <ObserverToCallback.h>
 #include <stdio.h>
 #include <snprintf.h>
+#include <ColorAttribute.h>
 
 // ****************************************************************************
 // Module: PyPseudocolorAttributes
@@ -248,6 +249,9 @@ PyPseudocolorAttributes_ToString(const PseudocolorAttributes *atts, const char *
     str += tmpStr;
     SNPRINTF(tmpStr, 1000, "%spointSizePixels = %d\n", prefix, atts->GetPointSizePixels());
     str += tmpStr;
+    const char *lineStyle_values[] = {"SOLID", "DASH", "DOT", "DOTDASH"};
+    SNPRINTF(tmpStr, 1000, "%slineStyle = %s%s  # SOLID, DASH, DOT, DOTDASH\n", prefix, prefix, lineStyle_values[atts->GetLineStyle()]);
+    str += tmpStr;
     const char *lineType_names = "Line, Tube, Ribbon";
     switch (atts->GetLineType())
     {
@@ -267,12 +271,9 @@ PyPseudocolorAttributes_ToString(const PseudocolorAttributes *atts, const char *
           break;
     }
 
-    const char *lineStyle_values[] = {"SOLID", "DASH", "DOT", "DOTDASH"};
-    SNPRINTF(tmpStr, 1000, "%slineStyle = %s%s  # SOLID, DASH, DOT, DOTDASH\n", prefix, prefix, lineStyle_values[atts->GetLineStyle()]);
-    str += tmpStr;
     SNPRINTF(tmpStr, 1000, "%slineWidth = %d\n", prefix, atts->GetLineWidth());
     str += tmpStr;
-    SNPRINTF(tmpStr, 1000, "%stubeDisplayDensity = %d\n", prefix, atts->GetTubeDisplayDensity());
+    SNPRINTF(tmpStr, 1000, "%stubeResolution = %d\n", prefix, atts->GetTubeResolution());
     str += tmpStr;
     const char *tubeRadiusSizeType_names = "Absolute, FractionOfBBox";
     switch (atts->GetTubeRadiusSizeType())
@@ -300,21 +301,21 @@ PyPseudocolorAttributes_ToString(const PseudocolorAttributes *atts, const char *
     str += tmpStr;
     SNPRINTF(tmpStr, 1000, "%stubeRadiusVar = \"%s\"\n", prefix, atts->GetTubeRadiusVar().c_str());
     str += tmpStr;
-    SNPRINTF(tmpStr, 1000, "%stubeRadiusVarFactor = %g\n", prefix, atts->GetTubeRadiusVarFactor());
+    SNPRINTF(tmpStr, 1000, "%stubeRadiusVarRatio = %g\n", prefix, atts->GetTubeRadiusVarRatio());
     str += tmpStr;
-    const char *endPointType_names = "None, Tails, Heads, Both";
+    const char *endPointType_names = "None, Heads, Tails, Both";
     switch (atts->GetEndPointType())
     {
       case PseudocolorAttributes::None:
           SNPRINTF(tmpStr, 1000, "%sendPointType = %sNone  # %s\n", prefix, prefix, endPointType_names);
           str += tmpStr;
           break;
-      case PseudocolorAttributes::Tails:
-          SNPRINTF(tmpStr, 1000, "%sendPointType = %sTails  # %s\n", prefix, prefix, endPointType_names);
-          str += tmpStr;
-          break;
       case PseudocolorAttributes::Heads:
           SNPRINTF(tmpStr, 1000, "%sendPointType = %sHeads  # %s\n", prefix, prefix, endPointType_names);
+          str += tmpStr;
+          break;
+      case PseudocolorAttributes::Tails:
+          SNPRINTF(tmpStr, 1000, "%sendPointType = %sTails  # %s\n", prefix, prefix, endPointType_names);
           str += tmpStr;
           break;
       case PseudocolorAttributes::Both:
@@ -359,7 +360,18 @@ PyPseudocolorAttributes_ToString(const PseudocolorAttributes *atts, const char *
     str += tmpStr;
     SNPRINTF(tmpStr, 1000, "%sendPointRadiusBBox = %g\n", prefix, atts->GetEndPointRadiusBBox());
     str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%sendPointResolution = %d\n", prefix, atts->GetEndPointResolution());
+    str += tmpStr;
     SNPRINTF(tmpStr, 1000, "%sendPointRatio = %g\n", prefix, atts->GetEndPointRatio());
+    str += tmpStr;
+    if(atts->GetEndPointRadiusVarEnabled())
+        SNPRINTF(tmpStr, 1000, "%sendPointRadiusVarEnabled = 1\n", prefix);
+    else
+        SNPRINTF(tmpStr, 1000, "%sendPointRadiusVarEnabled = 0\n", prefix);
+    str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%sendPointRadiusVar = \"%s\"\n", prefix, atts->GetEndPointRadiusVar().c_str());
+    str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%sendPointRadiusVarRatio = %g\n", prefix, atts->GetEndPointRadiusVarRatio());
     str += tmpStr;
     SNPRINTF(tmpStr, 1000, "%srenderSurfaces = %d\n", prefix, atts->GetRenderSurfaces());
     str += tmpStr;
@@ -378,6 +390,12 @@ PyPseudocolorAttributes_ToString(const PseudocolorAttributes *atts, const char *
         SNPRINTF(tmpStr, 1000, "%slightingFlag = 1\n", prefix);
     else
         SNPRINTF(tmpStr, 1000, "%slightingFlag = 0\n", prefix);
+    str += tmpStr;
+    const unsigned char *wireframeColor = atts->GetWireframeColor().GetColor();
+    SNPRINTF(tmpStr, 1000, "%swireframeColor = (%d, %d, %d, %d)\n", prefix, int(wireframeColor[0]), int(wireframeColor[1]), int(wireframeColor[2]), int(wireframeColor[3]));
+    str += tmpStr;
+    const unsigned char *pointColor = atts->GetPointColor().GetColor();
+    SNPRINTF(tmpStr, 1000, "%spointColor = (%d, %d, %d, %d)\n", prefix, int(pointColor[0]), int(pointColor[1]), int(pointColor[2]), int(pointColor[3]));
     str += tmpStr;
     return str;
 }
@@ -967,39 +985,6 @@ PseudocolorAttributes_GetPointSizePixels(PyObject *self, PyObject *args)
 }
 
 /*static*/ PyObject *
-PseudocolorAttributes_SetLineType(PyObject *self, PyObject *args)
-{
-    PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
-
-    int ival;
-    if(!PyArg_ParseTuple(args, "i", &ival))
-        return NULL;
-
-    // Set the lineType in the object.
-    if(ival >= 0 && ival < 3)
-        obj->data->SetLineType(PseudocolorAttributes::LineType(ival));
-    else
-    {
-        fprintf(stderr, "An invalid lineType value was given. "
-                        "Valid values are in the range of [0,2]. "
-                        "You can also use the following names: "
-                        "Line, Tube, Ribbon.");
-        return NULL;
-    }
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-/*static*/ PyObject *
-PseudocolorAttributes_GetLineType(PyObject *self, PyObject *args)
-{
-    PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
-    PyObject *retval = PyInt_FromLong(long(obj->data->GetLineType()));
-    return retval;
-}
-
-/*static*/ PyObject *
 PseudocolorAttributes_SetLineStyle(PyObject *self, PyObject *args)
 {
     PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
@@ -1033,6 +1018,39 @@ PseudocolorAttributes_GetLineStyle(PyObject *self, PyObject *args)
 }
 
 /*static*/ PyObject *
+PseudocolorAttributes_SetLineType(PyObject *self, PyObject *args)
+{
+    PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
+
+    int ival;
+    if(!PyArg_ParseTuple(args, "i", &ival))
+        return NULL;
+
+    // Set the lineType in the object.
+    if(ival >= 0 && ival < 3)
+        obj->data->SetLineType(PseudocolorAttributes::LineType(ival));
+    else
+    {
+        fprintf(stderr, "An invalid lineType value was given. "
+                        "Valid values are in the range of [0,2]. "
+                        "You can also use the following names: "
+                        "Line, Tube, Ribbon.");
+        return NULL;
+    }
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+PseudocolorAttributes_GetLineType(PyObject *self, PyObject *args)
+{
+    PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
+    PyObject *retval = PyInt_FromLong(long(obj->data->GetLineType()));
+    return retval;
+}
+
+/*static*/ PyObject *
 PseudocolorAttributes_SetLineWidth(PyObject *self, PyObject *args)
 {
     PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
@@ -1057,7 +1075,7 @@ PseudocolorAttributes_GetLineWidth(PyObject *self, PyObject *args)
 }
 
 /*static*/ PyObject *
-PseudocolorAttributes_SetTubeDisplayDensity(PyObject *self, PyObject *args)
+PseudocolorAttributes_SetTubeResolution(PyObject *self, PyObject *args)
 {
     PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
 
@@ -1065,18 +1083,18 @@ PseudocolorAttributes_SetTubeDisplayDensity(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "i", &ival))
         return NULL;
 
-    // Set the tubeDisplayDensity in the object.
-    obj->data->SetTubeDisplayDensity((int)ival);
+    // Set the tubeResolution in the object.
+    obj->data->SetTubeResolution((int)ival);
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 /*static*/ PyObject *
-PseudocolorAttributes_GetTubeDisplayDensity(PyObject *self, PyObject *args)
+PseudocolorAttributes_GetTubeResolution(PyObject *self, PyObject *args)
 {
     PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
-    PyObject *retval = PyInt_FromLong(long(obj->data->GetTubeDisplayDensity()));
+    PyObject *retval = PyInt_FromLong(long(obj->data->GetTubeResolution()));
     return retval;
 }
 
@@ -1210,7 +1228,7 @@ PseudocolorAttributes_GetTubeRadiusVar(PyObject *self, PyObject *args)
 }
 
 /*static*/ PyObject *
-PseudocolorAttributes_SetTubeRadiusVarFactor(PyObject *self, PyObject *args)
+PseudocolorAttributes_SetTubeRadiusVarRatio(PyObject *self, PyObject *args)
 {
     PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
 
@@ -1218,18 +1236,18 @@ PseudocolorAttributes_SetTubeRadiusVarFactor(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "d", &dval))
         return NULL;
 
-    // Set the tubeRadiusVarFactor in the object.
-    obj->data->SetTubeRadiusVarFactor(dval);
+    // Set the tubeRadiusVarRatio in the object.
+    obj->data->SetTubeRadiusVarRatio(dval);
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 /*static*/ PyObject *
-PseudocolorAttributes_GetTubeRadiusVarFactor(PyObject *self, PyObject *args)
+PseudocolorAttributes_GetTubeRadiusVarRatio(PyObject *self, PyObject *args)
 {
     PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
-    PyObject *retval = PyFloat_FromDouble(obj->data->GetTubeRadiusVarFactor());
+    PyObject *retval = PyFloat_FromDouble(obj->data->GetTubeRadiusVarRatio());
     return retval;
 }
 
@@ -1250,7 +1268,7 @@ PseudocolorAttributes_SetEndPointType(PyObject *self, PyObject *args)
         fprintf(stderr, "An invalid endPointType value was given. "
                         "Valid values are in the range of [0,3]. "
                         "You can also use the following names: "
-                        "None, Tails, Heads, Both.");
+                        "None, Heads, Tails, Both.");
         return NULL;
     }
 
@@ -1381,6 +1399,30 @@ PseudocolorAttributes_GetEndPointRadiusBBox(PyObject *self, PyObject *args)
 }
 
 /*static*/ PyObject *
+PseudocolorAttributes_SetEndPointResolution(PyObject *self, PyObject *args)
+{
+    PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
+
+    int ival;
+    if(!PyArg_ParseTuple(args, "i", &ival))
+        return NULL;
+
+    // Set the endPointResolution in the object.
+    obj->data->SetEndPointResolution((int)ival);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+PseudocolorAttributes_GetEndPointResolution(PyObject *self, PyObject *args)
+{
+    PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
+    PyObject *retval = PyInt_FromLong(long(obj->data->GetEndPointResolution()));
+    return retval;
+}
+
+/*static*/ PyObject *
 PseudocolorAttributes_SetEndPointRatio(PyObject *self, PyObject *args)
 {
     PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
@@ -1401,6 +1443,78 @@ PseudocolorAttributes_GetEndPointRatio(PyObject *self, PyObject *args)
 {
     PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
     PyObject *retval = PyFloat_FromDouble(obj->data->GetEndPointRatio());
+    return retval;
+}
+
+/*static*/ PyObject *
+PseudocolorAttributes_SetEndPointRadiusVarEnabled(PyObject *self, PyObject *args)
+{
+    PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
+
+    int ival;
+    if(!PyArg_ParseTuple(args, "i", &ival))
+        return NULL;
+
+    // Set the endPointRadiusVarEnabled in the object.
+    obj->data->SetEndPointRadiusVarEnabled(ival != 0);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+PseudocolorAttributes_GetEndPointRadiusVarEnabled(PyObject *self, PyObject *args)
+{
+    PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
+    PyObject *retval = PyInt_FromLong(obj->data->GetEndPointRadiusVarEnabled()?1L:0L);
+    return retval;
+}
+
+/*static*/ PyObject *
+PseudocolorAttributes_SetEndPointRadiusVar(PyObject *self, PyObject *args)
+{
+    PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
+
+    char *str;
+    if(!PyArg_ParseTuple(args, "s", &str))
+        return NULL;
+
+    // Set the endPointRadiusVar in the object.
+    obj->data->SetEndPointRadiusVar(std::string(str));
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+PseudocolorAttributes_GetEndPointRadiusVar(PyObject *self, PyObject *args)
+{
+    PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
+    PyObject *retval = PyString_FromString(obj->data->GetEndPointRadiusVar().c_str());
+    return retval;
+}
+
+/*static*/ PyObject *
+PseudocolorAttributes_SetEndPointRadiusVarRatio(PyObject *self, PyObject *args)
+{
+    PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
+
+    double dval;
+    if(!PyArg_ParseTuple(args, "d", &dval))
+        return NULL;
+
+    // Set the endPointRadiusVarRatio in the object.
+    obj->data->SetEndPointRadiusVarRatio(dval);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+PseudocolorAttributes_GetEndPointRadiusVarRatio(PyObject *self, PyObject *args)
+{
+    PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
+    PyObject *retval = PyFloat_FromDouble(obj->data->GetEndPointRadiusVarRatio());
     return retval;
 }
 
@@ -1548,6 +1662,160 @@ PseudocolorAttributes_GetLightingFlag(PyObject *self, PyObject *args)
     return retval;
 }
 
+/*static*/ PyObject *
+PseudocolorAttributes_SetWireframeColor(PyObject *self, PyObject *args)
+{
+    PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
+
+    int c[4];
+    if(!PyArg_ParseTuple(args, "iiii", &c[0], &c[1], &c[2], &c[3]))
+    {
+        c[3] = 255;
+        if(!PyArg_ParseTuple(args, "iii", &c[0], &c[1], &c[2]))
+        {
+            double dr, dg, db, da;
+            if(PyArg_ParseTuple(args, "dddd", &dr, &dg, &db, &da))
+            {
+                c[0] = int(dr);
+                c[1] = int(dg);
+                c[2] = int(db);
+                c[3] = int(da);
+            }
+            else if(PyArg_ParseTuple(args, "ddd", &dr, &dg, &db))
+            {
+                c[0] = int(dr);
+                c[1] = int(dg);
+                c[2] = int(db);
+                c[3] = 255;
+            }
+            else
+            {
+                PyObject *tuple = NULL;
+                if(!PyArg_ParseTuple(args, "O", &tuple))
+                    return NULL;
+
+                if(!PyTuple_Check(tuple))
+                    return NULL;
+
+                // Make sure that the tuple is the right size.
+                if(PyTuple_Size(tuple) < 3 || PyTuple_Size(tuple) > 4)
+                    return NULL;
+
+                // Make sure that all elements in the tuple are ints.
+                for(int i = 0; i < PyTuple_Size(tuple); ++i)
+                {
+                    PyObject *item = PyTuple_GET_ITEM(tuple, i);
+                    if(PyInt_Check(item))
+                        c[i] = int(PyInt_AS_LONG(PyTuple_GET_ITEM(tuple, i)));
+                    else if(PyFloat_Check(item))
+                        c[i] = int(PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(tuple, i)));
+                    else
+                        return NULL;
+                }
+            }
+        }
+        PyErr_Clear();
+    }
+
+    // Set the wireframeColor in the object.
+    ColorAttribute ca(c[0], c[1], c[2], c[3]);
+    obj->data->SetWireframeColor(ca);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+PseudocolorAttributes_GetWireframeColor(PyObject *self, PyObject *args)
+{
+    PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
+    // Allocate a tuple the with enough entries to hold the wireframeColor.
+    PyObject *retval = PyTuple_New(4);
+    const unsigned char *wireframeColor = obj->data->GetWireframeColor().GetColor();
+    PyTuple_SET_ITEM(retval, 0, PyInt_FromLong(long(wireframeColor[0])));
+    PyTuple_SET_ITEM(retval, 1, PyInt_FromLong(long(wireframeColor[1])));
+    PyTuple_SET_ITEM(retval, 2, PyInt_FromLong(long(wireframeColor[2])));
+    PyTuple_SET_ITEM(retval, 3, PyInt_FromLong(long(wireframeColor[3])));
+    return retval;
+}
+
+/*static*/ PyObject *
+PseudocolorAttributes_SetPointColor(PyObject *self, PyObject *args)
+{
+    PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
+
+    int c[4];
+    if(!PyArg_ParseTuple(args, "iiii", &c[0], &c[1], &c[2], &c[3]))
+    {
+        c[3] = 255;
+        if(!PyArg_ParseTuple(args, "iii", &c[0], &c[1], &c[2]))
+        {
+            double dr, dg, db, da;
+            if(PyArg_ParseTuple(args, "dddd", &dr, &dg, &db, &da))
+            {
+                c[0] = int(dr);
+                c[1] = int(dg);
+                c[2] = int(db);
+                c[3] = int(da);
+            }
+            else if(PyArg_ParseTuple(args, "ddd", &dr, &dg, &db))
+            {
+                c[0] = int(dr);
+                c[1] = int(dg);
+                c[2] = int(db);
+                c[3] = 255;
+            }
+            else
+            {
+                PyObject *tuple = NULL;
+                if(!PyArg_ParseTuple(args, "O", &tuple))
+                    return NULL;
+
+                if(!PyTuple_Check(tuple))
+                    return NULL;
+
+                // Make sure that the tuple is the right size.
+                if(PyTuple_Size(tuple) < 3 || PyTuple_Size(tuple) > 4)
+                    return NULL;
+
+                // Make sure that all elements in the tuple are ints.
+                for(int i = 0; i < PyTuple_Size(tuple); ++i)
+                {
+                    PyObject *item = PyTuple_GET_ITEM(tuple, i);
+                    if(PyInt_Check(item))
+                        c[i] = int(PyInt_AS_LONG(PyTuple_GET_ITEM(tuple, i)));
+                    else if(PyFloat_Check(item))
+                        c[i] = int(PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(tuple, i)));
+                    else
+                        return NULL;
+                }
+            }
+        }
+        PyErr_Clear();
+    }
+
+    // Set the pointColor in the object.
+    ColorAttribute ca(c[0], c[1], c[2], c[3]);
+    obj->data->SetPointColor(ca);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+PseudocolorAttributes_GetPointColor(PyObject *self, PyObject *args)
+{
+    PseudocolorAttributesObject *obj = (PseudocolorAttributesObject *)self;
+    // Allocate a tuple the with enough entries to hold the pointColor.
+    PyObject *retval = PyTuple_New(4);
+    const unsigned char *pointColor = obj->data->GetPointColor().GetColor();
+    PyTuple_SET_ITEM(retval, 0, PyInt_FromLong(long(pointColor[0])));
+    PyTuple_SET_ITEM(retval, 1, PyInt_FromLong(long(pointColor[1])));
+    PyTuple_SET_ITEM(retval, 2, PyInt_FromLong(long(pointColor[2])));
+    PyTuple_SET_ITEM(retval, 3, PyInt_FromLong(long(pointColor[3])));
+    return retval;
+}
+
 
 
 PyMethodDef PyPseudocolorAttributes_methods[PSEUDOCOLORATTRIBUTES_NMETH] = {
@@ -1596,14 +1864,14 @@ PyMethodDef PyPseudocolorAttributes_methods[PSEUDOCOLORATTRIBUTES_NMETH] = {
     {"GetPointSizeVar", PseudocolorAttributes_GetPointSizeVar, METH_VARARGS},
     {"SetPointSizePixels", PseudocolorAttributes_SetPointSizePixels, METH_VARARGS},
     {"GetPointSizePixels", PseudocolorAttributes_GetPointSizePixels, METH_VARARGS},
-    {"SetLineType", PseudocolorAttributes_SetLineType, METH_VARARGS},
-    {"GetLineType", PseudocolorAttributes_GetLineType, METH_VARARGS},
     {"SetLineStyle", PseudocolorAttributes_SetLineStyle, METH_VARARGS},
     {"GetLineStyle", PseudocolorAttributes_GetLineStyle, METH_VARARGS},
+    {"SetLineType", PseudocolorAttributes_SetLineType, METH_VARARGS},
+    {"GetLineType", PseudocolorAttributes_GetLineType, METH_VARARGS},
     {"SetLineWidth", PseudocolorAttributes_SetLineWidth, METH_VARARGS},
     {"GetLineWidth", PseudocolorAttributes_GetLineWidth, METH_VARARGS},
-    {"SetTubeDisplayDensity", PseudocolorAttributes_SetTubeDisplayDensity, METH_VARARGS},
-    {"GetTubeDisplayDensity", PseudocolorAttributes_GetTubeDisplayDensity, METH_VARARGS},
+    {"SetTubeResolution", PseudocolorAttributes_SetTubeResolution, METH_VARARGS},
+    {"GetTubeResolution", PseudocolorAttributes_GetTubeResolution, METH_VARARGS},
     {"SetTubeRadiusSizeType", PseudocolorAttributes_SetTubeRadiusSizeType, METH_VARARGS},
     {"GetTubeRadiusSizeType", PseudocolorAttributes_GetTubeRadiusSizeType, METH_VARARGS},
     {"SetTubeRadiusAbsolute", PseudocolorAttributes_SetTubeRadiusAbsolute, METH_VARARGS},
@@ -1614,8 +1882,8 @@ PyMethodDef PyPseudocolorAttributes_methods[PSEUDOCOLORATTRIBUTES_NMETH] = {
     {"GetTubeRadiusVarEnabled", PseudocolorAttributes_GetTubeRadiusVarEnabled, METH_VARARGS},
     {"SetTubeRadiusVar", PseudocolorAttributes_SetTubeRadiusVar, METH_VARARGS},
     {"GetTubeRadiusVar", PseudocolorAttributes_GetTubeRadiusVar, METH_VARARGS},
-    {"SetTubeRadiusVarFactor", PseudocolorAttributes_SetTubeRadiusVarFactor, METH_VARARGS},
-    {"GetTubeRadiusVarFactor", PseudocolorAttributes_GetTubeRadiusVarFactor, METH_VARARGS},
+    {"SetTubeRadiusVarRatio", PseudocolorAttributes_SetTubeRadiusVarRatio, METH_VARARGS},
+    {"GetTubeRadiusVarRatio", PseudocolorAttributes_GetTubeRadiusVarRatio, METH_VARARGS},
     {"SetEndPointType", PseudocolorAttributes_SetEndPointType, METH_VARARGS},
     {"GetEndPointType", PseudocolorAttributes_GetEndPointType, METH_VARARGS},
     {"SetEndPointStyle", PseudocolorAttributes_SetEndPointStyle, METH_VARARGS},
@@ -1626,8 +1894,16 @@ PyMethodDef PyPseudocolorAttributes_methods[PSEUDOCOLORATTRIBUTES_NMETH] = {
     {"GetEndPointRadiusAbsolute", PseudocolorAttributes_GetEndPointRadiusAbsolute, METH_VARARGS},
     {"SetEndPointRadiusBBox", PseudocolorAttributes_SetEndPointRadiusBBox, METH_VARARGS},
     {"GetEndPointRadiusBBox", PseudocolorAttributes_GetEndPointRadiusBBox, METH_VARARGS},
+    {"SetEndPointResolution", PseudocolorAttributes_SetEndPointResolution, METH_VARARGS},
+    {"GetEndPointResolution", PseudocolorAttributes_GetEndPointResolution, METH_VARARGS},
     {"SetEndPointRatio", PseudocolorAttributes_SetEndPointRatio, METH_VARARGS},
     {"GetEndPointRatio", PseudocolorAttributes_GetEndPointRatio, METH_VARARGS},
+    {"SetEndPointRadiusVarEnabled", PseudocolorAttributes_SetEndPointRadiusVarEnabled, METH_VARARGS},
+    {"GetEndPointRadiusVarEnabled", PseudocolorAttributes_GetEndPointRadiusVarEnabled, METH_VARARGS},
+    {"SetEndPointRadiusVar", PseudocolorAttributes_SetEndPointRadiusVar, METH_VARARGS},
+    {"GetEndPointRadiusVar", PseudocolorAttributes_GetEndPointRadiusVar, METH_VARARGS},
+    {"SetEndPointRadiusVarRatio", PseudocolorAttributes_SetEndPointRadiusVarRatio, METH_VARARGS},
+    {"GetEndPointRadiusVarRatio", PseudocolorAttributes_GetEndPointRadiusVarRatio, METH_VARARGS},
     {"SetRenderSurfaces", PseudocolorAttributes_SetRenderSurfaces, METH_VARARGS},
     {"GetRenderSurfaces", PseudocolorAttributes_GetRenderSurfaces, METH_VARARGS},
     {"SetRenderWireframe", PseudocolorAttributes_SetRenderWireframe, METH_VARARGS},
@@ -1640,6 +1916,10 @@ PyMethodDef PyPseudocolorAttributes_methods[PSEUDOCOLORATTRIBUTES_NMETH] = {
     {"GetLegendFlag", PseudocolorAttributes_GetLegendFlag, METH_VARARGS},
     {"SetLightingFlag", PseudocolorAttributes_SetLightingFlag, METH_VARARGS},
     {"GetLightingFlag", PseudocolorAttributes_GetLightingFlag, METH_VARARGS},
+    {"SetWireframeColor", PseudocolorAttributes_SetWireframeColor, METH_VARARGS},
+    {"GetWireframeColor", PseudocolorAttributes_GetWireframeColor, METH_VARARGS},
+    {"SetPointColor", PseudocolorAttributes_SetPointColor, METH_VARARGS},
+    {"GetPointColor", PseudocolorAttributes_GetPointColor, METH_VARARGS},
     {NULL, NULL}
 };
 
@@ -1759,15 +2039,6 @@ PyPseudocolorAttributes_getattr(PyObject *self, char *name)
         return PseudocolorAttributes_GetPointSizeVar(self, NULL);
     if(strcmp(name, "pointSizePixels") == 0)
         return PseudocolorAttributes_GetPointSizePixels(self, NULL);
-    if(strcmp(name, "lineType") == 0)
-        return PseudocolorAttributes_GetLineType(self, NULL);
-    if(strcmp(name, "Line") == 0)
-        return PyInt_FromLong(long(PseudocolorAttributes::Line));
-    if(strcmp(name, "Tube") == 0)
-        return PyInt_FromLong(long(PseudocolorAttributes::Tube));
-    if(strcmp(name, "Ribbon") == 0)
-        return PyInt_FromLong(long(PseudocolorAttributes::Ribbon));
-
     if(strcmp(name, "lineStyle") == 0)
         return PseudocolorAttributes_GetLineStyle(self, NULL);
     if(strcmp(name, "SOLID") == 0)
@@ -1779,10 +2050,19 @@ PyPseudocolorAttributes_getattr(PyObject *self, char *name)
     else if(strcmp(name, "DOTDASH") == 0)
         return PyInt_FromLong(long(3));
 
+    if(strcmp(name, "lineType") == 0)
+        return PseudocolorAttributes_GetLineType(self, NULL);
+    if(strcmp(name, "Line") == 0)
+        return PyInt_FromLong(long(PseudocolorAttributes::Line));
+    if(strcmp(name, "Tube") == 0)
+        return PyInt_FromLong(long(PseudocolorAttributes::Tube));
+    if(strcmp(name, "Ribbon") == 0)
+        return PyInt_FromLong(long(PseudocolorAttributes::Ribbon));
+
     if(strcmp(name, "lineWidth") == 0)
         return PseudocolorAttributes_GetLineWidth(self, NULL);
-    if(strcmp(name, "tubeDisplayDensity") == 0)
-        return PseudocolorAttributes_GetTubeDisplayDensity(self, NULL);
+    if(strcmp(name, "tubeResolution") == 0)
+        return PseudocolorAttributes_GetTubeResolution(self, NULL);
     if(strcmp(name, "tubeRadiusSizeType") == 0)
         return PseudocolorAttributes_GetTubeRadiusSizeType(self, NULL);
     if(strcmp(name, "Absolute") == 0)
@@ -1798,16 +2078,16 @@ PyPseudocolorAttributes_getattr(PyObject *self, char *name)
         return PseudocolorAttributes_GetTubeRadiusVarEnabled(self, NULL);
     if(strcmp(name, "tubeRadiusVar") == 0)
         return PseudocolorAttributes_GetTubeRadiusVar(self, NULL);
-    if(strcmp(name, "tubeRadiusVarFactor") == 0)
-        return PseudocolorAttributes_GetTubeRadiusVarFactor(self, NULL);
+    if(strcmp(name, "tubeRadiusVarRatio") == 0)
+        return PseudocolorAttributes_GetTubeRadiusVarRatio(self, NULL);
     if(strcmp(name, "endPointType") == 0)
         return PseudocolorAttributes_GetEndPointType(self, NULL);
     if(strcmp(name, "None") == 0)
         return PyInt_FromLong(long(PseudocolorAttributes::None));
-    if(strcmp(name, "Tails") == 0)
-        return PyInt_FromLong(long(PseudocolorAttributes::Tails));
     if(strcmp(name, "Heads") == 0)
         return PyInt_FromLong(long(PseudocolorAttributes::Heads));
+    if(strcmp(name, "Tails") == 0)
+        return PyInt_FromLong(long(PseudocolorAttributes::Tails));
     if(strcmp(name, "Both") == 0)
         return PyInt_FromLong(long(PseudocolorAttributes::Both));
 
@@ -1829,8 +2109,16 @@ PyPseudocolorAttributes_getattr(PyObject *self, char *name)
         return PseudocolorAttributes_GetEndPointRadiusAbsolute(self, NULL);
     if(strcmp(name, "endPointRadiusBBox") == 0)
         return PseudocolorAttributes_GetEndPointRadiusBBox(self, NULL);
+    if(strcmp(name, "endPointResolution") == 0)
+        return PseudocolorAttributes_GetEndPointResolution(self, NULL);
     if(strcmp(name, "endPointRatio") == 0)
         return PseudocolorAttributes_GetEndPointRatio(self, NULL);
+    if(strcmp(name, "endPointRadiusVarEnabled") == 0)
+        return PseudocolorAttributes_GetEndPointRadiusVarEnabled(self, NULL);
+    if(strcmp(name, "endPointRadiusVar") == 0)
+        return PseudocolorAttributes_GetEndPointRadiusVar(self, NULL);
+    if(strcmp(name, "endPointRadiusVarRatio") == 0)
+        return PseudocolorAttributes_GetEndPointRadiusVarRatio(self, NULL);
     if(strcmp(name, "renderSurfaces") == 0)
         return PseudocolorAttributes_GetRenderSurfaces(self, NULL);
     if(strcmp(name, "renderWireframe") == 0)
@@ -1843,6 +2131,10 @@ PyPseudocolorAttributes_getattr(PyObject *self, char *name)
         return PseudocolorAttributes_GetLegendFlag(self, NULL);
     if(strcmp(name, "lightingFlag") == 0)
         return PseudocolorAttributes_GetLightingFlag(self, NULL);
+    if(strcmp(name, "wireframeColor") == 0)
+        return PseudocolorAttributes_GetWireframeColor(self, NULL);
+    if(strcmp(name, "pointColor") == 0)
+        return PseudocolorAttributes_GetPointColor(self, NULL);
 
     // Try and handle legacy fields in PseudocolorAttributes
     if(strcmp(name, "useColorTableOpacity") == 0)
@@ -1908,14 +2200,14 @@ PyPseudocolorAttributes_setattr(PyObject *self, char *name, PyObject *args)
         obj = PseudocolorAttributes_SetPointSizeVar(self, tuple);
     else if(strcmp(name, "pointSizePixels") == 0)
         obj = PseudocolorAttributes_SetPointSizePixels(self, tuple);
-    else if(strcmp(name, "lineType") == 0)
-        obj = PseudocolorAttributes_SetLineType(self, tuple);
     else if(strcmp(name, "lineStyle") == 0)
         obj = PseudocolorAttributes_SetLineStyle(self, tuple);
+    else if(strcmp(name, "lineType") == 0)
+        obj = PseudocolorAttributes_SetLineType(self, tuple);
     else if(strcmp(name, "lineWidth") == 0)
         obj = PseudocolorAttributes_SetLineWidth(self, tuple);
-    else if(strcmp(name, "tubeDisplayDensity") == 0)
-        obj = PseudocolorAttributes_SetTubeDisplayDensity(self, tuple);
+    else if(strcmp(name, "tubeResolution") == 0)
+        obj = PseudocolorAttributes_SetTubeResolution(self, tuple);
     else if(strcmp(name, "tubeRadiusSizeType") == 0)
         obj = PseudocolorAttributes_SetTubeRadiusSizeType(self, tuple);
     else if(strcmp(name, "tubeRadiusAbsolute") == 0)
@@ -1926,8 +2218,8 @@ PyPseudocolorAttributes_setattr(PyObject *self, char *name, PyObject *args)
         obj = PseudocolorAttributes_SetTubeRadiusVarEnabled(self, tuple);
     else if(strcmp(name, "tubeRadiusVar") == 0)
         obj = PseudocolorAttributes_SetTubeRadiusVar(self, tuple);
-    else if(strcmp(name, "tubeRadiusVarFactor") == 0)
-        obj = PseudocolorAttributes_SetTubeRadiusVarFactor(self, tuple);
+    else if(strcmp(name, "tubeRadiusVarRatio") == 0)
+        obj = PseudocolorAttributes_SetTubeRadiusVarRatio(self, tuple);
     else if(strcmp(name, "endPointType") == 0)
         obj = PseudocolorAttributes_SetEndPointType(self, tuple);
     else if(strcmp(name, "endPointStyle") == 0)
@@ -1938,8 +2230,16 @@ PyPseudocolorAttributes_setattr(PyObject *self, char *name, PyObject *args)
         obj = PseudocolorAttributes_SetEndPointRadiusAbsolute(self, tuple);
     else if(strcmp(name, "endPointRadiusBBox") == 0)
         obj = PseudocolorAttributes_SetEndPointRadiusBBox(self, tuple);
+    else if(strcmp(name, "endPointResolution") == 0)
+        obj = PseudocolorAttributes_SetEndPointResolution(self, tuple);
     else if(strcmp(name, "endPointRatio") == 0)
         obj = PseudocolorAttributes_SetEndPointRatio(self, tuple);
+    else if(strcmp(name, "endPointRadiusVarEnabled") == 0)
+        obj = PseudocolorAttributes_SetEndPointRadiusVarEnabled(self, tuple);
+    else if(strcmp(name, "endPointRadiusVar") == 0)
+        obj = PseudocolorAttributes_SetEndPointRadiusVar(self, tuple);
+    else if(strcmp(name, "endPointRadiusVarRatio") == 0)
+        obj = PseudocolorAttributes_SetEndPointRadiusVarRatio(self, tuple);
     else if(strcmp(name, "renderSurfaces") == 0)
         obj = PseudocolorAttributes_SetRenderSurfaces(self, tuple);
     else if(strcmp(name, "renderWireframe") == 0)
@@ -1952,6 +2252,10 @@ PyPseudocolorAttributes_setattr(PyObject *self, char *name, PyObject *args)
         obj = PseudocolorAttributes_SetLegendFlag(self, tuple);
     else if(strcmp(name, "lightingFlag") == 0)
         obj = PseudocolorAttributes_SetLightingFlag(self, tuple);
+    else if(strcmp(name, "wireframeColor") == 0)
+        obj = PseudocolorAttributes_SetWireframeColor(self, tuple);
+    else if(strcmp(name, "pointColor") == 0)
+        obj = PseudocolorAttributes_SetPointColor(self, tuple);
 
     // Try and handle legacy fields in PseudocolorAttributes
     if(obj == NULL)
