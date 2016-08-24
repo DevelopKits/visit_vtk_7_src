@@ -418,7 +418,6 @@ vtkPointGlyphMapper::vtkPointGlyphMapper()
   this->NormalsFilter->SetNormalTypeToCell();
   this->NormalsFilter->SetInputConnection(this->GlyphFilter->GetOutputPort());
 
-this->PointMapper->DebugOn();
   this->PointMapper->SetInputConnection(this->PointOutput->GetOutputPort());
   this->PointMapper->SetInterpolateScalarsBeforeMapping(0);
   this->PointMapper->SetRadius(0.3);
