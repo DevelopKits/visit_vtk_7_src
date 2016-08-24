@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -46,7 +46,7 @@
 #include <plotter_exports.h>
 
 #include <avtVariableMapper.h>
-#include <avtPointGlypher.h>
+#include <avtPointMapper.h>
 
 
 // ****************************************************************************
@@ -70,10 +70,15 @@
 //    Kathleen Biagas, Wed Feb 6 19:38:27 PDT 2013
 //    Changed signature of InsertFilters.
 //
+//    Kathleen Biagas, Tue Aug 23 11:38:11 PDT 2016
+//    Changed inheritance from avtPointGlypher to avtPointMapper.
+//    Removed glyph-related methods.
+//
 // ****************************************************************************
 
-class PLOTTER_API  avtVariablePointGlyphMapper : virtual public avtVariableMapper,
-                                                 virtual public avtPointGlypher
+class PLOTTER_API  avtVariablePointGlyphMapper :
+    virtual public avtVariableMapper,
+    virtual public avtPointMapper
 {
   public:
                                avtVariablePointGlyphMapper();
@@ -81,17 +86,11 @@ class PLOTTER_API  avtVariablePointGlyphMapper : virtual public avtVariableMappe
 
     void                       ColorBySingleColor(const unsigned char [3]);
     void                       ColorBySingleColor(const double [3]);
-    virtual void               ScaleByVar(const std::string &);
-    void                       SetGlyphType(PointGlyphType type);
-    virtual bool               SetFullFrameScaling(bool, const double *);
 
   protected:
     double                     singleColor[3];
 
     virtual void               CustomizeMappers(void);
-
-    virtual vtkAlgorithmOutput *InsertFilters(vtkDataSet *, int);
-    virtual void               SetUpFilters(int);
 
   private:
 

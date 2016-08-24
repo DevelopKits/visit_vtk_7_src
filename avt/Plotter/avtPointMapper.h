@@ -37,54 +37,84 @@
 *****************************************************************************/
 
 // ************************************************************************* //
-//                      avtLevelsPointGlyphMapper.h                          //
+//                            avtPointMapper.h                               //
 // ************************************************************************* //
 
-#ifndef AVT_LEVELS_POINT_GLYPH_MAPPER_H
-#define AVT_LEVELS_POINT_GLYPH_MAPPER_H
+#ifndef AVT_POINT_MAPPER_H
+#define AVT_POINT_MAPPER_H
 
+#include <avtMapper.h>
 #include <plotter_exports.h>
 
-#include <avtLevelsMapper.h>
-#include <avtPointMapper.h>
+#include <string>
 
+
+class vtkLookupTable;
 
 // ****************************************************************************
-//  Class: avtLevelsPointGlyphMapper
+//  Class: avtPointMapper
 //
 //  Purpose:
-//    A mapper for glyph.  This extends the functionality of a mapper by
-//    mapping a glyph onto a dataset.
+//      A mapper for points.  This extends the functionality of a mapper by
+//      mapping a glyph onto a dataset with a scalar variable.
 //
-//  Programmer: Kathleen Bonnell
-//  Creation:   November 12, 2004 
+//  Programmer: Kathleen Biagas
+//  Creation:   August 17, 2016
 //
 //  Modifications:
-//    Brad Whitlock, Fri Jul 22 11:21:47 PDT 2005
-//    Added an override for the SetGlyphType method that lets us switch
-//    mapper inputs when we enter of leave point glyphing mode.
-//
-//    Kathleen Biagas, Wed Feb 6 19:38:27 PDT 2013
-//    Changed signature of InsertFilters.
-//
-//    Kathleen Biagas, Tue Aug 23 11:34:11 PDT 2016
-//    Changed inheritance from avtPointGlypher to avtPointMapper. Removed
-//    Glyph related methods.
 //
 // ****************************************************************************
 
-class PLOTTER_API  avtLevelsPointGlyphMapper : virtual public avtLevelsMapper,
-                                               virtual public avtPointMapper
+class PLOTTER_API  avtPointMapper : virtual public avtMapper
 {
   public:
-                               avtLevelsPointGlyphMapper();
-    virtual                   ~avtLevelsPointGlyphMapper();
+    typedef enum {Box,
+                  Axis,
+                  Icosahedron,
+                  Point,
+                  Sphere,
+                  Octahedron,
+                  Tetrahedron,
+                  SphereGeometry
+                 } PointGlyphType;
 
+                               avtPointMapper();
+    virtual                   ~avtPointMapper();
+
+
+    void                       ColorByScalarOn(const std::string &);
+    void                       ColorByScalarOff(void);
+
+    void                       ScaleByVar(const std::string &);
+    void                       DataScalingOn(const std::string &, int = 1);
+    void                       DataScalingOff(void);
+
+    void                       SetScale(double);
+    void                       SetGlyphType(PointGlyphType);
+    void                       SetPointSize(double s);
+
+    virtual bool               SetFullFrameScaling(bool, const double *);
+
+    bool                       GetColorByScalar(void)
+                                  { return colorByScalar ; }
+    void                       SetLUT(vtkLookupTable *);
 
   protected:
     virtual void               CustomizeMappers(void);
+    virtual vtkDataSetMapper  *CreateMapper(void);
+
+    bool                       colorByScalar;
 
   private:
+    int                        spatialDim;
+    double                     scale;
+    std::string                scalingVarName;
+    std::string                coloringVarName;
+    int                        scalingVarDim;
+    PointGlyphType             glyphType;
+    double                     pointSize;
+    bool                       dataScaling;
+    vtkLookupTable            *lut;
 
 };
 

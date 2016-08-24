@@ -36,59 +36,41 @@
 *
 *****************************************************************************/
 
-// ************************************************************************* //
-//                      avtLevelsPointGlyphMapper.h                          //
-// ************************************************************************* //
-
-#ifndef AVT_LEVELS_POINT_GLYPH_MAPPER_H
-#define AVT_LEVELS_POINT_GLYPH_MAPPER_H
+#ifndef vtkOpenGLPointMapper_h
+#define vtkOpenGLPointMapper_h
 
 #include <plotter_exports.h>
 
-#include <avtLevelsMapper.h>
-#include <avtPointMapper.h>
+#include "vtkPointMapper.h"
 
+class vtkImposterHelper;
+class vtkPointHelper;
 
-// ****************************************************************************
-//  Class: avtLevelsPointGlyphMapper
-//
-//  Purpose:
-//    A mapper for glyph.  This extends the functionality of a mapper by
-//    mapping a glyph onto a dataset.
-//
-//  Programmer: Kathleen Bonnell
-//  Creation:   November 12, 2004 
-//
-//  Modifications:
-//    Brad Whitlock, Fri Jul 22 11:21:47 PDT 2005
-//    Added an override for the SetGlyphType method that lets us switch
-//    mapper inputs when we enter of leave point glyphing mode.
-//
-//    Kathleen Biagas, Wed Feb 6 19:38:27 PDT 2013
-//    Changed signature of InsertFilters.
-//
-//    Kathleen Biagas, Tue Aug 23 11:34:11 PDT 2016
-//    Changed inheritance from avtPointGlypher to avtPointMapper. Removed
-//    Glyph related methods.
-//
-// ****************************************************************************
-
-class PLOTTER_API  avtLevelsPointGlyphMapper : virtual public avtLevelsMapper,
-                                               virtual public avtPointMapper
+class PLOTTER_API vtkOpenGLPointMapper : public vtkPointMapper
 {
-  public:
-                               avtLevelsPointGlyphMapper();
-    virtual                   ~avtLevelsPointGlyphMapper();
+public:
+  static vtkOpenGLPointMapper *New();
+  vtkTypeMacro(vtkOpenGLPointMapper, vtkPointMapper)
+  void PrintSelf(ostream &os, vtkIndent indent);
 
+  void Render(vtkRenderer *ren, vtkActor *act);
+  void ReleaseGraphicsResources(vtkWindow *);
 
-  protected:
-    virtual void               CustomizeMappers(void);
+protected:
+  vtkOpenGLPointMapper();
+ ~vtkOpenGLPointMapper();
 
-  private:
+  virtual void RenderPiece(vtkRenderer *ren, vtkActor *act);
+
+  vtkImposterHelper *IHelper;
+  vtkPointHelper *PHelper;
+  vtkTimeStamp IHelperUpdateTime;
+  vtkTimeStamp PHelperUpdateTime;
+
+private:
+  vtkOpenGLPointMapper(const vtkOpenGLPointMapper&) VTK_DELETE_FUNCTION;
+  void operator=(const vtkOpenGLPointMapper&) VTK_DELETE_FUNCTION;
 
 };
 
-
 #endif
-
-

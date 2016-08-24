@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -166,16 +166,16 @@ avtScatterPlot::SetScaling(int mode, double skew)
 
     if (mode == 1)
     {
-       glyphMapper->SetLookupTable(avtLUT->GetLogLookupTable());
+       glyphMapper->SetLUT(avtLUT->GetLogLookupTable());
     }
     else if (mode == 2)
     {
        avtLUT->SetSkewFactor(skew);
-       glyphMapper->SetLookupTable(avtLUT->GetSkewLookupTable());
+       glyphMapper->SetLUT(avtLUT->GetSkewLookupTable());
     }
     else 
     {
-       glyphMapper->SetLookupTable(avtLUT->GetLookupTable());
+       glyphMapper->SetLUT(avtLUT->GetLookupTable());
     }
 }
 
@@ -430,21 +430,21 @@ avtScatterPlot::SetAtts(const AttributeGroup *a)
     glyphMapper->DataScalingOff();
 
     if (atts.GetPointType() == ScatterAttributes::Box)
-        glyphMapper->SetGlyphType(avtPointGlypher::Box);
+        glyphMapper->SetGlyphType(avtPointMapper::Box);
     else if (atts.GetPointType() == ScatterAttributes::Axis)
-        glyphMapper->SetGlyphType(avtPointGlypher::Axis);
+        glyphMapper->SetGlyphType(avtPointMapper::Axis);
     else if (atts.GetPointType() == ScatterAttributes::Icosahedron)
-        glyphMapper->SetGlyphType(avtPointGlypher::Icosahedron);
+        glyphMapper->SetGlyphType(avtPointMapper::Icosahedron);
     else if (atts.GetPointType() == ScatterAttributes::Octahedron)
-        glyphMapper->SetGlyphType(avtPointGlypher::Octahedron);
+        glyphMapper->SetGlyphType(avtPointMapper::Octahedron);
     else if (atts.GetPointType() == ScatterAttributes::Tetrahedron)
-        glyphMapper->SetGlyphType(avtPointGlypher::Tetrahedron);
+        glyphMapper->SetGlyphType(avtPointMapper::Tetrahedron);
     else if (atts.GetPointType() == ScatterAttributes::SphereGeometry)
-        glyphMapper->SetGlyphType(avtPointGlypher::SphereGeometry);
+        glyphMapper->SetGlyphType(avtPointMapper::SphereGeometry);
     else if (atts.GetPointType() == ScatterAttributes::Point)
-        glyphMapper->SetGlyphType(avtPointGlypher::Point);
+        glyphMapper->SetGlyphType(avtPointMapper::Point);
     else if (atts.GetPointType() == ScatterAttributes::Sphere)
-        glyphMapper->SetGlyphType(avtPointGlypher::Sphere);
+        glyphMapper->SetGlyphType(avtPointMapper::Sphere);
 
     // Get color information.
     std::string colorString;

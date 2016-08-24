@@ -36,59 +36,33 @@
 *
 *****************************************************************************/
 
-// ************************************************************************* //
-//                      avtLevelsPointGlyphMapper.h                          //
-// ************************************************************************* //
+#include "vtkPointMapper.h"
 
-#ifndef AVT_LEVELS_POINT_GLYPH_MAPPER_H
-#define AVT_LEVELS_POINT_GLYPH_MAPPER_H
+#include <vtkObjectFactory.h>
 
-#include <plotter_exports.h>
+//-----------------------------------------------------------------------------
+vtkAbstractObjectFactoryNewMacro(vtkPointMapper)
 
-#include <avtLevelsMapper.h>
-#include <avtPointMapper.h>
-
-
-// ****************************************************************************
-//  Class: avtLevelsPointGlyphMapper
-//
-//  Purpose:
-//    A mapper for glyph.  This extends the functionality of a mapper by
-//    mapping a glyph onto a dataset.
-//
-//  Programmer: Kathleen Bonnell
-//  Creation:   November 12, 2004 
-//
-//  Modifications:
-//    Brad Whitlock, Fri Jul 22 11:21:47 PDT 2005
-//    Added an override for the SetGlyphType method that lets us switch
-//    mapper inputs when we enter of leave point glyphing mode.
-//
-//    Kathleen Biagas, Wed Feb 6 19:38:27 PDT 2013
-//    Changed signature of InsertFilters.
-//
-//    Kathleen Biagas, Tue Aug 23 11:34:11 PDT 2016
-//    Changed inheritance from avtPointGlypher to avtPointMapper. Removed
-//    Glyph related methods.
-//
-// ****************************************************************************
-
-class PLOTTER_API  avtLevelsPointGlyphMapper : virtual public avtLevelsMapper,
-                                               virtual public avtPointMapper
+//-----------------------------------------------------------------------------
+vtkPointMapper::vtkPointMapper()
 {
-  public:
-                               avtLevelsPointGlyphMapper();
-    virtual                   ~avtLevelsPointGlyphMapper();
+  this->ScaleArray = 0;
+  this->Radius = 1.f;
+  this->UseImposters = true;
+  this->InterpolateScalarsBeforeMappingOff();
+}
 
+//-----------------------------------------------------------------------------
+vtkPointMapper::~vtkPointMapper()
+{
+  this->SetScaleArray(0);
+}
 
-  protected:
-    virtual void               CustomizeMappers(void);
+//-----------------------------------------------------------------------------
+void vtkPointMapper::PrintSelf(ostream& os, vtkIndent indent)
+{
+  this->Superclass::PrintSelf(os, indent);
 
-  private:
-
-};
-
-
-#endif
-
-
+  os << indent << "Scale Array: " << (this->ScaleArray ? this->ScaleArray : "(none)") << "\n";
+  os << indent << "Radius: " << this->Radius << "\n";
+}

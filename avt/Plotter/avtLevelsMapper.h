@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -106,9 +106,13 @@
 //    Kathleen Biagas, Thu Oct  9 12:36:47 PDT 2014
 //    Added meethod UpdateMapperColors, and bool arg to SetColors.
 //
+//    Kathleen Biagas, Tue Aug 23 11:32:34 PDT 2016
+//    Add virtual inheritance from avtMapper, removed SetPointSize as this
+//    mapper no longer handles points.
+//
 // ****************************************************************************
 
-class PLOTTER_API avtLevelsMapper : public avtMapper
+class PLOTTER_API avtLevelsMapper : virtual public avtMapper
 {
   public:
                               avtLevelsMapper();
@@ -116,7 +120,6 @@ class PLOTTER_API avtLevelsMapper : public avtMapper
 
     void                      SetLineWidth(_LineWidth lw);
     void                      SetLineStyle(_LineStyle ls);
-    void                      SetPointSize(double);
     void                      GetOriginalDataRange(double &, double &);
 
     void                      SetColors(const ColorAttributeList &c, bool);

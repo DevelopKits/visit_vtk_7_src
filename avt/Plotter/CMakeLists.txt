@@ -1,6 +1,6 @@
 #*****************************************************************************
 #
-# Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+# Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 # Produced at the Lawrence Livermore National Laboratory
 # LLNL-CODE-442911
 # All rights reserved.
@@ -58,14 +58,10 @@
 #   Kathleen Biagas, Tue May 10 18:35:26 MST 2016
 #   Remove vtkVisItDataSetMapper and its subclasses.
 #
-#   Kathleen Biagas, Tue May 10 18:55:00 MST 2016
-#   Add avtSurfaceAndWireframeMapper.C
 #
-#   Kathleen Biagas, Wed May 11 11:54:00 MST 2016
-#   Add avtSimpleMapper.C
-#
-#   Kathleen Biagas, Wed May 11 15:28:15 MST 2016
-#   Rename avtSurfaceAndWireframeMapper to avtLinesAndPolysMapper.
+#   Kathleen Biagas, Mon Jul 18 10:04:22 PDT 2016
+#   Remove SurfaceAndWireframeMapper, and specialized mappers for
+#   Structured/Rectilinear grids.
 #
 #****************************************************************************/
 
@@ -90,9 +86,33 @@ CONFIGURE_FILE(
 )
 
 SET(AVTPLOTTER_OPENGL_SOURCES
-avtOpenGLExtensionManager.C 
-vtk/vtkOpenGLTexturedBackgroundMapper.C 
+avtOpenGLExtensionManager.C
+vtk/vtkOpenGLPointMapper.C
+vtk/vtkOpenGLTexturedBackgroundMapper.C
 )
+
+# shader files
+set(AVTPLOTTER_SHADER_FILES
+    vtk/glsl/vtkSphereMapperVS.glsl
+)
+
+foreach(file ${AVTPLOTTER_SHADER_FILES})
+  get_filename_component(file_we ${file} NAME_WE)
+  set(src  ${CMAKE_CURRENT_SOURCE_DIR}/${file})
+  set(res  ${CMAKE_CURRENT_BINARY_DIR}/${file_we}.cxx)
+  set(resh ${CMAKE_CURRENT_BINARY_DIR}/${file_we}.h)
+  add_custom_command(
+    OUTPUT ${res} ${resh}
+    DEPENDS ${src} vtkEncodeString
+    COMMAND vtkEncodeString
+    ARGS ${res} ${src} ${file_we}
+    --build-header PLOTTER_API ${CMAKE_CURRENT_SOURCE_DIR}/plotter_exports.h
+    )
+  list(APPEND AVTPLOTTER_OPENGL_SOURCES ${res})
+  unset(src)
+  unset(res)
+  unset(resh)
+endforeach()
 
 IF(VISIT_USE_GLEW)
     SET(GRAPHICS_INCLUDES ${GLEW_INCLUDE_DIR})
@@ -107,6 +127,8 @@ vtk/vtkBackgroundActor.C
 vtk/vtkLineLegend.C 
 vtk/vtkMultiFontVectorText.C 
 vtk/vtkParallelImageSpaceRedistributor.C 
+vtk/vtkPointGlyphMapper.C 
+vtk/vtkPointMapper.C 
 vtk/vtkTexturedBackgroundActor.C 
 vtk/vtkTimeSliderActor.C 
 vtk/vtkTriad2D.C 
@@ -144,7 +166,7 @@ avtMapper.C
 avtPickActor.C
 avtPlot.C
 avtPlotMetaData.C
-avtPointGlypher.C
+avtPointMapper.C
 avtSoftwareShader.C
 avtTensorGlyphMapper.C
 avtTheater.C

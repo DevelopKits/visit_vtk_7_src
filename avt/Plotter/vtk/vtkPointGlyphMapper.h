@@ -36,59 +36,107 @@
 *
 *****************************************************************************/
 
+
 // ************************************************************************* //
-//                      avtLevelsPointGlyphMapper.h                          //
+//                         vtkPointGlyphMapper.h                             //
 // ************************************************************************* //
 
-#ifndef AVT_LEVELS_POINT_GLYPH_MAPPER_H
-#define AVT_LEVELS_POINT_GLYPH_MAPPER_H
+
+#ifndef vtkPointGlyphMapper_h
+#define vtkPointGlyphMapper_h
+
+#include <vtkPolyDataMapper.h>
+#include <vtkNew.h>
 
 #include <plotter_exports.h>
 
-#include <avtLevelsMapper.h>
-#include <avtPointMapper.h>
+#include <string>
 
+class vtkLookupTable;
+class vtkPointGlyphMapperHelper;
+class vtkPointMapper;
+class vtkTrivialProducer;
+class vtkVisItGlyph3D;
+class vtkVisItPolyDataNormals;
 
 // ****************************************************************************
-//  Class: avtLevelsPointGlyphMapper
+// Class: vtkPointGlyphMapper
 //
-//  Purpose:
-//    A mapper for glyph.  This extends the functionality of a mapper by
-//    mapping a glyph onto a dataset.
+// Purpose:
+//   Subclass of vtkPolyDataMapper that can draw points as glyphs, points,
+//   or sphere imposters.
 //
-//  Programmer: Kathleen Bonnell
-//  Creation:   November 12, 2004 
+//  Programmer: Kathleen Biagas 
+//  Creation:   August 17, 2016
 //
 //  Modifications:
-//    Brad Whitlock, Fri Jul 22 11:21:47 PDT 2005
-//    Added an override for the SetGlyphType method that lets us switch
-//    mapper inputs when we enter of leave point glyphing mode.
 //
-//    Kathleen Biagas, Wed Feb 6 19:38:27 PDT 2013
-//    Changed signature of InsertFilters.
-//
-//    Kathleen Biagas, Tue Aug 23 11:34:11 PDT 2016
-//    Changed inheritance from avtPointGlypher to avtPointMapper. Removed
-//    Glyph related methods.
-//
-// ****************************************************************************
+// **************************************************************************** 
 
-class PLOTTER_API  avtLevelsPointGlyphMapper : virtual public avtLevelsMapper,
-                                               virtual public avtPointMapper
+class PLOTTER_API vtkPointGlyphMapper : public vtkPolyDataMapper
 {
-  public:
-                               avtLevelsPointGlyphMapper();
-    virtual                   ~avtLevelsPointGlyphMapper();
+public:
+  static vtkPointGlyphMapper *New();
+  vtkTypeMacro(vtkPointGlyphMapper,vtkPolyDataMapper);
+  void PrintSelf(ostream& os, vtkIndent indent);
+
+  virtual void Render(vtkRenderer *, vtkActor *);
+  virtual void ReleaseGraphicsResources(vtkWindow *);
+
+  // To pass on to underlying mappers
+  void SetScalarRange(double, double);
+  void SetLookupTable(vtkLookupTable *lut);
+
+  enum GlyphType {
+    Box = 0,
+    Axis,
+    Icosahedron,
+    Point,
+    Sphere,
+    Octahedron,
+    Tetrahedron,
+    SphereGeometry
+  };
+
+  vtkGetMacro(SpatialDimension, int);
+  vtkSetMacro(SpatialDimension, int);
+
+  void SetGlyphType(int);
+  int  GetGlyphType(void);
+  void SetScale(double);
+  void DataScalingOff(void);
+  void DataScalingOn(const std::string &, int);
+  void ColorByScalarOn(const std::string &);
+  void ColorByScalarOff(void);
+  bool SetFullFrameScaling(bool useScale, const double *s);
+
+protected:
+  vtkPointGlyphMapper();
+  ~vtkPointGlyphMapper();
+
+  virtual void RenderPiece(vtkRenderer *, vtkActor *);
+
+  // Description:
+  bool        UseImposters;
+  bool        PointDataInitialized;
+  int         SpatialDimension;
 
 
-  protected:
-    virtual void               CustomizeMappers(void);
+  // Cached variables
+  vtkNew<vtkPolyData> PointPolyData; 
+  vtkNew<vtkTrivialProducer> PointOutput;
+  vtkNew<vtkVisItGlyph3D>         GlyphFilter;
+  vtkNew<vtkVisItPolyDataNormals> NormalsFilter;
+  vtkNew<vtkPolyDataMapper>       GlyphMapper;
+  vtkNew<vtkPointMapper>          PointMapper;
 
-  private:
+  virtual void UpdatePointData();
 
+private:
+  vtkPointGlyphMapper(const vtkPointGlyphMapper&); 
+  void operator=(const vtkPointGlyphMapper&);
+
+  vtkPointGlyphMapperHelper *Helper;
 };
 
-
 #endif
-
-

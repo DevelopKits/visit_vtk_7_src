@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -308,40 +308,7 @@ avtLevelsMapper::SetLineStyle(_LineStyle ls)
 
 
 // ****************************************************************************
-//  Method: avtLevelsMapper::SetPointSize
-//
-//  Purpose:
-//      Sets the point size for all the actors of plot.
-//
-//  Arguments:
-//      s        The new point size
-//
-//  Programmer:  Kathleen Bonnell
-//  Creation:    March 22, 2001
-//
-// ****************************************************************************
-
-void
-avtLevelsMapper::SetPointSize(double s)
-{
-    if ( actors == NULL )
-    {
-        // this occurs when this method called before input is set.
-        return;
-    }
-
-    for (int i = 0 ; i < nMappers ; i++)
-    {
-        if (actors[i] != NULL)
-        {
-            actors[i]->GetProperty()->SetPointSize(s);
-        }
-    }
-}
-
-
-// ****************************************************************************
-//  Method: avtVariableMapper::GetOriginalDataRange
+//  Method: avtLevelsMapper::GetOriginalDataRange
 //
 //  Purpose:
 //      Gets the original range of the input.

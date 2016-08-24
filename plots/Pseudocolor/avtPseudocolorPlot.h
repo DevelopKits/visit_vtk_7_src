@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -51,6 +51,7 @@
 class     avtLookupTable;
 class     avtPseudocolorFilter;
 class     avtShiftCenteringFilter;
+class     avtVariableMapper;
 class     avtVariablePointGlyphMapper;
 class     avtVariableLegend;
 class     avtStaggeringFilter;
@@ -136,6 +137,10 @@ class     avtStaggeringFilter;
 //    Added support for using per-color alpha values from a color table
 //    (instead of just a single global opacity for the whole plot).
 //
+//    Kathleen Biagas, Tue Aug 23 11:25:34 PDT 2016
+//    Add VariableMapper as points and surfaces no longer handled by the
+//    same mapper.
+//
 // ****************************************************************************
 
 class avtPseudocolorPlot : public avtSurfaceDataPlot
@@ -163,7 +168,8 @@ class avtPseudocolorPlot : public avtSurfaceDataPlot
     void                        SetScaling(int, double);
 
   protected:
-    avtVariablePointGlyphMapper  *glyphMapper;
+    avtVariablePointGlyphMapper   *glyphMapper;
+    avtVariableMapper             *mapper;
     avtVariableLegend          *varLegend;
     avtLegend_p                 varLegendRefPtr;
     PseudocolorAttributes       atts;

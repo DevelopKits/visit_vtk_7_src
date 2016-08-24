@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -36,7 +36,7 @@
 *
 *****************************************************************************/
 
-// ************************************************************************* // 
+// ************************************************************************* //
 //                              avtMeshPlot.C                                //
 // ************************************************************************* // 
 
@@ -381,21 +381,21 @@ avtMeshPlot::SetAtts(const AttributeGroup *a)
         glyphMapper->DataScalingOff();
     }
     if (atts.GetPointType() == MeshAttributes::Box)
-        glyphMapper->SetGlyphType(avtPointGlypher::Box);
+        glyphMapper->SetGlyphType(avtPointMapper::Box);
     else if (atts.GetPointType() == MeshAttributes::Axis)
-        glyphMapper->SetGlyphType(avtPointGlypher::Axis);
+        glyphMapper->SetGlyphType(avtPointMapper::Axis);
     else if (atts.GetPointType() == MeshAttributes::Icosahedron)
-        glyphMapper->SetGlyphType(avtPointGlypher::Icosahedron);
+        glyphMapper->SetGlyphType(avtPointMapper::Icosahedron);
     else if (atts.GetPointType() == MeshAttributes::Octahedron)
-        glyphMapper->SetGlyphType(avtPointGlypher::Octahedron);
+        glyphMapper->SetGlyphType(avtPointMapper::Octahedron);
     else if (atts.GetPointType() == MeshAttributes::Tetrahedron)
-        glyphMapper->SetGlyphType(avtPointGlypher::Tetrahedron);
+        glyphMapper->SetGlyphType(avtPointMapper::Tetrahedron);
     else if (atts.GetPointType() == MeshAttributes::SphereGeometry)
-        glyphMapper->SetGlyphType(avtPointGlypher::SphereGeometry);
+        glyphMapper->SetGlyphType(avtPointMapper::SphereGeometry);
     else if (atts.GetPointType() == MeshAttributes::Point)
-        glyphMapper->SetGlyphType(avtPointGlypher::Point);
+        glyphMapper->SetGlyphType(avtPointMapper::Point);
     else if (atts.GetPointType() == MeshAttributes::Sphere)
-        glyphMapper->SetGlyphType(avtPointGlypher::Sphere);
+        glyphMapper->SetGlyphType(avtPointMapper::Sphere);
 
     SetPointGlyphSize();
 
@@ -896,9 +896,6 @@ avtMeshPlot::ApplyRenderingTransformation(avtDataObject_p input)
 //
 //    Jeremy Meredith, Fri Feb 20 17:26:05 EST 2009
 //    Added per-plot alpha support.
-//
-//    Kathleen Biagas, Wed May 11 09:18:18 MST 2016
-//    Remove property.
 //
 // ****************************************************************************
 

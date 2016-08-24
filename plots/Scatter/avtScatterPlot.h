@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -46,7 +46,6 @@
 #include <ScatterAttributes.h>
 
 #include <avtPlot.h>
-#include <avtSurfaceAndWireframeRenderer.h>
 
 class avtLookupTable;
 class avtVariableLegend;

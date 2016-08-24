@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -48,6 +48,7 @@
 #include <BoundaryAttributes.h>
 
 class     avtLevelsLegend;
+class     avtLevelsMapper;
 class     avtLevelsPointGlyphMapper;
 class     avtLookupTable;
 
@@ -88,6 +89,10 @@ class     avtSmoothPolyDataFilter;
 //    Kathleen Biagas, Wed Feb 29 13:10:11 MST 2012
 //    Add GetExtraInfoForPick.
 //
+//    Kathleen Biagas, Tue Aug 23 11:16:20 PDT 2016
+//    Added LevelsMapper, as points and surfaces are no longer mapped
+//    by the same mapper.
+//
 // ****************************************************************************
 
 class
@@ -123,7 +128,8 @@ avtBoundaryPlot : public avtVolumeDataPlot
     avtSmoothPolyDataFilter         *smooth;
 
     BoundaryAttributes         atts;
-    avtLevelsPointGlyphMapper *levelsMapper;
+    avtLevelsPointGlyphMapper *glyphMapper;
+    avtLevelsMapper           *levelsMapper;
     avtLevelsLegend           *levelsLegend;
     avtLegend_p                levLegendRefPtr;
     avtLookupTable            *avtLUT;

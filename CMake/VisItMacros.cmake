@@ -1,6 +1,6 @@
 #*****************************************************************************
 #
-# Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+# Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 # Produced at the Lawrence Livermore National Laboratory
 # LLNL-CODE-442911
 # All rights reserved.
@@ -81,18 +81,15 @@ IF (WIN32)
 ENDIF (WIN32)
 
 FUNCTION(ADD_TARGET_INCLUDE target)
-    set_property(TARGET ${target} APPEND
-    # the current settings, but we want to append, so first retrieve
-    # the current values, then append the desired include.
-                 PROPERTY INCLUDE_DIRECTORIES ${ARGN})
+      set_property(TARGET ${target} 
+                   APPEND
+                   PROPERTY INCLUDE_DIRECTORIES ${ARGN})
 ENDFUNCTION(ADD_TARGET_INCLUDE)
 
 FUNCTION(ADD_TARGET_DEFINITIONS target newDefs)
-    set_property(TARGET ${target} APPEND
-                 PROPERTY COMPILE_DEFINITIONS ${newDefs})
-    # if there truly are current definitions, and more than 1 in the list, then
-    # IF(${currentDefs} MATCHES NOTFOUND) causes a configure failure.
-    # Grab the first item in the list for comparison instead.
+        set_property(TARGET ${target}
+                     APPEND
+                     PROPERTY COMPILE_DEFINITIONS ${newDefs})
 ENDFUNCTION(ADD_TARGET_DEFINITIONS)
 
 FUNCTION(ADD_PARALLEL_LIBRARY target)
@@ -104,17 +101,15 @@ FUNCTION(ADD_PARALLEL_LIBRARY target)
         FOREACH (X ${VISIT_PARALLEL_CXXFLAGS})
             SET(PAR_COMPILE_FLAGS "${PAR_COMPILE_FLAGS} ${X}")
         ENDFOREACH(X)
-        SET_TARGET_PROPERTIES(${target} PROPERTIES
-            COMPILE_FLAGS ${PAR_COMPILE_FLAGS}
-        )
+        set_property(TARGET ${target}
+                     APPEND PROPERTY COMPILE_FLAGS ${PAR_COMPILE_FLAGS})
         IF(VISIT_PARALLEL_LINKER_FLAGS)
             SET(PAR_LINK_FLAGS "")
             FOREACH(X ${VISIT_PARALLEL_LINKER_FLAGS})
                 SET(PAR_LINK_FLAGS "${PAR_LINK_FLAGS} ${X}")
             ENDFOREACH(X)
-            SET_TARGET_PROPERTIES(${target} PROPERTIES
-                LINK_FLAGS ${PAR_LINK_FLAGS}
-            )
+            set_property(TARGET ${target}
+                     APPEND PROPERTY LINK_FLAGS ${PAR_LINK_FLAGS})
         ENDIF(VISIT_PARALLEL_LINKER_FLAGS)
 
         IF(VISIT_PARALLEL_RPATH)
@@ -125,9 +120,8 @@ FUNCTION(ADD_PARALLEL_LIBRARY target)
             FOREACH(X ${VISIT_PARALLEL_RPATH})
                 SET(PAR_RPATHS "${PAR_RPATHS} ${X}")
             ENDFOREACH(X)
-            SET_TARGET_PROPERTIES(${target} PROPERTIES
-                INSTALL_RPATH ${PAR_RPATHS}
-            )
+            set_property(TARGET ${target}
+                     APPEND PROPERTY INSTALL_RPATH ${PAR_RPATHS})
         ENDIF(VISIT_PARALLEL_RPATH)
       ENDIF(VISIT_PARALLEL_CXXFLAGS)
 

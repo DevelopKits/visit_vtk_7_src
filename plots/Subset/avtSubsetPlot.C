@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -49,6 +49,7 @@
 #include <avtFacelistFilter.h>
 #include <avtGhostZoneFilter.h>
 #include <avtLevelsLegend.h>
+#include <avtLevelsMapper.h>
 #include <avtLevelsPointGlyphMapper.h>
 #include <avtLookupTable.h>
 #include <avtSubsetFilter.h>
@@ -107,11 +108,16 @@ using std::vector;
 //    Jeremy Meredith, Tue Oct 14 14:00:06 EDT 2008
 //    Changed interface to SetMustCreatePolyData to allow either setting.
 //
+//    Kathleen Biagas, Tue Aug 23 11:20:32 PDT 2016
+//    Added LevelsMapper as points and surfaces no longer handled by the
+//    same mapper.
+//
 // ****************************************************************************
 
 avtSubsetPlot::avtSubsetPlot()
 {
-    levelsMapper = new avtLevelsPointGlyphMapper();
+    glyphMapper  = new avtLevelsPointGlyphMapper();
+    levelsMapper = new avtLevelsMapper();
     levelsLegend = new avtLevelsLegend();
     levelsLegend->SetTitle("Subset");
     // there is no 'range' per se, so turn off range visibility.
@@ -168,6 +174,11 @@ avtSubsetPlot::avtSubsetPlot()
 
 avtSubsetPlot::~avtSubsetPlot()
 {
+    if (glyphMapper != NULL)
+    {
+        delete glyphMapper;
+        glyphMapper = NULL;
+    }
     if (levelsMapper != NULL)
     {
         delete levelsMapper;
@@ -300,41 +311,43 @@ avtSubsetPlot::SetAtts(const AttributeGroup *a)
     {
         behavior->SetAntialiasedRenderOrder(DOES_NOT_MATTER);
         levelsMapper->SetSpecularIsInappropriate(false);
+        glyphMapper->SetSpecularIsInappropriate(false);
     }
     else 
     {
         behavior->SetAntialiasedRenderOrder(ABSOLUTELY_LAST);
         levelsMapper->SetSpecularIsInappropriate(true);
+        glyphMapper->SetSpecularIsInappropriate(true);
     }
 
-    levelsMapper->SetScale(atts.GetPointSize());
+    glyphMapper->SetScale(atts.GetPointSize());
     if (atts.GetPointSizeVarEnabled() &&
         atts.GetPointSizeVar() != "default" &&
         atts.GetPointSizeVar() != "" &&
         atts.GetPointSizeVar() != "\0")
     {
-        levelsMapper->ScaleByVar(atts.GetPointSizeVar());
+        glyphMapper->ScaleByVar(atts.GetPointSizeVar());
     }
     else 
     {
-        levelsMapper->DataScalingOff();
+        glyphMapper->DataScalingOff();
     }
     if (atts.GetPointType() == SubsetAttributes::Box)
-        levelsMapper->SetGlyphType(avtPointGlypher::Box);
+        glyphMapper->SetGlyphType(avtPointMapper::Box);
     else if (atts.GetPointType() == SubsetAttributes::Axis)
-        levelsMapper->SetGlyphType(avtPointGlypher::Axis);
+        glyphMapper->SetGlyphType(avtPointMapper::Axis);
     else if (atts.GetPointType() == SubsetAttributes::Icosahedron)
-        levelsMapper->SetGlyphType(avtPointGlypher::Icosahedron);
+        glyphMapper->SetGlyphType(avtPointMapper::Icosahedron);
     else if (atts.GetPointType() == SubsetAttributes::Octahedron)
-        levelsMapper->SetGlyphType(avtPointGlypher::Octahedron);
+        glyphMapper->SetGlyphType(avtPointMapper::Octahedron);
     else if (atts.GetPointType() == SubsetAttributes::Tetrahedron)
-        levelsMapper->SetGlyphType(avtPointGlypher::Tetrahedron);
+        glyphMapper->SetGlyphType(avtPointMapper::Tetrahedron);
     else if (atts.GetPointType() == SubsetAttributes::SphereGeometry)
-        levelsMapper->SetGlyphType(avtPointGlypher::SphereGeometry);
+        glyphMapper->SetGlyphType(avtPointMapper::SphereGeometry);
     else if (atts.GetPointType() == SubsetAttributes::Point)
-        levelsMapper->SetGlyphType(avtPointGlypher::Point);
+        glyphMapper->SetGlyphType(avtPointMapper::Point);
     else if (atts.GetPointType() == SubsetAttributes::Sphere)
-        levelsMapper->SetGlyphType(avtPointGlypher::Sphere);
+        glyphMapper->SetGlyphType(avtPointMapper::Sphere);
     SetPointGlyphSize();
 }
 
@@ -458,7 +471,14 @@ avtSubsetPlot::SetLineWidth(int lw)
 avtMapper *
 avtSubsetPlot::GetMapper(void)
 {
-    return levelsMapper;
+    if (topologicalDim != 0)
+    {
+        return levelsMapper;
+    }
+    else
+    {
+        return glyphMapper;
+    }
 }
 
 
@@ -780,7 +800,7 @@ avtSubsetPlot::SetPointGlyphSize()
     // Size used for points when using a point glyph.
     if(atts.GetPointType() == SubsetAttributes::Point ||
        atts.GetPointType() == SubsetAttributes::Sphere)
-        levelsMapper->SetPointSize(atts.GetPointSizePixels());
+        glyphMapper->SetPointSize(atts.GetPointSizePixels());
 }
 
 
@@ -891,7 +911,7 @@ avtSubsetPlot::SetColors()
 
         avtLUT->SetLUTColorsWithOpacity(ca.GetColor(), 1);
         levelsMapper->SetColors(cal, needsRecalculation);
-
+        glyphMapper->SetColors(cal, needsRecalculation);
         // 
         //  Send an empty color map, rather than one where all
         //  entries map to same value. 
@@ -926,9 +946,11 @@ avtSubsetPlot::SetColors()
 
         avtLUT->SetLUTColorsWithOpacity(colors, numColors);
         levelsMapper->SetColors(cal, needsRecalculation);
+        glyphMapper->SetColors(cal, needsRecalculation);
         levelsLegend->SetLevels(labels);
 
         levelsMapper->SetLabelColorMap(levelColorMap);
+        glyphMapper->SetLabelColorMap(levelColorMap);
         levelsLegend->SetLabelColorMap(levelColorMap);
 
         delete [] colors;
@@ -962,7 +984,7 @@ avtSubsetPlot::SetColors()
             levelColorMap.insert(LevelColorMap::value_type(allLabels[i], i));
 
         bool invert = atts.GetInvertColorTable();
-        // 
+        //
         // Add a color for each subset name.
         //
         if(ct->IsDiscrete(ctName.c_str()))
@@ -1003,9 +1025,11 @@ avtSubsetPlot::SetColors()
 
         avtLUT->SetLUTColorsWithOpacity(colors, numColors);
         levelsMapper->SetColors(cal, needsRecalculation);
+        glyphMapper->SetColors(cal, needsRecalculation);
         levelsLegend->SetLevels(labels);
 
         levelsMapper->SetLabelColorMap(levelColorMap);
+        glyphMapper->SetLabelColorMap(levelColorMap);
         levelsLegend->SetLabelColorMap(levelColorMap);
 
         delete [] colors;

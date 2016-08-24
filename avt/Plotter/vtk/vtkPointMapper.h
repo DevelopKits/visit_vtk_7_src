@@ -36,59 +36,44 @@
 *
 *****************************************************************************/
 
-// ************************************************************************* //
-//                      avtLevelsPointGlyphMapper.h                          //
-// ************************************************************************* //
-
-#ifndef AVT_LEVELS_POINT_GLYPH_MAPPER_H
-#define AVT_LEVELS_POINT_GLYPH_MAPPER_H
+#ifndef vtkPointMapper_h
+#define vtkPointMapper_h
 
 #include <plotter_exports.h>
 
-#include <avtLevelsMapper.h>
-#include <avtPointMapper.h>
+#include <vtkPolyDataMapper.h>
 
-
-// ****************************************************************************
-//  Class: avtLevelsPointGlyphMapper
+// A PolyDataMapper that Renders Points as Points or as SphereImposters
+// (UseImposters is true)
 //
-//  Purpose:
-//    A mapper for glyph.  This extends the functionality of a mapper by
-//    mapping a glyph onto a dataset.
-//
-//  Programmer: Kathleen Bonnell
-//  Creation:   November 12, 2004 
-//
-//  Modifications:
-//    Brad Whitlock, Fri Jul 22 11:21:47 PDT 2005
-//    Added an override for the SetGlyphType method that lets us switch
-//    mapper inputs when we enter of leave point glyphing mode.
-//
-//    Kathleen Biagas, Wed Feb 6 19:38:27 PDT 2013
-//    Changed signature of InsertFilters.
-//
-//    Kathleen Biagas, Tue Aug 23 11:34:11 PDT 2016
-//    Changed inheritance from avtPointGlypher to avtPointMapper. Removed
-//    Glyph related methods.
-//
-// ****************************************************************************
-
-class PLOTTER_API  avtLevelsPointGlyphMapper : virtual public avtLevelsMapper,
-                                               virtual public avtPointMapper
+class vtkPointMapper : public vtkPolyDataMapper
 {
-  public:
-                               avtLevelsPointGlyphMapper();
-    virtual                   ~avtLevelsPointGlyphMapper();
+public:
+  static vtkPointMapper *New();
+  vtkTypeMacro(vtkPointMapper, vtkPolyDataMapper)
+  void PrintSelf(ostream& os, vtkIndent indent);
 
+  vtkSetStringMacro(ScaleArray);
+  vtkGetStringMacro(ScaleArray);
 
-  protected:
-    virtual void               CustomizeMappers(void);
+  vtkSetMacro(Radius, float);
+  vtkGetMacro(Radius, float);
 
-  private:
+  vtkSetMacro(UseImposters, bool);
+  vtkGetMacro(UseImposters, bool);
+  vtkBooleanMacro(UseImposters, bool);
 
+protected:
+  vtkPointMapper();
+ ~vtkPointMapper();
+
+  char *ScaleArray;
+  float Radius;
+  bool UseImposters;
+
+private:
+  vtkPointMapper(const vtkPointMapper&) VTK_DELETE_FUNCTION;
+  void operator=(const vtkPointMapper&) VTK_DELETE_FUNCTION;
 };
 
-
 #endif
-
-

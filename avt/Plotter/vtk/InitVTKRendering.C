@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -41,6 +41,7 @@
 #include <vtkToolkits.h>
 #include <vtkVisItRectilinearGrid.h>
 #include <vtkVisItStructuredGrid.h>
+#include <vtkOpenGLPointMapper.h>
 
 #include <vtkObjectFactory.h>
 #include <vtkVersion.h>
@@ -61,21 +62,28 @@
 class vtkVisItGraphicsFactory : public vtkObjectFactory
 {
   public:
-    vtkVisItGraphicsFactory();
-    static vtkVisItGraphicsFactory* New() { return new vtkVisItGraphicsFactory;};
-    virtual const char* GetVTKSourceVersion();
+    static vtkVisItGraphicsFactory * New();
+    vtkTypeMacro(vtkVisItGraphicsFactory, vtkObjectFactory)
+
     const char* GetDescription() { return "vtkVisItGraphicsFactory"; };
+    const char* GetVTKSourceVersion();
 
   protected:
+    vtkVisItGraphicsFactory();
+
+  private:
     vtkVisItGraphicsFactory(const vtkVisItGraphicsFactory&);
     void operator=(const vtkVisItGraphicsFactory&);
 };
+
+vtkStandardNewMacro(vtkVisItGraphicsFactory)
 
 //
 // Necessary for each object that will override a vtkObject.
 //
 VTK_CREATE_CREATE_FUNCTION(vtkVisItRectilinearGrid);
 VTK_CREATE_CREATE_FUNCTION(vtkVisItStructuredGrid);
+VTK_CREATE_CREATE_FUNCTION(vtkOpenGLPointMapper);
 
 const char*
 vtkVisItGraphicsFactory::GetVTKSourceVersion()
@@ -104,22 +112,31 @@ vtkVisItGraphicsFactory::GetVTKSourceVersion()
 //    to pile on instead.
 //
 //    Dave Bremer, Thu Jun 14 16:47:37 PDT 2007
-//    Disable my previous change.  It causes a problem I don't understand
-//    yet, seemingly related to reading a vtkRectilinearGrid or vtkStructuredGrid
+//    Disable my previous change.  It causes a problem I don't understand yet,
+//    seemingly related to reading a vtkRectilinearGrid or vtkStructuredGrid
 //    from a file.
 //
 //    Dave Bremer, Mon Jun 18 17:44:43 PDT 2007
 //    Reinstantiated use of vtkVisItStructuredGrid and vtkVisItRectilinearGrid.
 //
 //    Brad Whitlock, Thurs Nov 15 16:25 PST 2007
-//    Added override of vtkOpenGLTexture that is compatible with our vtkQtRenderWindow.
+//    Added override of vtkOpenGLTexture that is compatible with our
+//    vtkQtRenderWindow.
 //
 //    Tom Fogal, Tue Apr 27 11:42:46 MDT 2010
 //    Fix Mesa special case: our OGL classes can handle that.
 //
 //    Brad Whitlock, Wed Aug 10 11:52:31 PDT 2011
-//    Use VTK's new polydata mapper by eliminating our override of vtkOpenGLPolyDataMapper.
+//    Use VTK's new polydata mapper by eliminating our override of
+//    vtkOpenGLPolyDataMapper.
 //
+//    Kathleen Biagas, Mon Jul 18 10:02:30 PDT 2016
+//    Remove vtkVisItDataSetMapper
+//
+//    Kathleen Biagas, Wed Aug 17 09:27:12 PDT 2016
+//    Add vtkOpenGLPointMapper.
+//
+
 vtkVisItGraphicsFactory::vtkVisItGraphicsFactory()
 {
   this->RegisterOverride("vtkRectilinearGrid", "vtkVisItRectilinearGrid",
@@ -130,6 +147,11 @@ vtkVisItGraphicsFactory::vtkVisItGraphicsFactory()
                          "vtkVisItStructuredGrid override vtkStructuredGrid",
                          1,
                          vtkObjectFactoryCreatevtkVisItStructuredGrid);
+  this->RegisterOverride("vtkPointMapper",
+    "vtkOpenGLPointMapper",
+    "vtkOpenGLPointMapper override vtkPointMapper",
+    1,
+    vtkObjectFactoryCreatevtkOpenGLPointMapper);
 }
 
 // ****************************************************************************
