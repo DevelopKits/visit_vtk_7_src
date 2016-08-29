@@ -19,9 +19,7 @@
 # override: the name of the class that will override base
 macro(visit_add_override mod_name base override)
   list(APPEND visit_module_overrides ${base})
-message("visit_module overrides: ${visit_module_overrides}")
   set(visit_module_${base}_override ${override})
-message("${mod_name} base overrides: ${visit_module_${base}_override}")
   #list(APPEND ${${mod_name}}_overrides ${base})
 #message("${mod_name} overrides: ${${${mod_name}_overrides}}")
   #set(${${mod_name}}_${base}_override ${override})
@@ -32,7 +30,6 @@ function(visit_object_factory_configure mod_name override_list)
     foreach(_class ${override_list})
         set(visit-module ${mod_name})
         set(_override ${visit_module_${_class}_override})
-message("override: ${_override}" )
         set(_mod_override_includes
             "${_mod_override_includes}\n#include \"${_override}.h\"")
         set(_mod_override_creates "${_mod_override_creates} 

@@ -228,7 +228,7 @@ vtkDepthSortPolyData2::vtkDepthSortPolyData2()
   this->Vector[0] = this->Vector[1] = this->Vector[2] = 0.0;
   this->Origin[0] = this->Origin[1] = this->Origin[2] = 0.0;
   this->Transform = vtkTransform::New();
-  this->SortScalars = 0;
+  this->SortScalars = false;
 }
 
 vtkDepthSortPolyData2::~vtkDepthSortPolyData2()
@@ -481,13 +481,13 @@ void vtkDepthSortPolyData2::ComputeProjectionVector(double vector[3],
     }
 }
 
-unsigned long int vtkDepthSortPolyData2::GetMTime()
+vtkMTimeType vtkDepthSortPolyData2::GetMTime()
 {
-  unsigned long mTime=this->Superclass::GetMTime();
+  vtkMTimeType mTime = this->Superclass::GetMTime();
 
   if ( this->Direction != VTK_DIRECTION_SPECIFIED_VECTOR )
     {
-    unsigned long time;
+    vtkMTimeType time;
     if ( this->Camera != NULL )
       {
       time = this->Camera->GetMTime();

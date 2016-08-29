@@ -39,11 +39,11 @@ vtkStandardNewMacro(vtkVisItFeatureEdges);
 vtkVisItFeatureEdges::vtkVisItFeatureEdges()
 {
   this->FeatureAngle = 30.0;
-  this->BoundaryEdges = 1;
-  this->FeatureEdges = 1;
-  this->NonManifoldEdges = 1;
-  this->ManifoldEdges = 0;
-  this->Coloring = 1;
+  this->BoundaryEdges = true;
+  this->FeatureEdges = true;
+  this->NonManifoldEdges = true;
+  this->ManifoldEdges = false;
+  this->Coloring = true;
   this->Locator = NULL;
 }
 
@@ -415,10 +415,10 @@ void vtkVisItFeatureEdges::SetLocator(vtkPointLocator *locator)
 //
 // ****************************************************************************
 
-unsigned long int vtkVisItFeatureEdges::GetMTime()
+vtkMTimeType vtkVisItFeatureEdges::GetMTime()
 {
-  unsigned long mTime=this->Superclass::GetMTime();
-  unsigned long time;
+  vtkMTimeType mTime = this->Superclass::GetMTime();
+  vtkMTimeType time;
 
   if ( this->Locator != NULL )
     {
