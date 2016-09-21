@@ -798,8 +798,7 @@ void
 avtSubsetPlot::SetPointGlyphSize()
 {
     // Size used for points when using a point glyph.
-    if(atts.GetPointType() == SubsetAttributes::Point ||
-       atts.GetPointType() == SubsetAttributes::Sphere)
+    if(atts.GetPointType() == SubsetAttributes::Point) 
         glyphMapper->SetPointSize(atts.GetPointSizePixels());
 }
 

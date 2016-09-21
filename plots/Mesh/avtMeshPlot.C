@@ -353,7 +353,7 @@ avtMeshPlot::SetAtts(const AttributeGroup *a)
         SetMeshColor(atts.GetMeshColor().GetColor());
         glyphMapper->ColorBySingleColor(atts.GetMeshColor().GetColor());
     }
-    SetPointSize(atts.GetPointSize());
+
     SetRenderOpaque();
     if (atts.GetOpaqueColorSource()==0)  
     {
@@ -618,24 +618,6 @@ void
 avtMeshPlot::SetLineStyle(_LineStyle ls)
 {
     mapper->SetLineStyle(LineStyle2StipplePattern(ls));
-}
-
-
-// ****************************************************************************
-//  Method: avtMeshPlot::SetPointSize
-//
-//  Purpose:
-//      Sets the point size.
-//
-//  Programmer: Kathleen Bonnell
-//  Creation:   March 22, 2001
-//
-// ****************************************************************************
-
-void
-avtMeshPlot::SetPointSize(float ps)
-{
-    //property->SetPointSize(ps);
 }
 
 
@@ -1230,8 +1212,7 @@ void
 avtMeshPlot::SetPointGlyphSize()
 {
     // Size used for points when using a point glyph.
-    if(atts.GetPointType() == MeshAttributes::Point ||
-       atts.GetPointType() == MeshAttributes::Sphere)
+    if(atts.GetPointType() == MeshAttributes::Point)
         glyphMapper->SetPointSize(atts.GetPointSizePixels());
 }
 

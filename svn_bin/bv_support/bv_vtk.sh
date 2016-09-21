@@ -75,11 +75,11 @@ function bv_vtk_force
 
 function bv_vtk_info
 {
-    export VTK_FILE=${VTK_FILE:-"VTK-dbae27c.tar.gz"}
+    export VTK_FILE=${VTK_FILE:-"VTK-9768c8e.tar.gz"}
     export VTK_VERSION=${VTK_VERSION:-"7.1.0"}
     export VTK_SHORT_VERSION=${VTK_SHORT_VERSION:-"7.1"}
     export VTK_COMPATIBILITY_VERSION=${VTK_SHORT_VERSION}
-    export VTK_BUILD_DIR=${VTK_BUILD_DIR:-"VTK-dbae27c"}
+    export VTK_BUILD_DIR=${VTK_BUILD_DIR:-"VTK-9768c8e"}
     export VTK_INSTALL_DIR=${VTK_INSTALL_DIR:-"vtk"}
     export VTK_MD5_CHECKSUM=""
     export VTK_SHA256_CHECKSUM=""
@@ -142,11 +142,247 @@ function bv_vtk_dry_run
 # *************************************************************************** #
 #                            Function 6, build_vtk                            #
 # *************************************************************************** #
+function apply_vtk_710_spheremapper_patch
+{
+    patch -p0 << \EOF
+*** Rendering/OpenGL2/vtkOpenGLSphereMapper.h	2016-09-19 13:21:30.820593378 -0700
+--- Rendering/OpenGL2/vtkOpenGLSphereMapper.h.new	2016-09-19 12:50:08.488597160 -0700
+***************
+*** 32,41 ****
+--- 32,46 ----
+    // Description:
+    // Convenience method to set the array to scale with.
+    vtkSetStringMacro(ScaleArray);
+  
+    // Description:
++   // Convenience method to set a single radius to scale with.
++   // Will be used if ScaleArray has not been set or does not exist in input.
++   vtkSetMacro(Radius, float);
++ 
++   // Description:
+    // This calls RenderPiece (twice when transparent)
+    virtual void Render(vtkRenderer *ren, vtkActor *act);
+  
+  protected:
+    vtkOpenGLSphereMapper();
+***************
+*** 60,69 ****
+--- 65,75 ----
+    // Description:
+    // Set the shader parameters related to the actor/mapper
+    virtual void SetMapperShaderParameters(vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act);
+  
+    const char *ScaleArray;
++   float Radius;
+  
+    // Description:
+    // Does the VBO/IBO need to be rebuilt
+    virtual bool GetNeedToRebuildBufferObjects(vtkRenderer *ren, vtkActor *act);
+  
+
+EOF
+
+    if [[ $? != 0 ]] ; then
+      warn "vtk710 patch vtkSphereMapper header failed."
+      return 1
+    fi
+
+    patch -p0 << \EOF
+*** Rendering/OpenGL2/vtkOpenGLSphereMapper.cxx	2016-09-19 13:21:19.068593131 -0700
+--- Rendering/OpenGL2/vtkOpenGLSphereMapper.cxx.new	2016-09-19 12:50:08.488597160 -0700
+***************
+*** 40,49 ****
+--- 40,50 ----
+  
+  //-----------------------------------------------------------------------------
+  vtkOpenGLSphereMapper::vtkOpenGLSphereMapper()
+  {
+    this->ScaleArray = 0;
++   this->Radius = 0.3;
+    this->Invert = false;
+  }
+  
+  //-----------------------------------------------------------------------------
+  void vtkOpenGLSphereMapper::GetShaderTemplate(
+***************
+*** 221,232 ****
+  
+  namespace
+  {
+  // internal function called by CreateVBO
+  void vtkOpenGLSphereMapperCreateVBO(float * points, vtkIdType numPts,
+!               unsigned char *colors, int colorComponents,
+                float *sizes,
+                vtkOpenGLVertexBufferObject *VBO)
+  {
+    // Figure out how big each block will be, currently 6 or 7 floats.
+    int blockSize = 3;
+    VBO->VertexOffset = 0;
+--- 222,234 ----
+  
+  namespace
+  {
+  // internal function called by CreateVBO
+  void vtkOpenGLSphereMapperCreateVBO(float * points, vtkIdType numPts,
+!               unsigned char *colors, int colorComponents, vtkIdType nc,
+                float *sizes,
++               vtkIdType ns,
+                vtkOpenGLVertexBufferObject *VBO)
+  {
+    // Figure out how big each block will be, currently 6 or 7 floats.
+    int blockSize = 3;
+    VBO->VertexOffset = 0;
+***************
+*** 251,262 ****
+    float cos30 = cos(vtkMath::RadiansFromDegrees(30.0));
+  
+    for (vtkIdType i = 0; i < numPts; ++i)
+      {
+      pointPtr = points + i*3;
+!     colorPtr = colors + i*colorComponents;
+!     float radius = sizes[i];
+  
+      // Vertices
+      *(it++) = pointPtr[0];
+      *(it++) = pointPtr[1];
+      *(it++) = pointPtr[2];
+--- 253,264 ----
+    float cos30 = cos(vtkMath::RadiansFromDegrees(30.0));
+  
+    for (vtkIdType i = 0; i < numPts; ++i)
+      {
+      pointPtr = points + i*3;
+!     colorPtr = (nc == numPts ? colors + i*colorComponents : colors);
+!     float radius = (ns == numPts ? sizes[i] : sizes[0]);
+  
+      // Vertices
+      *(it++) = pointPtr[0];
+      *(it++) = pointPtr[1];
+      *(it++) = pointPtr[2];
+***************
+*** 300,310 ****
+  }
+  
+  //-------------------------------------------------------------------------
+  void vtkOpenGLSphereMapper::BuildBufferObjects(
+    vtkRenderer *vtkNotUsed(ren),
+!   vtkActor *vtkNotUsed(act))
+  {
+    vtkPolyData *poly = this->CurrentInput;
+  
+    if (poly == NULL)// || !poly->GetPointData()->GetNormals())
+      {
+--- 302,312 ----
+  }
+  
+  //-------------------------------------------------------------------------
+  void vtkOpenGLSphereMapper::BuildBufferObjects(
+    vtkRenderer *vtkNotUsed(ren),
+!   vtkActor *act)
+  {
+    vtkPolyData *poly = this->CurrentInput;
+  
+    if (poly == NULL)// || !poly->GetPointData()->GetNormals())
+      {
+***************
+*** 317,336 ****
+    // I moved this out of the conditional because it is fast.
+    // Color arrays are cached. If nothing has changed,
+    // then the scalars do not have to be regenerted.
+    this->MapScalars(1.0);
+  
+    // Iterate through all of the different types in the polydata, building OpenGLs
+    // and IBOs as appropriate for each type.
+    vtkOpenGLSphereMapperCreateVBO(
+      static_cast<float *>(poly->GetPoints()->GetVoidPointer(0)),
+!     poly->GetPoints()->GetNumberOfPoints(),
+!     this->Colors ? (unsigned char *)this->Colors->GetVoidPointer(0) : NULL,
+!     this->Colors ? this->Colors->GetNumberOfComponents() : 0,
+!     static_cast<float *>(poly->GetPointData()->GetArray(this->ScaleArray)->GetVoidPointer(0)),
+      this->VBO);
+  
+    // create the IBO
+    this->Points.IBO->IndexCount = 0;
+    this->Lines.IBO->IndexCount = 0;
+    this->TriStrips.IBO->IndexCount = 0;
+    this->Tris.IBO->IndexCount = this->VBO->VertexCount;
+--- 319,380 ----
+    // I moved this out of the conditional because it is fast.
+    // Color arrays are cached. If nothing has changed,
+    // then the scalars do not have to be regenerted.
+    this->MapScalars(1.0);
+  
++   vtkIdType numPts = poly->GetPoints()->GetNumberOfPoints();
++   unsigned char *c;
++   int cc;
++   vtkIdType nc;
++   if (this->Colors)
++     {
++     c = (unsigned char *)this->Colors->GetVoidPointer(0);
++     nc = numPts;
++     cc = this->Colors->GetNumberOfComponents();
++     }
++   else
++     {
++     double *ac = act->GetProperty()->GetColor();
++     c = new unsigned char[3];
++     c[0] = (unsigned char) (ac[0] *255.0);
++     c[1] = (unsigned char) (ac[1] *255.0);
++     c[2] = (unsigned char) (ac[2] *255.0);
++     nc = 1;
++     cc = 3;
++     }
++ 
++   float *scales;
++   vtkIdType ns = poly->GetPoints()->GetNumberOfPoints();
++   if (this->ScaleArray != NULL && 
++       poly->GetPointData()->HasArray(this->ScaleArray))
++     {
++     scales = static_cast<float*>(poly->GetPointData()->GetArray(this->ScaleArray)->GetVoidPointer(0));
++     ns = numPts; 
++     }
++   else
++     {
++     scales = &this->Radius;
++     ns = 1;
++     }
++ 
+    // Iterate through all of the different types in the polydata, building OpenGLs
+    // and IBOs as appropriate for each type.
+    vtkOpenGLSphereMapperCreateVBO(
+      static_cast<float *>(poly->GetPoints()->GetVoidPointer(0)),
+!     numPts,
+!     c,
+!     cc,
+!     nc,
+!     scales,
+!     ns,
+      this->VBO);
+  
++   if (!this->Colors)
++     {
++     delete [] c;
++     }
++ 
+    // create the IBO
+    this->Points.IBO->IndexCount = 0;
+    this->Lines.IBO->IndexCount = 0;
+    this->TriStrips.IBO->IndexCount = 0;
+    this->Tris.IBO->IndexCount = this->VBO->VertexCount;
+
+EOF
+    if [[ $? != 0 ]] ; then
+      warn "vtk710 patch vtkSphereMapper source failed."
+      return 1
+    fi
+
+    return 0
+}
 
 
 function apply_vtk_710_glew_patch
 {
-  # path vtk's glew to use our own dlGetProcAddressMesa 
+  # patch vtk's glew to use our own dlGetProcAddressMesa 
 
    patch -p0 << \EOF
 *** ThirdParty/glew/vtkglew/src/glew.orig.c	Fri Jun 10 12:34:46 2016
@@ -332,6 +568,10 @@ function apply_vtk_patch
             if [[ $? != 0 ]] ; then
                 return 1
             fi
+        fi
+        apply_vtk_710_spheremapper_patch
+        if [[ $? != 0 ]] ; then
+            return 1
         fi
     fi
 

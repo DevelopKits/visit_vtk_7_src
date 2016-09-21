@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2015, Lawrence Livermore National Security, LLC
+* Copyright (c) 2000 - 2016, Lawrence Livermore National Security, LLC
 * Produced at the Lawrence Livermore National Laboratory
 * LLNL-CODE-442911
 * All rights reserved.
@@ -54,10 +54,10 @@
 // ****************************************************************************
 // Method: QvisPointControl::QvisPointControl
 //
-// Purpose: This is the constructor for the QvisPointControl class. 
+// Purpose: This is the constructor for the QvisPointControl class.
 //
-// Programmer: Kathleen Bonnell 
-// Creation:   November 4, 2004 
+// Programmer: Kathleen Bonnell
+// Creation:   November 4, 2004
 //
 // Modifications:
 //    Brad Whitlock, Thu Dec 9 17:05:12 PST 2004
@@ -79,7 +79,7 @@
 //    Reorganize layout of widget.
 //
 //    John Schmidt, Thu Nov 15 13:08:21 MST 2012
-//    Added Tensor quantities to the scaling toggle box.  
+//    Added Tensor quantities to the scaling toggle box.
 //
 // ****************************************************************************
 
@@ -154,11 +154,11 @@ QvisPointControl::QvisPointControl(QWidget *parent,
 //
 // Purpose: This is the destructor for the QvisPointControl class.
 //
-// Programmer: Kathleen Bonnell 
-// Creation:   November 4, 2004 
+// Programmer: Kathleen Bonnell
+// Creation:   November 4, 2004
 //
 // Modifications:
-//   
+//
 // ****************************************************************************
 
 QvisPointControl::~QvisPointControl()
@@ -170,12 +170,12 @@ QvisPointControl::~QvisPointControl()
 // ****************************************************************************
 // Method: QvisPointControl::processSizeText
 //
-// Purpose: 
+// Purpose:
 //   This is a Qt slot function that is called when the user changes the
 //   size text and presses the Enter key.
 //
-// Programmer: Kathleen Bonnell 
-// Creation:   November 4, 2004 
+// Programmer: Kathleen Bonnell
+// Creation:   November 4, 2004
 //
 // Modifications:
 //   Brad Whitlock, Wed Jul 20 13:53:17 PST 2005
@@ -183,6 +183,9 @@ QvisPointControl::~QvisPointControl()
 //
 //   Brad Whitlock, Thu Aug 25 09:52:13 PDT 2005
 //   Added support for sphere points.
+//
+//   Kathleen Biagas, Tue Sep 20 17:07:28 PDT 2016
+//   Sphere points now uses pointSize instead of pointSizePixels.
 //
 // ****************************************************************************
 
@@ -193,8 +196,7 @@ QvisPointControl::processSizeText()
     {
         if(!signalsBlocked())
         {
-            if(lastGoodPointType == POINT_TYPE_POINTS ||
-               lastGoodPointType == POINT_TYPE_SPHERE)
+            if(lastGoodPointType == POINT_TYPE_POINTS)
             {
                 emit pointSizePixelsChanged(lastGoodSizePixels);
             }
@@ -207,7 +209,7 @@ QvisPointControl::processSizeText()
 // ****************************************************************************
 // Method: QvisPointControl::ProcessSizeText
 //
-// Purpose: 
+// Purpose:
 //   Processes the text in the size text field based on the point type.
 //
 // Arguments:
@@ -215,7 +217,7 @@ QvisPointControl::processSizeText()
 //
 // Returns:    True if the text was processed okay.
 //
-// Note:       
+// Note:
 //
 // Programmer: Brad Whitlock
 // Creation:   Wed Jul 20 14:49:19 PST 2005
@@ -223,6 +225,9 @@ QvisPointControl::processSizeText()
 // Modifications:
 //   Brad Whitlock, Thu Aug 25 09:51:31 PDT 2005
 //   Added support for sphere points.
+//
+//   Kathleen Biagas, Tue Sep 20 17:07:28 PDT 2016
+//   Sphere points now uses pointSize instead of pointSizePixels.
 //
 // ****************************************************************************
 
@@ -232,8 +237,7 @@ QvisPointControl::ProcessSizeText(int pointType)
     QString temp = sizeLineEdit->displayText().trimmed();
     bool okay = !temp.isEmpty();
 
-    if(pointType == POINT_TYPE_POINTS ||
-       pointType == POINT_TYPE_SPHERE)
+    if(pointType == POINT_TYPE_POINTS)
     {
         int val;
         if (okay)
@@ -261,20 +265,22 @@ QvisPointControl::ProcessSizeText(int pointType)
 // ****************************************************************************
 // Method: QvisPointControl::GetPointSize
 //
-// Purpose: 
+// Purpose:
 //   This is a method to retrieve the value contained in the pointSizeLineEdit.
 //
-// Programmer: Kathleen Bonnell 
-// Creation:   November 4, 2004 
+// Programmer: Kathleen Bonnell
+// Creation:   November 4, 2004
 //
 // Modifications:
-//   
+//   Kathleen Biagas, Tue Sep 20 17:07:28 PDT 2016
+//   Sphere points now uses pointSize instead of pointSizePixels.
+//
 // ****************************************************************************
 
 double
-QvisPointControl::GetPointSize() 
+QvisPointControl::GetPointSize()
 {
-    if(lastGoodPointType < POINT_TYPE_POINTS)
+    if(lastGoodPointType != POINT_TYPE_POINTS)
     {
         blockSignals(true);
         ProcessSizeText(lastGoodPointType);
@@ -286,7 +292,7 @@ QvisPointControl::GetPointSize()
 // ****************************************************************************
 // Method: QvisPointControl::GetPointSizePixels
 //
-// Purpose: 
+// Purpose:
 //   Gets the point size in terms of pixels.
 //
 // Programmer: Brad Whitlock
@@ -296,13 +302,15 @@ QvisPointControl::GetPointSize()
 //   Brad Whitlock, Thu Aug 25 09:49:50 PDT 2005
 //   Added support for sphere points.
 //
+//   Kathleen Biagas, Tue Sep 20 17:07:28 PDT 2016
+//   Sphere points now uses pointSize instead of pointSizePixels.
+//
 // ****************************************************************************
 
 int
-QvisPointControl::GetPointSizePixels() 
+QvisPointControl::GetPointSizePixels()
 {
-    if(lastGoodPointType == POINT_TYPE_POINTS ||
-       lastGoodPointType == POINT_TYPE_SPHERE)
+    if(lastGoodPointType == POINT_TYPE_POINTS)
     {
         blockSignals(true);
         ProcessSizeText(lastGoodPointType);
@@ -314,12 +322,12 @@ QvisPointControl::GetPointSizePixels()
 // ****************************************************************************
 // Method: QvisPointControl::sizeVarChanged
 //
-// Purpose: 
+// Purpose:
 //   This is a Qt slot function that is called when the user changes the
 //   size var text and pressed the Enter key.
 //
-// Programmer: Kathleen Bonnell 
-// Creation:   November 4, 2004 
+// Programmer: Kathleen Bonnell
+// Creation:   November 4, 2004
 //
 // Modifications:
 //   Brad Whitlock, Thu Dec 9 17:09:50 PST 2004
@@ -342,12 +350,12 @@ QvisPointControl::sizeVarChanged(const QString &var)
 // ****************************************************************************
 // Method: QvisPointControl::GetPointSizeVar
 //
-// Purpose: 
-//   This is a method to retrieve the value contained in the 
+// Purpose:
+//   This is a method to retrieve the value contained in the
 //   pointSizeVarLineEdit.
 //
-// Programmer: Kathleen Bonnell 
-// Creation:   November 4, 2004 
+// Programmer: Kathleen Bonnell
+// Creation:   November 4, 2004
 //
 // Modifications:
 //   Brad Whitlock, Thu Dec 9 17:12:12 PST 2004
@@ -356,7 +364,7 @@ QvisPointControl::sizeVarChanged(const QString &var)
 // ****************************************************************************
 
 QString  &
-QvisPointControl::GetPointSizeVar() 
+QvisPointControl::GetPointSizeVar()
 {
     return lastGoodVar;
 }
@@ -371,8 +379,8 @@ QvisPointControl::GetPointSizeVar()
 //  Arguments:
 //    type   :   The new type
 //
-//  Programmer:  Kathleen Bonnell 
-//  Creation:    November 4, 2004 
+//  Programmer:  Kathleen Bonnell
+//  Creation:    November 4, 2004
 //
 //  Modifications:
 //    Brad Whitlock, Thu Dec 9 17:12:39 PST 2004
@@ -409,8 +417,8 @@ QvisPointControl::typeComboBoxChanged(int type)
 //   val : The new state of the sizeVar toggle.
 //
 // Programmer: Kathleen Bonnell
-// Creation:   November 4, 2004 
-// 
+// Creation:   November 4, 2004
+//
 // Modifications:
 //   Brad Whitlock, Thu Dec 9 17:13:06 PST 2004
 //   I changed the name of one of the widgets.
@@ -438,11 +446,11 @@ QvisPointControl::sizeVarToggled(bool val)
 // Arguments:
 //   val : The size.
 //
-// Programmer: Kathleen Bonnell 
-// Creation:   November 4, 2004 
+// Programmer: Kathleen Bonnell
+// Creation:   November 4, 2004
 //
 // Modifications:
-//   
+//
 // ****************************************************************************
 
 void QvisPointControl::SetPointSize(double val)
@@ -454,7 +462,7 @@ void QvisPointControl::SetPointSize(double val)
 // ****************************************************************************
 // Method: QvisPointControl::SetPointSizePixels
 //
-// Purpose: 
+// Purpose:
 //   Sets the point size in terms of pixels.
 //
 // Arguments:
@@ -464,7 +472,7 @@ void QvisPointControl::SetPointSize(double val)
 // Creation:   Wed Jul 20 14:47:26 PST 2005
 //
 // Modifications:
-//   
+//
 // ****************************************************************************
 
 void
@@ -488,12 +496,15 @@ QvisPointControl::SetPointSizePixels(int val)
 //   Use helper function DoubleToQString for consistency in formatting across
 //   all windows.
 //
+//   Kathleen Biagas, Tue Sep 20 17:07:28 PDT 2016
+//   Sphere points now uses pointSize instead of pointSizePixels.
+//
 // ****************************************************************************
 
 void
 QvisPointControl::UpdateSizeText()
 {
-    if(lastGoodPointType < POINT_TYPE_POINTS)
+    if(lastGoodPointType != POINT_TYPE_POINTS)
     {
         sizeLineEdit->setText(GUIBase::DoubleToQString(lastGoodSize));
     }
@@ -507,14 +518,14 @@ QvisPointControl::UpdateSizeText()
 // ****************************************************************************
 // Method: QvisPointControl::SetSizeVarChecked
 //
-// Purpose: 
-//   This method sets the sizeVar toggle. 
+// Purpose:
+//   This method sets the sizeVar toggle.
 //
 // Arguments:
-//   checked : The value for the toggle 
+//   checked : The value for the toggle
 //
-// Programmer: Kathleen Bonnell 
-// Creation:   November 4, 2004 
+// Programmer: Kathleen Bonnell
+// Creation:   November 4, 2004
 //
 // Modifications:
 //   Brad Whitlock, Thu Dec 9 17:13:40 PST 2004
@@ -537,14 +548,14 @@ void QvisPointControl::SetPointSizeVarChecked(bool checked)
 // ****************************************************************************
 // Method: QvisPointControl::GetSizeVarChecked
 //
-// Purpose: 
-//   Returns the state of the sizeVarToggle. 
+// Purpose:
+//   Returns the state of the sizeVarToggle.
 //
-// Programmer: Kathleen Bonnell 
-// Creation:   November 4, 2004 
+// Programmer: Kathleen Bonnell
+// Creation:   November 4, 2004
 //
 // Modifications:
-//   
+//
 // ****************************************************************************
 
 bool
@@ -557,14 +568,14 @@ QvisPointControl::GetPointSizeVarChecked() const
 // ****************************************************************************
 // Method: QvisPointControl::SetPointSizeVar
 //
-// Purpose: 
+// Purpose:
 //   This method sets the value of the sizeVarLineEdit.
 //
 // Arguments:
-//   var : The value for the sizeVarLineEdit 
+//   var : The value for the sizeVarLineEdit
 //
-// Programmer: Kathleen Bonnell 
-// Creation:   November 4, 2004 
+// Programmer: Kathleen Bonnell
+// Creation:   November 4, 2004
 //
 // Modifications:
 //   Brad Whitlock, Thu Dec 9 17:14:17 PST 2004
@@ -582,14 +593,14 @@ void QvisPointControl::SetPointSizeVar(QString &var)
 // ****************************************************************************
 // Method: QvisPointControl::SetPointType
 //
-// Purpose: 
-//   This method sets the point type radio buttons. 
+// Purpose:
+//   This method sets the point type radio buttons.
 //
 // Arguments:
 //   type : Which button should be active.
 //
-// Programmer: Kathleen Bonnell 
-// Creation:   November 4, 2004 
+// Programmer: Kathleen Bonnell
+// Creation:   November 4, 2004
 //
 // Modifications:
 //   Brad Whitlock, Thu Dec 9 17:14:45 PST 2004
@@ -609,7 +620,7 @@ void QvisPointControl::SetPointSizeVar(QString &var)
 //
 //   Brad Whitlock, Mon Jan  7 17:02:49 PST 2013
 //   Changed 4 to 7 since I added 3 new point types.
-// 
+//
 // ****************************************************************************
 
 void QvisPointControl::SetPointType(int type)
@@ -632,7 +643,7 @@ void QvisPointControl::SetPointType(int type)
 // ****************************************************************************
 // Method: QvisPointControl::UpdatePointType
 //
-// Purpose: 
+// Purpose:
 //   Updates some point widgets based on the point type.
 //
 // Programmer: Brad Whitlock
@@ -653,17 +664,19 @@ void QvisPointControl::SetPointType(int type)
 //   Combine point type test ... we wanted an 'and', where the current test
 //   was just giving us a last one in.
 //
+//   Kathleen Biagas, Tue Sep 20 17:07:28 PDT 2016
+//   Sphere points now uses pointSize instead of pointSizePixels.
+//
 // ****************************************************************************
 
 void
 QvisPointControl::UpdatePointType()
 {
     bool e = false;
-    if(lastGoodPointType != POINT_TYPE_POINTS &&
-       lastGoodPointType != POINT_TYPE_SPHERE)
+    if(lastGoodPointType != POINT_TYPE_POINTS)
     {
         sizeLabel->setText(tr("Point size"));
-        e = true;
+        e = lastGoodPointType != POINT_TYPE_SPHERE;
     }
     else
         sizeLabel->setText(tr("Point size (pixels)"));
@@ -678,11 +691,11 @@ QvisPointControl::UpdatePointType()
 // ****************************************************************************
 // Method: QvisPointControl::GetPointType
 //
-// Purpose: 
-//   Returns the state of the Point type radio button (which one is checked). 
+// Purpose:
+//   Returns the state of the Point type radio button (which one is checked).
 //
-// Programmer: Kathleen Bonnell 
-// Creation:   November 4, 2004 
+// Programmer: Kathleen Bonnell
+// Creation:   November 4, 2004
 //
 // Modifications:
 //   Brad Whitlock, Wed Dec 15 11:12:52 PDT 2004

@@ -1352,8 +1352,7 @@ void
 avtPseudocolorPlot::SetPointGlyphSize()
 {
     // Size used for points when using a point glyph.
-    if(atts.GetPointType() == PseudocolorAttributes::Point ||
-       atts.GetPointType() == PseudocolorAttributes::Sphere)
+    if(atts.GetPointType() == PseudocolorAttributes::Point)
         glyphMapper->SetPointSize(atts.GetPointSizePixels());
 }
 

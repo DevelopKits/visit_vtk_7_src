@@ -46,16 +46,16 @@ vtkAbstractObjectFactoryNewMacro(vtkPointMapper)
 //-----------------------------------------------------------------------------
 vtkPointMapper::vtkPointMapper()
 {
-  this->ScaleArray = 0;
-  this->Radius = 1.f;
-  this->UseImposters = true;
+  this->ImposterScaleArray = 0;
+  this->ImposterRadius = 0.3f;
+  this->UseImposters = false;
   this->InterpolateScalarsBeforeMappingOff();
 }
 
 //-----------------------------------------------------------------------------
 vtkPointMapper::~vtkPointMapper()
 {
-  this->SetScaleArray(0);
+  this->SetImposterScaleArray(0);
 }
 
 //-----------------------------------------------------------------------------
@@ -63,6 +63,7 @@ void vtkPointMapper::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 
-  os << indent << "Scale Array: " << (this->ScaleArray ? this->ScaleArray : "(none)") << "\n";
-  os << indent << "Radius: " << this->Radius << "\n";
+  os << indent << "Imposter Scale Array: " 
+     << (this->ImposterScaleArray ? this->ImposterScaleArray : "(none)") << "\n";
+  os << indent << "Imposter Radius: " << this->ImposterRadius << "\n";
 }

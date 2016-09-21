@@ -43,33 +43,55 @@
 
 #include <vtkPolyDataMapper.h>
 
-// A PolyDataMapper that Renders Points as Points or as SphereImposters
-// (UseImposters is true)
+
+// ****************************************************************************
+// Class: vtkPointMapper
 //
-class vtkPointMapper : public vtkPolyDataMapper
+// Purpose:
+//   Subclass of vtkPolyDataMapper that can draw points as GL points
+//   or sphere imposters.
+//
+//  Programmer: Kathleen Biagas
+//  Creation:   August 17, 2016
+//
+//  Modifications:
+//
+// **************************************************************************** 
+
+class PLOTTER_API vtkPointMapper : public vtkPolyDataMapper
 {
 public:
   static vtkPointMapper *New();
   vtkTypeMacro(vtkPointMapper, vtkPolyDataMapper)
   void PrintSelf(ostream& os, vtkIndent indent);
 
-  vtkSetStringMacro(ScaleArray);
-  vtkGetStringMacro(ScaleArray);
 
-  vtkSetMacro(Radius, float);
-  vtkGetMacro(Radius, float);
-
+  // Toggle for Sphere Imposters
   vtkSetMacro(UseImposters, bool);
   vtkGetMacro(UseImposters, bool);
   vtkBooleanMacro(UseImposters, bool);
+
+  // Controls for Imposters size
+  // (GL Points size controlled by vtkProperty::PointSize).
+
+  // Description:
+  // Convenience method to set the array to scale with.
+  vtkSetStringMacro(ImposterScaleArray);
+  vtkGetStringMacro(ImposterScaleArray);
+
+  // Description:
+  // Convenience method to set a single radius to scale with.
+  // Will be used if ScaleArray has not been set or does not exist in input.
+  vtkSetMacro(ImposterRadius, float);
+  vtkGetMacro(ImposterRadius, float);
 
 protected:
   vtkPointMapper();
  ~vtkPointMapper();
 
-  char *ScaleArray;
-  float Radius;
   bool UseImposters;
+  char *ImposterScaleArray;
+  float ImposterRadius;
 
 private:
   vtkPointMapper(const vtkPointMapper&) VTK_DELETE_FUNCTION;

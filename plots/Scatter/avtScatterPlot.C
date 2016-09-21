@@ -36,7 +36,7 @@
 *
 *****************************************************************************/
 
-// ************************************************************************* // 
+// ************************************************************************* //
 //                              avtScatterPlot.C                             //
 // ************************************************************************* // 
 
@@ -809,8 +809,7 @@ void
 avtScatterPlot::SetPointGlyphSize()
 {
     // Size used for points when using a point glyph.
-    if(atts.GetPointType() == ScatterAttributes::Point ||
-       atts.GetPointType() == ScatterAttributes::Sphere)
+    if(atts.GetPointType() == ScatterAttributes::Point) 
         glyphMapper->SetPointSize(atts.GetPointSizePixels());
 }
 

@@ -53,7 +53,6 @@ public:
   vtkTypeMacro(vtkOpenGLPointMapper, vtkPointMapper)
   void PrintSelf(ostream &os, vtkIndent indent);
 
-  void Render(vtkRenderer *ren, vtkActor *act);
   void ReleaseGraphicsResources(vtkWindow *);
 
 protected:

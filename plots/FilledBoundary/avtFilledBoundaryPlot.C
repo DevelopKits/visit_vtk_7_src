@@ -673,8 +673,7 @@ void
 avtFilledBoundaryPlot::SetPointGlyphSize()
 {
     // Size used for points when using a point glyph.
-    if(atts.GetPointType() == FilledBoundaryAttributes::Point ||
-       atts.GetPointType() == FilledBoundaryAttributes::Sphere)
+    if(atts.GetPointType() == FilledBoundaryAttributes::Point) 
         glyphMapper->SetPointSize(atts.GetPointSizePixels());
 }
 

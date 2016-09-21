@@ -420,7 +420,7 @@ vtkPointGlyphMapper::vtkPointGlyphMapper()
 
   this->PointMapper->SetInputConnection(this->PointOutput->GetOutputPort());
   this->PointMapper->SetInterpolateScalarsBeforeMapping(0);
-  this->PointMapper->SetRadius(0.3);
+  this->PointMapper->SetImposterRadius(0.3f);
   this->PointMapper->UseImpostersOff();
 
   this->PointDataInitialized = false;
@@ -529,10 +529,10 @@ void vtkPointGlyphMapper::SetGlyphType(int gt)
     {
     this->Helper->SetGlyphType(gt);
     this->Modified();
-    if (gt == Point)
-        this->PointMapper->UseImpostersOff();
-    else if (gt == Sphere)
+    if (gt == Sphere)
         this->PointMapper->UseImpostersOn();
+    else
+        this->PointMapper->UseImpostersOff();
     }
 }
 
@@ -545,6 +545,7 @@ int vtkPointGlyphMapper::GetGlyphType()
 void vtkPointGlyphMapper::SetScale(double s)
 {
   this->GlyphFilter->SetScaleFactor(s);
+  this->PointMapper->SetImposterRadius(s*0.5);
 }
 
 //----------------------------------------------------------------------------
