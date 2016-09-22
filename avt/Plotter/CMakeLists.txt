@@ -169,7 +169,6 @@ avtPlotMetaData.C
 avtPointMapper.C
 avtSoftwareShader.C
 avtTensorGlyphMapper.C
-avtTheater.C
 avtTransparencyActor.C
 avtUserDefinedMapper.C
 avtVariableLegend.C
